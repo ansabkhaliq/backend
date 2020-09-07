@@ -1,0 +1,107 @@
+pipeline {
+
+    environment {
+        REGISTRY_BACKEND = "80869538/backend"
+        REGISTRY_DB = "80869538/db"
+        registryCredential = 'dockerhub'
+        BUILD_NUMBER = "${env.BUILD_NUMBER}"
+        dockerImage = ''
+        dbImage = ''
+
+    }
+    agent any
+    stages {
+        stage('Prepare Docker Environment'){
+            steps {
+                sh 'echo "y" | sudo docker system prune -a'
+                sh 'sudo docker network create test  | echo "SUCCESS"'
+            }
+        }
+
+
+        stage('Build db image') {
+            steps {
+                sh 'sudo docker stop $(docker ps -a -q)  | echo "SUCCESS"'
+                sh 'sudo docker rm $(docker ps -a -q) | echo "SUCCESS"'
+
+                script{
+                    dbImage =  docker.build(REGISTRY_DB + ":latest",'./db/')
+                }
+               
+            }
+        }
+
+        stage('Run db container') {
+
+            steps {
+                sh 'sudo docker run -d -p 3306:3306 --name db --net=test  $REGISTRY_DB:latest'
+                sh 'chmod +x jenkins/db_connection.sh'
+                sh './jenkins/db_connection.sh'
+
+            }
+        }
+
+        stage('Building App image'){
+            steps{
+                script {
+                    dockerImage = docker.build REGISTRY_BACKEND + ":latest"
+                    
+                }
+            }
+        }
+
+        stage('Test App'){
+            steps {
+
+                sh 'sudo docker run -d -p 5000:5000 --name backend --net=test $REGISTRY_BACKEND:latest'
+                sh 'chmod +x jenkins/backend_connection.sh'
+                sh './jenkins/backend_connection.sh'
+                sh 'echo "TODO: Test Script"'
+                
+                sh 'sudo docker stop $(docker ps -a -q)   | echo "SUCCESS"'
+                sh 'sudo docker rm $(docker ps -a -q) | echo "SUCCESS"'
+            }
+        }
+
+
+
+        stage('Push Image') {
+            steps{
+                script {
+                    docker.withRegistry( '', registryCredential ) {
+                    dockerImage.push()
+                    }
+                }
+                script {
+                    docker.withRegistry( '', registryCredential ) {
+                    dbImage.push()
+                    }
+                }
+            }
+        }   
+
+        stage('Remove Unused docker image') {
+            steps{
+                sh 'echo "y" | sudo docker system prune -a'
+            }
+        }
+
+        stage("Deploy"){
+            steps{
+                script{
+                if(env.BRANCH_NAME == 'master'){
+                        sh 'chmod 400 Team2122.pem'
+                        sh 'ssh -i "Team2122.pem" -o "StrictHostKeyChecking no" ubuntu@ec2-52-68-78-115.ap-northeast-1.compute.amazonaws.com "bash -s" < ./jenkins/deploy.sh'
+
+                }
+                else{
+                    echo "no deploy"
+            }
+
+            }
+            
+            }
+
+        }
+    }
+}
