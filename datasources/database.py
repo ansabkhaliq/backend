@@ -1,68 +1,60 @@
 import logging
 import datetime
-import random
-import time
 import pymysql
 from typing import Tuple
 from werkzeug.security import generate_password_hash, check_password_hash
-import json
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
+
 
 class Database:
 
     def __init__(self):
-        host = "52.68.78.115"
-        user = "squizz"
-        password = "squizz"
-        charSet = "utf8mb4"
-        db = "squizz_app"
-        
-        self.con = pymysql.connect(
-            host=host,
-            user=user,
-            password=password,
-            db=db,
-            cursorclass=pymysql.cursors.DictCursor,
-            autocommit=True,
-            read_timeout=None, 
-            write_timeout=None,
-            charset=charSet
-        )
-        self.cur = self.con.cursor()
-        self.con.get_autocommit()
+        # Connect to the database
+        self.connection = pymysql.connect(host='localhost',
+                                          user='root',
+                                          password='squizz',
+                                          db='squizz_app',
+                                          charset='utf8mb4',
+                                          cursorclass=pymysql.cursors.DictCursor,
+                                          autocommit=True,
+                                          read_timeout=None,
+                                          write_timeout=None)
+
+        self.cursor = self.connection.cursor()
+        self.connection.get_autocommit()
+
 
     def run_query(self, query: str, values: list, commit: bool = False):
         """
-        This method runs MYSQL commands and return the result retrieved from database
+        This method runs a MySQL query against the database and returns the result
 
         Args:
-            query - a string of MYSQL command to be executed
-            values - a list of values for the query
-            commit - requries to commit after execution
+            query: a MySQL query string
+            values: a list of values for the query
+            commit: indicates whether to commit after execution
         """
-        if not self.con.open :
-            self.con.ping(reconnect=True)
-            logger.info("reconnecting to the database")
+        if not self.connection.open :
+            self.connection.ping(reconnect=True)
+            logger.info("Reconnecting to the database")
         try:
-            self.cur.execute(query, values)
+            self.cursor.execute(query, values)
             if commit:
-                self.con.commit()
-            if not self.cur.rowcount:
-                return None
-            else:
-                return self.cur.fetchall()
+                self.connection.commit()
+            return None if not self.cursor.rowcount else self.cursor.fetchall()
         except Exception as e:
-            logger.error("Could exceute the query" , e)
-            return None
+            logger.error("Could not execute the query" , e)
+
 
     def validate_username_password(self, username: str, password: str) -> str:
         """
-        This method retrieves the customer org id and password based on the username and vaidate the user's identity.
+        Retrieves the customer's organisation ID and password, based on the 
+        the inputted username, and vaidates the user's identity
 
         Args:
-            username - user's input
-            password - hashed password string
+            username: taken from user input
+            password: hashed password string
         """
         query = "SELECT customers_org_id, passwd FROM userinfo WHERE username=%s"
         values = [username]
@@ -70,17 +62,20 @@ class Database:
         if result is not None:
             result = result[0]
             if check_password_hash(result['passwd'], password):
+                logger.info("Logged in successfully")
                 return result['customers_org_id']
             else:
-                logger.info("wrong username or password")
+                logger.info("Incorrect username or password entered")
                 return None
         else:
-            logger.error("Could not validate username password")
+            logger.error(f"Could not find user '{username}'")
             return None
+
 
     def retrieve_api_key_pw(self, org_id: str) -> Tuple[str, str]:
         """
-        This method retrieves the api key and password based on the user's organsisation ID
+        This method retrieves the API key and password based on the user's 
+        organsisation ID
 
         Args:
             org_id - the orginisation ID of the user
@@ -121,7 +116,7 @@ class Database:
         if result is not None and result[0]['num'] > 0:
             return True
         else:
-            logger.info("No valid session")
+            logger.info("Could not find a valid existing session for the given user")
             return False
 
     def remove_session(self, login_session: str):
@@ -196,8 +191,8 @@ class Database:
             # constraint issue.
             product_record = None
             try:
-                #self.cur.execute(search_query, key_product_id)
-                #_, product_record = self.cur.fetchall()
+                #self.cursor.execute(search_query, key_product_id)
+                #_, product_record = self.cursor.fetchall()
                 product_record = self.run_query(search_query, key_product_id, False)
             except Exception as e:
                 logger.error('Exception occurred when searching for product record in store_product_level method.', e)
@@ -325,12 +320,12 @@ class Database:
                     self.run_query(update_query, latest_record, True)
                     value_inserted += 1
                 except Exception as e:
-                    self.con.rollback()
+                    self.connection.rollback()
                     logger.error('Exception occurred when updating product table', e)
                     value_not_inserted += 1
                     failedToStore.append(data_record['keyProductID'] + "error:" + "error occured while updating: " + str(e))
 
-        self.con.close()
+        self.connection.close()
         logger.info('This is the value updated: %d' % value_inserted)
         logger.info('This is the value not updated: %d' % value_not_inserted)
         result = {'status': "success", 'data': {'failed':failedToStore}, 'message': "successfully updated products"}
@@ -379,13 +374,13 @@ class Database:
                     try:
                         self.run_query(update_query, latest_values, True)
                     except Exception as e:
-                        self.con.rollback()
+                        self.connection.rollback()
                         logger.error('Exception occurred when updating the latest price info', e)
                         failedToStore.append(data_record['keyProductID'] + "error:" + "failed to update price")
             except Exception as e:
                 logger.error('Exception occurred when search price in price_level', e)
                 failedToStore.append(data_record['keyProductID'] + "error:" + "failed to update price")
-                # self.con.close()
+                # self.connection.close()
         result = {'status': "success", 'data': {'failed':failedToStore}, 'message': "successfully updated price of products"}
         return result
     logger.info('completed update_product_price')
@@ -416,7 +411,7 @@ class Database:
             # get cutomer organization ID
             customerAccountCode = tempCustomer[0]["customers_org_id"]
         except Exception as e:
-            self.con.rollback()
+            self.connection.rollback()
             logger.error('Session not found', e)
         # Insert the purchase records. lines are store as strings in this table for fast lookup.
         lines = purchaseList['dataRecords'][0]["lines"]
@@ -429,7 +424,7 @@ class Database:
                 lines[i]['uri_medium'] = uri[0]['uri_medium']
                 lines[i]['uri_large'] = uri[0]['uri_large']
             except Exception as e:
-                self.con.rollback()
+                self.connection.rollback()
                 logger.error('URI search error', e)
 
         insert_query = "INSERT INTO squizz_app.purchase(keyPurchaseOrderID, supplierAccountCode, "\
@@ -445,7 +440,7 @@ class Database:
         try:
             self.run_query(insert_query, values, True)
         except Exception as e:
-            self.con.rollback()
+            self.connection.rollback()
             logger.error('Exception occurred when insert new purchase order', e)
         
         # insert table 'lines'
@@ -461,7 +456,7 @@ class Database:
                 try:
                     self.run_query(insert_query, values, True)
                 except Exception as e:
-                    self.con.rollback()
+                    self.connection.rollback()
                     failedToStore.append(line['productCode'] + "error:" + "failed to store the purchase of order")
 
         except Exception as e:
@@ -488,7 +483,7 @@ class Database:
             tempCustomer = self.run_query(customer_search_query, [session_id], False)
             customerAccountCode = tempCustomer[0]["customers_org_id"] # get cutomer organization ID
         except Exception as e:
-            self.con.rollback()
+            self.connection.rollback()
             logger.error('Session not found', e)
             result = {'status': "error", 'data': 'null','Message': 'Session invalid, please login again'}
             return result

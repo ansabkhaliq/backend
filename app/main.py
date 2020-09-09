@@ -1,6 +1,12 @@
-from flask import Blueprint, redirect, request, jsonify, url_for
+from flask import (
+    Blueprint, 
+    redirect, 
+    request, 
+    jsonify, 
+    url_for, 
+)
 from app import auth
-from . import session
+# from . import session
 from datasources.database import Database
 
 main = Blueprint('main', __name__)

@@ -1,14 +1,15 @@
 import os
 import logging
-from flask import Flask, Blueprint, request, jsonify
-#from datetime import datetime
-from . import session
-from . import create_app
+from flask import Blueprint, request, jsonify, session
+# from datetime import datetime
+# from . import session
+# from . import create_app
 from datasources.iam import IAM
 from datasources.database import Database
 import app.main as main
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 base_url = os.environ.get('BASE_URL')
 
@@ -66,7 +67,7 @@ def login_post():
         session['seesion_id'] = session_id
         session['login_session'] = session_id
         db.store_session(session_id, org_id)
-        logger.info("You have create a new login session, session id:" + session_id)
+        logger.info(f"Created a new login session with ID: {session_id}")
         result = {'status': "success", 'data': {"session_id": session_id}, "message": "LOGIN_SUCCESS"}
         return jsonify(result)
     else:
@@ -81,7 +82,7 @@ def logout():
         session.pop('login_session ', None)
         session.pop('session_id ', None)
         session.pop('org_id', None)
-        logger.info("Your session has destroyed")
+        logger.info("Session has been deleted")
         result = {'status': "success", "message": "LOGOUT_SUCCESS"}
         return jsonify(result)
     else:
