@@ -1,17 +1,17 @@
 import logging
-import json
 import time
-from aiohttp import ClientSession
 from typing import Tuple, Optional
 import requests
 from requests import Session
-from requests.adapters import HTTPAdapter
-from urllib3 import Retry
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-class IAM:
+
+class SQUIZZConnectionHelper:
+    """
+    This class represents a connection to the SQUIZZ platform
+    """
 
     def __init__(self, base_url: str, org_id: str, api_org_key: str, api_org_pw: str):
         self.requests = self._init_client(base_url)
@@ -139,4 +139,3 @@ class IAM:
         data = self.requests.post(purchaseURL, json=result, headers=header).json()
         # return the result code of purchase
         return data["result_code"], result
-        

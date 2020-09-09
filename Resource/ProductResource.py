@@ -1,144 +1,26 @@
 import logging
 import datetime
-import pymysql
-from typing import Tuple
-from werkzeug.security import generate_password_hash, check_password_hash
+from .DatabaseResource import DatabaseResource
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class Database:
+class ProductResource(DatabaseResource):
+    """
+    A subclass of DatabaseResource, responsible for handling database
+    operations regarding products
+    
+    These operations include:
+        - Product insertion
+        - Product price insertion
+        - Retrieving barcode values
+        - Batch synchronizing product data with the SQUIZZ platform
+        - Batch synchronizing product prices with the SQUIZZ platform
+    """
 
     def __init__(self):
-        # Connect to the database
-        self.connection = pymysql.connect(host='localhost',
-                                          user='root',
-                                          password='squizz',
-                                          db='squizz_app',
-                                          charset='utf8mb4',
-                                          cursorclass=pymysql.cursors.DictCursor,
-                                          autocommit=True,
-                                          read_timeout=None,
-                                          write_timeout=None)
-
-        self.cursor = self.connection.cursor()
-        self.connection.get_autocommit()
-
-
-    def run_query(self, query: str, values: list, commit: bool = False):
-        """
-        This method runs a MySQL query against the database and returns the result
-
-        Args:
-            query: a MySQL query string
-            values: a list of values for the query
-            commit: indicates whether to commit after execution
-        """
-        if not self.connection.open :
-            self.connection.ping(reconnect=True)
-            logger.info("Reconnecting to the database")
-        try:
-            self.cursor.execute(query, values)
-            if commit:
-                self.connection.commit()
-            return None if not self.cursor.rowcount else self.cursor.fetchall()
-        except Exception as e:
-            logger.error("Could not execute the query" , e)
-
-
-    def validate_username_password(self, username: str, password: str) -> str:
-        """
-        Retrieves the customer's organisation ID and password, based on the 
-        the inputted username, and vaidates the user's identity
-
-        Args:
-            username: taken from user input
-            password: hashed password string
-        """
-        query = "SELECT customers_org_id, passwd FROM userinfo WHERE username=%s"
-        values = [username]
-        result = self.run_query(query, values, False)
-        if result is not None:
-            result = result[0]
-            if check_password_hash(result['passwd'], password):
-                logger.info("Logged in successfully")
-                return result['customers_org_id']
-            else:
-                logger.info("Incorrect username or password entered")
-                return None
-        else:
-            logger.error(f"Could not find user '{username}'")
-            return None
-
-
-    def retrieve_api_key_pw(self, org_id: str) -> Tuple[str, str]:
-        """
-        This method retrieves the API key and password based on the user's 
-        organsisation ID
-
-        Args:
-            org_id - the orginisation ID of the user
-        """
-        query = "SELECT api_org_key, api_org_pw FROM customers WHERE org_id=%s"
-        values = [org_id]
-        result = self.run_query(query, values, False)
-        if result is not None:
-            result = result[0]
-            return result["api_org_key"], result["api_org_pw"]
-        else:
-            logger.error("Could not retrieve api key and pw")
-            return None, None
-        
-    def store_session(self, login_session: str, org_id: str):
-        """
-        This method strores the login session to the database
-
-        Args:
-            login_session - the session string
-            org_id - the orginisation ID of the user
-        """
-        query = "INSERT INTO session (id, customers_org_id) VALUES (%s, %s)"
-        values = [login_session, org_id]
-        result = self.run_query(query, values, True)
-
-    def validate_session(self, login_session, org_id: str):
-        """
-        This method validates whether login_session exists already in the database
-
-        Args:
-            login_session - the session string
-            org_id - the orginisation ID of the user
-        """
-        query = "SELECT count(*) as num FROM session WHERE id=%s and customers_org_id=%s"
-        values = [login_session, org_id]
-        result = self.run_query(query, values, False)
-        if result is not None and result[0]['num'] > 0:
-            return True
-        else:
-            logger.info("Could not find a valid existing session for the given user")
-            return False
-
-    def remove_session(self, login_session: str):
-        """
-        This method deletes the login session record in the database
-
-        Args:
-            login_session - the session string
-        """
-        query = "DELETE FROM session WHERE id = %s"
-        values = [login_session]
-        result = self.run_query(query, values, True)
-        logger.info("Removed session")
-
-    def create_user(self, username: str, password: str):
-        #temporary function
-        org_id = "11EA64D91C6E8F70A23EB6800B5BCB6D"
-        hpassword = generate_password_hash(password)
-        query = "INSERT INTO userinfo (customers_org_id, username, passwd) VALUES (%s,%s,%s)"
-        values = [org_id, username, hpassword]
-        result = self.run_query(query, values, True)
-        logger.info("Cretaed user")
+        super().__init__()
 
 
     def store_product(self, jsonValues):
@@ -238,6 +120,7 @@ class Database:
             result = {'status': "error",'data':'null', 'Message': str(e)}
             return result
 
+
     def update_product(self, json_values):
         """
         This method retrieves the product data from SQUIZZ API every 24 hour, it then checks with the local database.
@@ -330,7 +213,8 @@ class Database:
         logger.info('This is the value not updated: %d' % value_not_inserted)
         result = {'status': "success", 'data': {'failed':failedToStore}, 'message': "successfully updated products"}
         return result
-    logger.info('completed update_product')
+    logger.info('Successfully retrieved and synchronized latest products data from the SQUIZZ API')
+
 
     def update_product_price(self, json_values):
         """
@@ -383,126 +267,4 @@ class Database:
                 # self.connection.close()
         result = {'status': "success", 'data': {'failed':failedToStore}, 'message': "successfully updated price of products"}
         return result
-    logger.info('completed update_product_price')
-    
-    def purchase(self, session_id, squizzRep, purchaseList):
-        """
-        This methods will insert purchase table and lines tables in the database
-
-        Args:
-             session_id: squizz session id for submit purchase
-             squizzRep: response from SQUIZZ of whether the purchase has been proceeded properly
-             purchaseList: products listed in the purchase
-        """
-        now = datetime.datetime.now()
-        dateTime = now.strftime("%Y-%m-%d  %H:%M:%S")
-        PjSAS_id = "11EA0FDB9AC9C3B09BE36AF3476460FC"
-
-        keyPurchaseOrderID = purchaseList['dataRecords'][0]['keyPurchaseOrderID']
-        supplierAccountCode = PjSAS_id
-        createdDate = dateTime
-        status = squizzRep
-        failedToStore = []
-
-        # search the user organization ID based on session ID from seesion table
-        search_query = "SELECT customers_org_id FROM squizz_app.session WHERE id=%s"
-        try:
-            tempCustomer = self.run_query(search_query, [session_id], False)
-            # get cutomer organization ID
-            customerAccountCode = tempCustomer[0]["customers_org_id"]
-        except Exception as e:
-            self.connection.rollback()
-            logger.error('Session not found', e)
-        # Insert the purchase records. lines are store as strings in this table for fast lookup.
-        lines = purchaseList['dataRecords'][0]["lines"]
-        for i in range(0, len(lines)):
-            keyProductID = lines[i]["productId"]
-            uri_search_query = "SELECT * FROM squizz_app.products WHERE keyProductID=%s"
-            try:
-                uri = self.run_query(uri_search_query, [keyProductID], False)
-                lines[i]['uri_small'] = uri[0]['uri_small']
-                lines[i]['uri_medium'] = uri[0]['uri_medium']
-                lines[i]['uri_large'] = uri[0]['uri_large']
-            except Exception as e:
-                self.connection.rollback()
-                logger.error('URI search error', e)
-
-        insert_query = "INSERT INTO squizz_app.purchase(keyPurchaseOrderID, supplierAccountCode, "\
-                      "customerAccountCode, keySupplierAccountID, createdDate, bill_status, "\
-                      "deliveryContact, deliveryAddress1, deliveryAddress2, deliveryAddress3, session_id, line)"\
-                      " VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        values = [
-            keyPurchaseOrderID, supplierAccountCode, customerAccountCode, supplierAccountCode,
-            createdDate, status, 
-            "+6144433332222", "Unit 5", "22 Bourkie Street", "Melbourne",  # Hard code variables
-            session_id, str(lines)
-        ]
-        try:
-            self.run_query(insert_query, values, True)
-        except Exception as e:
-            self.connection.rollback()
-            logger.error('Exception occurred when insert new purchase order', e)
-        
-        # insert table 'lines'
-        try:
-            for line in lines:
-                # insertion query for table 'lines'
-                insert_query = "INSERT INTO squizz_app.lines(lineType, purchase_keyPurchaseOrderID, keyProductID,"\
-                               "quantity, priceTotalExTax, products_id) VALUES (%s, %s, %s, %s, %s, %s)"
-                values = [
-                    line['lineType'], keyPurchaseOrderID, line['productId'], line['quantity'],
-                    line['priceTotalExTax'], line['productId'] + PjSAS_id
-                ]
-                try:
-                    self.run_query(insert_query, values, True)
-                except Exception as e:
-                    self.connection.rollback()
-                    failedToStore.append(line['productCode'] + "error:" + "failed to store the purchase of order")
-
-        except Exception as e:
-            logger.error('Exception occurred when insert new purchase order', e)
-            result = {'status': "error", 'data': 'null',
-                      'Message': 'Exception occurred when adding purchase order'}
-            return result
-
-        # Only 'SERVER_SUCCESS' means SQUIZZ accept the purchase, others are negative
-        result = {'status': "success", 'data': {'puchaseID':keyPurchaseOrderID}, 'message': "successfully added the purchase orders"}
-        return result
-
-        
-    
-    def history_order(self, session_id, date_time):
-        """
-            This method will return the last 15 history records from the search time
-            Args: 
-                session_id: session ID of current user.
-                data_time: start time of searching
-        """
-        customer_search_query = "SELECT customers_org_id FROM squizz_app.session WHERE id=%s"
-        try:
-            tempCustomer = self.run_query(customer_search_query, [session_id], False)
-            customerAccountCode = tempCustomer[0]["customers_org_id"] # get cutomer organization ID
-        except Exception as e:
-            self.connection.rollback()
-            logger.error('Session not found', e)
-            result = {'status': "error", 'data': 'null','Message': 'Session invalid, please login again'}
-            return result
-        # query for searching the history orders
-        order_search_query = "SELECT keyPurchaseOrderID,createdDate,line," \
-                             "bill_status FROM squizz_app.purchase WHERE " \
-                             "customerAccountCode=%s and createdDate<=%s ORDER BY createdDate DESC LIMIT 15"
-        try:
-            order_info = self.run_query(order_search_query, [customerAccountCode, date_time], False)
-            if order_info is not None:
-                for i in range(0, len(order_info)):
-                    order_info[i]['products'] = list(eval(order_info[i]['line']))
-                    order_info[i].pop('line')
-                result = {'status': "success", 'data': {'history_orders': order_info}, 'message': "successfully retrieved history order"}
-                return result
-            else:
-                result = {'status': "success", 'data': 'null', 'message': "Success, but no data found!"}
-                return result
-        except Exception as e:
-            logger.error('Order searching failure:', e)
-            result = {'status': "error", 'data': 'null','Message': 'Exception occurred when retrieving history order' +str(e)}
-            return result
+    logger.info("Successfully updated 'price_level' table")

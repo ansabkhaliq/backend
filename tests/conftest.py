@@ -5,7 +5,7 @@ import pytest
 from app import create_app , session
 
 
-from datasources.iam import IAM
+from Resource.IAM import SQUIZZConnectionHelper
 
 @pytest.fixture
 def apps():

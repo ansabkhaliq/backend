@@ -1,42 +1,62 @@
 import os
 import logging
 from flask import Blueprint, request, jsonify, session
-# from datetime import datetime
-# from . import session
-# from . import create_app
-from datasources.iam import IAM
-from datasources.database import Database
+from Resource.IAM import SQUIZZConnectionHelper
+from Resource.UserResource import UserResource
 import app.main as main
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-base_url = os.environ.get('BASE_URL')
 
+# Configure Flask application
+base_url = os.environ.get('BASE_URL')
 auth = Blueprint('auth', __name__)
 
-db = Database()
 
-def build_connection():
-    #check with db, retrive api_org_key and api_org_pw
-    org_id = session.get('org_id')
-    api_org_key, api_org_pw = db.retrieve_api_key_pw(org_id)
-    return IAM(base_url, org_id, api_org_key, api_org_pw)
+# Initialise database resource objects
+user_resource = UserResource()
 
+
+# -- Helper functions
 def validate_login_session():
+    """
+    Determine whether or not the current user 
+    has an existing session within the database
+
+    Args:
+        None
+    """
     login_session = session.get('login_session')
     org_id = session.get('org_id')
 
-    if db.validate_session(login_session, org_id):
+    if user_resource.validate_session(login_session, org_id):
         return True
-    else:
-        return False
+    return False
 
+
+def build_connection():
+    """
+    Builds an returns an object that represents 
+    a connection to the SQUIZZ platform
+
+    Args:
+        None
+    """
+    # Retrieve organisation API key and password from the database
+    org_id = session.get('org_id')
+    api_org_key, api_org_pw = user_resource.retrieve_api_key_pw(org_id)
+
+    return SQUIZZConnectionHelper(base_url, org_id, api_org_key, api_org_pw)
+
+
+# -- Application routes
 @auth.route('/login')
 def login():
     if validate_login_session():
         return main.index()
     return "login page here", 200
+
 
 @auth.route('/api/login', methods=['POST'])
 def login_post():
@@ -49,7 +69,7 @@ def login_post():
     password = data.get('password')
 
     try:
-        org_id = db.validate_username_password(username, password)
+        org_id = user_resource.validate_username_password(username, password)
     except AttributeError:
         result = {'status': "failure", 'data': {"session_id": None}, "message": "LOGIN_WRONG"}
         return jsonify(result)
@@ -66,7 +86,7 @@ def login_post():
         session.permanent = True
         session['seesion_id'] = session_id
         session['login_session'] = session_id
-        db.store_session(session_id, org_id)
+        user_resource.store_session(session_id, org_id)
         logger.info(f"Created a new login session with ID: {session_id}")
         result = {'status': "success", 'data': {"session_id": session_id}, "message": "LOGIN_SUCCESS"}
         return jsonify(result)
@@ -78,7 +98,7 @@ def login_post():
 def logout():
     login_session = session.get('login_session')
     if validate_login_session():
-        db.remove_session(login_session)
+        user_resource.remove_session(login_session)
         session.pop('login_session ', None)
         session.pop('session_id ', None)
         session.pop('org_id', None)
