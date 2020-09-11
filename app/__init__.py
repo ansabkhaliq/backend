@@ -30,11 +30,19 @@ def create_app(test_config=None):
     sess.init_app(app)
 
     # Blueprint for auth routes in our app
-    from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint)
+    from app.Controller import UserController as auth_blueprint
+    app.register_blueprint(auth_blueprint.user)
 
     # Blueprint for non-auth parts of app
-    from .main import main as main_blueprint
-    app.register_blueprint(main_blueprint)
+
+    from .Controller import RouterController as router_blueprint
+    app.register_blueprint(router_blueprint.router)
+
+    from .Controller import ProductController as product_blueprint
+    app.register_blueprint(product_blueprint.product)
+
+    from .Controller import OrderController as order_blueprint
+    app.register_blueprint(order_blueprint.order)
+
 
     return app
