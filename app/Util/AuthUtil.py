@@ -1,9 +1,11 @@
 import os
 from flask import session
 from Resource.UserResource import UserResource
-from Resource.IAM import SQUIZZConnectionHelper
+from Resource.SessionResource import SessionResource
+from ..Service.SquizzGatewayService import SquizzGatewayService
 
 user_resource = UserResource()
+session_resource = SessionResource()
 base_url = os.environ.get('BASE_URL')
 
 # -- Helper functions
@@ -18,7 +20,7 @@ def validate_login_session():
     login_session = session.get('login_session')
     org_id = session.get('org_id')
 
-    if user_resource.validate_session(login_session, org_id):
+    if session_resource.validate_session(login_session, org_id):
         return True
     return False
 
@@ -35,4 +37,4 @@ def build_connection():
     org_id = session.get('org_id')
     api_org_key, api_org_pw = user_resource.retrieve_api_key_pw(org_id)
 
-    return SQUIZZConnectionHelper(base_url, org_id, api_org_key, api_org_pw)
+    return SquizzGatewayService(base_url, org_id, api_org_key, api_org_pw)

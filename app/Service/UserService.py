@@ -1,11 +1,14 @@
 from app.Util import AuthUtil as authUtil
 from flask import session
 from Resource.UserResource import UserResource
+from Resource.SessionResource import SessionResource
 import logging
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
+
 user_resource = UserResource()
+session_resource = SessionResource()
 
 
 def validate(username: str, password: str) -> dict:
@@ -25,7 +28,7 @@ def validate(username: str, password: str) -> dict:
         session.permanent = True
         session['seesion_id'] = session_id
         session['login_session'] = session_id
-        user_resource.store_session(session_id, org_id)
+        session_resource.store_session(session_id, org_id)
         logger.info(f"Created a new login session with ID: {session_id}")
         return {'status': "success", 'data': {"session_id": session_id}, "message": "LOGIN_SUCCESS"}
 

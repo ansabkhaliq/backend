@@ -1,20 +1,19 @@
 import logging
 from typing import Tuple
 from werkzeug.security import generate_password_hash, check_password_hash
-from .DatabaseResource import DatabaseResource
+from .DatabaseBase import DatabaseBase
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class UserResource(DatabaseResource):
+class UserResource(DatabaseBase):
     """
-    A subclass of DatabaseResource, responsible for handling database
+    A subclass of DatabaseBase, responsible for handling database
     operations regarding users
     
     These operations include:
         - User authentication
-        - Session creation, validation, and deletion
         - User creation
     """
 
@@ -64,50 +63,6 @@ class UserResource(DatabaseResource):
         else:
             logger.error("Could not retrieve API key and password")
             return None, None
-        
-
-    def store_session(self, login_session: str, org_id: str):
-        """
-        Creates a new login session within the database
-
-        Args:
-            login_session - the session string
-            org_id - the orginisation ID of the user
-        """
-        query = "INSERT INTO session (id, customers_org_id) VALUES (%s, %s)"
-        values = [login_session, org_id]
-        self.run_query(query, values, True)
-
-
-    def validate_session(self, login_session, org_id: str):
-        """
-        This method validates whether login_session exists already in the database
-
-        Args:
-            login_session - the session string
-            org_id - the orginisation ID of the user
-        """
-        query = "SELECT count(*) as num FROM session WHERE id=%s and customers_org_id=%s"
-        values = [login_session, org_id]
-        result = self.run_query(query, values, False)
-        if result is not None and result[0]['num'] > 0:
-            return True
-        else:
-            logger.info("Could not find an existing session for the given user")
-            return False
-
-
-    def remove_session(self, login_session: str):
-        """
-        Deletes the login session record from the database
-
-        Args:
-            login_session: the session string
-        """
-        query = "DELETE FROM session WHERE id = %s"
-        values = [login_session]
-        self.run_query(query, values, True)
-        logger.info(f"Removed session {login_session} from the database")
 
 
     def create_user(self, username: str, password: str):

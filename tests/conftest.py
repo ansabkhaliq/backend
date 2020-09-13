@@ -1,11 +1,8 @@
 import os
 import tempfile
 import pytest
-
 from app import create_app , session
 
-
-from Resource.IAM import SQUIZZConnectionHelper
 
 @pytest.fixture
 def apps():

@@ -1,14 +1,14 @@
 import logging
 import datetime
-from .DatabaseResource import DatabaseResource
+from .DatabaseBase import DatabaseBase
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class ProductResource(DatabaseResource):
+class ProductResource(DatabaseBase):
     """
-    A subclass of DatabaseResource, responsible for handling database
+    A subclass of DatabaseBase, responsible for handling database
     operations regarding products
     
     These operations include:
@@ -102,7 +102,7 @@ class ProductResource(DatabaseResource):
         return result
 
 
-    def get_barcode_value(self, barcode):
+    def get_product_by_barcode(self, barcode):
         sql_query = "SELECT * FROM squizz_app.products RIGHT JOIN squizz_app.price_level ON squizz_app.products.id=squizz_app.price_level.products_id " \
                     "WHERE squizz_app.products.barcode = %s"
         values = self.run_query(sql_query % barcode,[], False)

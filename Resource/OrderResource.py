@@ -1,14 +1,14 @@
 import logging
 import datetime
-from .DatabaseResource import DatabaseResource
+from .DatabaseBase import DatabaseBase
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class OrderResource(DatabaseResource):
+class OrderResource(DatabaseBase):
     """
-    A subclass of DatabaseResource, responsible for handling database
+    A subclass of DatabaseBase, responsible for handling database
     operations regarding orders
     
     These operations include:

@@ -33,7 +33,7 @@ def get_barcode_product():
 
     data = request.get_json(silent=True)
     barcode = data.get('barcode')
-    return jsonify(product_service.get_barcode_value(barcode))
+    return jsonify(product_service.get_product_by_barcode(barcode))
 
 
 

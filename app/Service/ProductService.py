@@ -28,8 +28,8 @@ def retrieve_product_price() -> dict:
         return {'status': "error", 'data': 'null', 'Message': "Error while retrieving product price from server"}
 
 
-def get_barcode_value(barcode) -> dict:
-    return product_resource.get_barcode_value(barcode)
+def get_product_by_barcode(barcode) -> dict:
+    return product_resource.get_product_by_barcode(barcode)
 
 
 def update_product() -> dict:

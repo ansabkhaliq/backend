@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-class DatabaseResource:
+class DatabaseBase:
     """
     This class represents an abstract base class for database operations.
     It is responsible for establishing a connection to the database and
