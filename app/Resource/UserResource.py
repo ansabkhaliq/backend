@@ -44,26 +44,7 @@ class UserResource(DatabaseBase):
         else:
             logger.info(f"Could not find user '{username}'")
             return None
-
-
-    def retrieve_api_key_pw(self, org_id: str) -> Tuple[str, str]:
-        """
-        This method retrieves the API key and password based on the user's 
-        organsisation ID
-
-        Args:
-            org_id - the organisation ID of the user
-        """
-        query = "SELECT api_org_key, api_org_pw FROM customers WHERE org_id=%s"
-        values = [org_id]
-        result = self.run_query(query, values, False)
-        if result is not None:
-            result = result[0]
-            return result["api_org_key"], result["api_org_pw"]
-        else:
-            logger.error("Could not retrieve API key and password")
-            return None, None
-
+            
 
     def create_user(self, username: str, password: str):
         """
