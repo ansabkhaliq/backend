@@ -7,11 +7,12 @@ from requests import Session
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-
 class SquizzGatewayService:
     """
     This class represents a connection or session to the SQUIZZ platform
     """
+    #ID of the supplier. In case the supplier changes we need to update this string.
+    supplier_org_id = '11EAF2251136B090BB69B6800B5BCB6D'
 
     def __init__(self, base_url: str, org_id: str, api_org_key: str, api_org_pw: str):
         self.requests = self._init_client(base_url)
@@ -74,7 +75,7 @@ class SquizzGatewayService:
     def get_product_list(self, data_type: int) -> Tuple[bool, Optional[list]]:
         session_id, _ = self.create_session()
         # genereate a new session id
-        parameter = {"session_id": session_id, "supplier_org_id": '11EA0FDB9AC9C3B09BE36AF3476460FC', "data_type_id": data_type}
+        parameter = {"session_id": session_id, "supplier_org_id": self.supplier_org_id, "data_type_id": data_type}
         data = self.requests.get("https://api.squizz.com/rest/1/org/retrieve_esd/"+ session_id, params = parameter).json()
         
         if data["resultStatus"] == 1:
@@ -87,7 +88,12 @@ class SquizzGatewayService:
         header = {"Content-Type": "application/json"}
         session_id = jsonValue['sessionKey']
         header = {"Content-Type": "application/json"}
-        purchaseURL = "https://api.squizz.com/rest/1/org/procure_purchase_order_from_supplier/" + session_id +"?supplier_org_id=11EA0FDB9AC9C3B09BE36AF3476460FC"
+
+        # I just hardcoded the CustomerAccountCode (we had three, just took one for now), this needs to be generic now. As based on a specific customer we will submit the order. Previously we only had 1 customer so
+        # the team was not mentioning the customer. Now we have three.
+        purchaseURL = "https://api.squizz.com/rest/1/org/procure_purchase_order_from_supplier/" + session_id +"?supplier_org_id="+self.supplier_org_id \
+                      + "&customer_account_code=TESTDEBTOR"
+
         keyPurchaseOrderID = int(time.time() * 1000000) 
         # Not mandotary details are are hard code for now.
         parameter = {
