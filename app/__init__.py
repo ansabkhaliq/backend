@@ -33,16 +33,11 @@ def create_app(test_config=None):
     from app.Controller import UserController as auth_blueprint
     app.register_blueprint(auth_blueprint.user)
 
-    # Blueprint for non-auth parts of app
-
-    from .Controller import RouterController as router_blueprint
-    app.register_blueprint(router_blueprint.router)
-
+    # Blueprints for non-auth parts of app
     from .Controller import ProductController as product_blueprint
     app.register_blueprint(product_blueprint.product)
 
     from .Controller import OrderController as order_blueprint
     app.register_blueprint(order_blueprint.order)
-
 
     return app

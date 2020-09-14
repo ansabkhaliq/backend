@@ -1,0 +1,12 @@
+# SQUIZZ Platform API Environment Variables
+BASE_URL = "https://api.squizz.com/rest/1"
+API_ORG_ID = "11EA64D91C6E8F70A23EB6800B5BCB6D"
+API_ORG_KEY = "3a62ea5aa2d8845a72dd030369dd571d5123567f70fa76b5bc3bcdf103e3307cc52b01030230c4f2807b44f88ce0052e91f3b7550341f38fe6544d02abfd7d87"
+API_ORG_PASSWORD = "Squizzunimelb!0"
+SUPPLIER_ORG_ID = "11EAF2251136B090BB69B6800B5BCB6D"
+
+# MySQL Environment Variables
+HOST = "localhost"
+USER = "root"
+PASSWORD = "squizz"
+DB_NAME = "squizz_app"

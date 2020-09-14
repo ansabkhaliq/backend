@@ -1,6 +1,7 @@
 import logging
 import datetime
-from .DatabaseBase import DatabaseBase
+from app import config
+from app.Resource.DatabaseBase import DatabaseBase
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -31,10 +32,9 @@ class OrderResource(DatabaseBase):
         """
         now = datetime.datetime.now()
         dateTime = now.strftime("%Y-%m-%d  %H:%M:%S")
-        PjSAS_id = "11EA0FDB9AC9C3B09BE36AF3476460FC"
 
         keyPurchaseOrderID = purchaseList['dataRecords'][0]['keyPurchaseOrderID']
-        supplierAccountCode = PjSAS_id
+        supplierAccountCode = config.SUPPLIER_ORG_ID
         createdDate = dateTime
         status = squizzResp
         failedToStore = []
@@ -85,8 +85,12 @@ class OrderResource(DatabaseBase):
                 insert_query = "INSERT INTO squizz_app.lines(lineType, purchase_keyPurchaseOrderID, keyProductID,"\
                                "quantity, priceTotalExTax, products_id) VALUES (%s, %s, %s, %s, %s, %s)"
                 values = [
-                    line['lineType'], keyPurchaseOrderID, line['productId'], line['quantity'],
-                    line['priceTotalExTax'], line['productId'] + PjSAS_id
+                    line['lineType'],
+                    keyPurchaseOrderID,
+                    line['productId'],
+                    line['quantity'],
+                    line['priceTotalExTax'],
+                    line['productId'] + config.SUPPLIER_ORG_ID
                 ]
                 try:
                     self.run_query(insert_query, values, True)

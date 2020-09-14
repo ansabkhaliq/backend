@@ -1,34 +1,28 @@
 import logging
+import requests
 import time
 from typing import Tuple, Optional
-import requests
-from requests import Session
+
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
+
 class SquizzGatewayService:
     """
-    This class represents a connection or session to the SQUIZZ platform
+    This class represents a connection, or session, to the SQUIZZ Platform API
     """
-    #ID of the supplier. In case the supplier changes we need to update this string.
-    supplier_org_id = '11EAF2251136B090BB69B6800B5BCB6D'
 
-    def __init__(self, base_url: str, org_id: str, api_org_key: str, api_org_pw: str):
-        self.requests = self._init_client(base_url)
+    def __init__(self, base_url: str, org_id: str, api_org_key: str, api_org_pw: str, supplier_org_id: str):
         self.base_url = base_url
         self.org_id = org_id
         self.api_org_key = api_org_key
         self.api_org_pw = api_org_pw
+        self.supplier_org_id = supplier_org_id
+        self.requests = requests.Session()
 
-    @staticmethod
-    def _init_client(base_url: str) -> Session:
-        s = requests.Session()
-        ##s.mount(base_url, HTTPAdapter(
-        #    max_retries=Retry(total=10, method_whitelist=["GET", "POST"], status_forcelist=[500, 501, 502, 503])))
-        return s
-    
-    #Web Service Endpoint: Create Organisation API Session
+
+    # Web Service Endpoint: Create Organisation API Session
     def create_session(self) -> Tuple[str, str]:
         header = {"Content-Type": "application/x-www-form-urlencoded"}
         parameter = {"org_id": self.org_id, "api_org_key": self.api_org_key, "api_org_pw": self.api_org_pw, "create_session": "Y" }
@@ -45,7 +39,8 @@ class SquizzGatewayService:
             logger.debug("Could not create organisation API session")
             return None, "SERVER_ERROR_UNKNOWN"
 
-    #Web Service Endpoint: Destroy Organisation API Session
+
+    # Web Service Endpoint: Destroy Organisation API Session
     def destory_session(self, session_id: str) -> bool:
         if session_id is None:
             return False
@@ -57,7 +52,8 @@ class SquizzGatewayService:
             logger.debug("Could not destroy organisation API session")
             return False
 
-    #Web Service Endpoint: Validate Organisation API Session
+
+    # Web Service Endpoint: Validate Organisation API Session
     def validate_session(self, session_id: str) -> bool:
         if session_id is None:
             return False
@@ -71,19 +67,24 @@ class SquizzGatewayService:
             logger.debug("Could not validate organisation API session")
             return False
     
-    #Web Service Endpoint: Product Price Retrieve API
+
+    # Web Service Endpoint: Product Price Retrieve API
     def get_product_list(self, data_type: int) -> Tuple[bool, Optional[list]]:
         session_id, _ = self.create_session()
-        # genereate a new session id
-        parameter = {"session_id": session_id, "supplier_org_id": self.supplier_org_id, "data_type_id": data_type}
-        data = self.requests.get("https://api.squizz.com/rest/1/org/retrieve_esd/"+ session_id, params = parameter).json()
+        params = {
+            "session_id": session_id,
+            "supplier_org_id": self.supplier_org_id,
+            "data_type_id": data_type
+        }
         
+        data = self.requests.get("https://api.squizz.com/rest/1/org/retrieve_esd/"+ session_id, params=params).json()
         if data["resultStatus"] == 1:
             return True, data["dataRecords"]
         else:
             return False, None
     
-    #Web Service Endpoint: Purchase Submit API
+
+    # Web Service Endpoint: Purchase Submit API
     def submit_purchase(self, jsonValue) -> Tuple[bool, Optional[list]]:
         header = {"Content-Type": "application/json"}
         session_id = jsonValue['sessionKey']

@@ -1,5 +1,5 @@
 
-from Resource.ProductResource import ProductResource
+from app.Resource.ProductResource import ProductResource
 from app.Util import AuthUtil as authUtil
 
 product_resource = ProductResource()

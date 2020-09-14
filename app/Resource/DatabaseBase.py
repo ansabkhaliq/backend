@@ -1,5 +1,6 @@
 import logging
 import pymysql
+from app import config
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -14,10 +15,10 @@ class DatabaseBase:
 
     def __init__(self):
         # Establish a connection to the database
-        self.connection = pymysql.connect(host='localhost',
-                                          user='root',
-                                          password='squizz',
-                                          db='squizz_app',
+        self.connection = pymysql.connect(host=config.HOST,
+                                          user=config.USER,
+                                          password=config.PASSWORD,
+                                          db=config.DB_NAME,
                                           charset='utf8mb4',
                                           cursorclass=pymysql.cursors.DictCursor,
                                           autocommit=True,

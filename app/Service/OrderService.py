@@ -1,5 +1,5 @@
 from app.Util import AuthUtil as authUtil
-from Resource.OrderResource import OrderResource
+from app.Resource.OrderResource import OrderResource
 
 order_resource = OrderResource()
 

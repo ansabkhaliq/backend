@@ -1,10 +1,10 @@
 
-from Resource.SessionResource import SessionResource
 import logging
+from app.Resource.SessionResource import SessionResource
 from flask import Blueprint, request, jsonify, session
 from requests.sessions import Session
 from app.Util import AuthUtil as authUtil
-from Resource.UserResource import UserResource
+from app.Resource.UserResource import UserResource
 from app.Service import UserService as user_service
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ user = Blueprint('user', __name__)
 user_resource = UserResource()
 session_resource = SessionResource()
 
-
+# Set routes
 @user.route('/api/login', methods=['POST'])
 def login_post():
     if authUtil.validate_login_session():
@@ -29,6 +29,7 @@ def login_post():
     password = data.get('password')
 
     return jsonify(user_service.validate(username,password))
+
 
 @user.route('/api/logout', methods=['GET'])
 def logout():

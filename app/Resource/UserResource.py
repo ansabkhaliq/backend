@@ -24,7 +24,7 @@ class UserResource(DatabaseBase):
     def validate_username_password(self, username: str, password: str) -> str:
         """
         Retrieves the customer's organisation ID and password, based on the 
-        the inputted username, and vaidates the user's identity
+        the input username, and vaidates the user's identity
 
         Args:
             username: taken from user input

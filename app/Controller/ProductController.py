@@ -10,7 +10,6 @@ from flask import (
 
 product = Blueprint('product', __name__)
 
-
 @product.route('/retrieveproduct', methods=['GET'])
 def retrieve_product():
     if not authUtil.validate_login_session():

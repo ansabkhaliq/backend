@@ -1,7 +1,7 @@
 from app.Util import AuthUtil as authUtil
 from flask import session
-from Resource.UserResource import UserResource
-from Resource.SessionResource import SessionResource
+from app.Resource.UserResource import UserResource
+from app.Resource.SessionResource import SessionResource
 import logging
 
 logger = logging.getLogger(__name__)
