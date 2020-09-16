@@ -1,4 +1,4 @@
-class category:
+class Category:
     def __init__(self):
         self.id = 0
         self.categoryCode = None
@@ -8,9 +8,9 @@ class category:
         self.description4 = None
         self.internalID = None
         self.keyCategoryID = None
-        #should we use id here?
         self.keyCategoryParentID = None
         self.metaDescription = None
         self.metaKeywords = None
         self.name = None
         self.ordering = 0
+        self.productList = None  # store product object

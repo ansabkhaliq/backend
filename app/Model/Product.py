@@ -10,7 +10,7 @@ class Product:
         self.isPriceTaxInclusive = None
         self.keyProductID = None
         self.keySellUnitID = None
-        self.keyTaxcodeID = None
+        self.keyTaxCodeID = None
         self.kitProductsSetPrice = None
         self.name = None
         self.productCode = None
@@ -20,4 +20,7 @@ class Product:
         self.stockLowQuantity = 0
         self.stockQuantity = 0
         self.width = 0
-        self.categoryId=None
+        self.categoryList = None  # store category object
+        self.priceList = None  # store price object
+        self.sellUnitsIdList = None
+        self.description = None

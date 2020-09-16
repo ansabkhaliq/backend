@@ -1,4 +1,4 @@
-class price:
+class Price:
     def __init__(self):
         # primary key
         self.id = 0
@@ -11,3 +11,4 @@ class price:
         # I don't know the meaning since it occurs every where
         self.referenceId = None
         self.referenceType = None
+        self.productId = None
