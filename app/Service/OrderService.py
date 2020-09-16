@@ -4,11 +4,11 @@ from app.Resource.OrderResource import OrderResource
 order_resource = OrderResource()
 
 
-def submit_order(data) -> dict:
+def submit_order(session_key, order_details) -> dict:
     connection = authUtil.build_connection()
-    squizzRep, purchaseList = connection.submit_purchase(data)
+    squizzRep, purchaseList = connection.submit_purchase(session_key, order_details)
     if squizzRep == 'SERVER_SUCCESS':
-        return order_resource.purchase(data["sessionKey"], squizzRep, purchaseList)
+        return order_resource.purchase(session_key, squizzRep, purchaseList)
     else:
         return {'status': "error", 'data': 'null', 'Message': "Error while sending purchase to SQUIZZ server"}
 

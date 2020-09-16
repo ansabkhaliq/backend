@@ -8,9 +8,9 @@ product_resource = ProductResource()
 def retrieve_product() -> dict:
     connection = authUtil.build_connection()
     data_type = 3
-    jsonResponse, jsonValues = connection.get_product_list(data_type)
+    jsonResponse, productList = connection.get_product_list(data_type)
     if jsonResponse:
-        return product_resource.store_product(jsonValues)
+        return product_resource.store_product(productList)
 
     else:
         return {'status': "error", 'data': 'null', 'Message': "Error while retrieving product from server"}

@@ -2,6 +2,8 @@ import logging
 import datetime
 from app import config
 from app.Resource.DatabaseBase import DatabaseBase
+from app.Model.Product import Product
+from typing import List
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -24,7 +26,7 @@ class ProductResource(DatabaseBase):
         super().__init__()
 
 
-    def store_product(self, jsonValues):
+    def store_product(self, productList: List[Product]):
         value_not_inserted = 0
         value_inserted = 0
         insert_query = "INSERT INTO products(id, keyTaxCodeID, supplierAccountCode, " \
@@ -34,36 +36,54 @@ class ProductResource(DatabaseBase):
                        " VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s,%s,%s,%s) "
 
         failedToStore = []
-        for dataRecord in jsonValues:
+        for product in productList:
             try:
                 values = [
-                    dataRecord['keyProductID'] + config.SUPPLIER_ORG_ID,
-                    dataRecord['keyTaxcodeID'], 
+                    # dataRecord['keyProductID'] + config.SUPPLIER_ORG_ID,
+                    # dataRecord['keyTaxcodeID'], 
+                    # config.SUPPLIER_ORG_ID,
+                    # dataRecord['productCode'],
+                    # dataRecord['keyProductID'],
+                    # dataRecord['barcode'],
+                    # dataRecord['barcodeInner'],
+                    # dataRecord['name'],
+                    # dataRecord['description1'],
+                    # dataRecord['keySellUnitID'],
+                    # dataRecord['width'],
+                    # dataRecord['height'],
+                    # dataRecord['stockQuantity'],
+                    # dataRecord['stockLowQuantity'],
+                    # dataRecord['isPriceTaxInclusive'],
+                    # dataRecord['isKitted'],
+                    # dataRecord['kitProductsSetPrice'],
+                    # dataRecord['internalID']
+                    product.keyProductID + config.SUPPLIER_ORG_ID,
+                    product.keyTaxcodeID,
                     config.SUPPLIER_ORG_ID,
-                    dataRecord['productCode'],
-                    dataRecord['keyProductID'],
-                    dataRecord['barcode'],
-                    dataRecord['barcodeInner'],
-                    dataRecord['name'],
-                    dataRecord['description1'],
-                    dataRecord['keySellUnitID'],
-                    dataRecord['width'],
-                    dataRecord['height'],
-                    dataRecord['stockQuantity'],
-                    dataRecord['stockLowQuantity'],
-                    dataRecord['isPriceTaxInclusive'],
-                    dataRecord['isKitted'],
-                    dataRecord['kitProductsSetPrice'],
-                    dataRecord['internalID']
+                    product.productCode,
+                    product.keyProductID,
+                    product.barcode,
+                    product.barcodeInner,
+                    product.name,
+                    product.description1,
+                    product.keySellUnitID,
+                    product.width,
+                    product.height,
+                    product.stockQuantity,
+                    product.stockLowQuantity,
+                    product.isPriceTaxInclusive,
+                    product.isKitted,
+                    product.kitProductsSetPrice,
+                    product.internalID
                 ]
                 self.run_query(insert_query, values, True)
 
             except Exception as e:
                 logger.error("exception", e)
-                failedToStore.append(dataRecord['keyProductID'] + "error: " +str(e))
+                failedToStore.append(product.keyProductID + "error: " + str(e))
 
         logger.info('completed store_product')
-        result = {'status': "success",'data':{'failed': failedToStore}, 'message': "successfully stored products"}
+        result = {'status': "success", 'data': {'failed': failedToStore}, 'message': "successfully stored products"}
         return result
 
     

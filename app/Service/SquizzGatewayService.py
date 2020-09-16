@@ -2,6 +2,7 @@ import logging
 import requests
 import time
 from typing import Tuple, Optional
+from app.Model.Product import Product
 
 
 logger = logging.getLogger(__name__)
@@ -77,17 +78,16 @@ class SquizzGatewayService:
             "data_type_id": data_type
         }
         
-        data = self.requests.get("https://api.squizz.com/rest/1/org/retrieve_esd/"+ session_id, params=params).json()
+        data = self.requests.get("https://api.squizz.com/rest/1/org/retrieve_esd/" + session_id, params=params).json()
         if data["resultStatus"] == 1:
-            return True, data["dataRecords"]
+            productList = [Product(dataRecord) for dataRecord in data['dataRecords']]
+            return True, productList
         else:
             return False, None
     
 
     # Web Service Endpoint: Purchase Submit API
-    def submit_purchase(self, jsonValue) -> Tuple[bool, Optional[list]]:
-        header = {"Content-Type": "application/json"}
-        session_id = jsonValue['sessionKey']
+    def submit_purchase(self, session_id, order_details) -> Tuple[bool, Optional[list]]:
         header = {"Content-Type": "application/json"}
 
         # I just hardcoded the CustomerAccountCode (we had three, just took one for now), this needs to be generic now. As based on a specific customer we will submit the order. Previously we only had 1 customer so
@@ -132,7 +132,7 @@ class SquizzGatewayService:
             "billingCountryCodeISO3":"AUS",
             "instructions":"Leave goods at the back entrance",
             "isDropship":"N", 
-            "lines": jsonValue['lines']
+            "lines": [order_detail.json() for order_detail in order_details] # jsonValue['lines']
         }
         result = {
             "version": 1.2,
