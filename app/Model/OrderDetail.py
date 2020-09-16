@@ -11,4 +11,4 @@ class OrderDetail:
         self.priceTotalExTax = None
         self.productCode = None  # same with product code in product
         self.productId = None  # our own product_id
-        self.orderId=None #store the relationship of order
+        self.orderId = None  # store the relationship of order
