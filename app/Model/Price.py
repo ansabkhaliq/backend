@@ -1,5 +1,7 @@
-class Price:
-    def __init__(self):
+from . import Model
+
+class Price(Model):
+    def __init__(self, json):
         # primary key
         self.id = 0
         # foreignkey--connect to product
@@ -12,3 +14,4 @@ class Price:
         self.referenceId = None
         self.referenceType = None
         self.productId = None
+        super().__init__(json)

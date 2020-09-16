@@ -1,5 +1,7 @@
-class Category:
-    def __init__(self):
+from . import Model
+
+class Category(Model):
+    def __init__(self, json):
         self.id = 0
         self.categoryCode = None
         self.description1 = None
@@ -14,3 +16,4 @@ class Category:
         self.name = None
         self.ordering = 0
         self.productList = None  # store product object
+        super().__init__(json)

@@ -1,5 +1,7 @@
-class SellUnit:
-    def __init__(self):
+from . import Model
+
+class SellUnit(Model):
+    def __init__(self, json):
         self.id = 0
         self.baseQuantity = None
         self.isBaseUnit = None
@@ -8,3 +10,4 @@ class SellUnit:
         self.keySellUnitParentID = None
         self.sellUnitCode = None
         self.sellUnitLabel = None
+        super().__init__(json)

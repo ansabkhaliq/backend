@@ -1,5 +1,7 @@
-class Product:
-    def __init__(self):
+from . import Model
+
+class Product(Model):
+    def __init__(self, json):
         self.id = 0
         self.barcode = None
         self.barcodeInner = None
@@ -24,3 +26,4 @@ class Product:
         self.priceList = None  # store price object
         self.sellUnitsIdList = None
         self.description = None
+        super().__init__(json)

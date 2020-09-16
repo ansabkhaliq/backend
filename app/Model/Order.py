@@ -1,5 +1,7 @@
-class Order:
-    def __init__(self):
+from . import Model
+
+class Order(Model):
+    def __init__(self, json):
         self.id = None
         self.keyPurchaseOrderId = None
         self.organizationId = None
@@ -29,3 +31,4 @@ class Order:
         self.orderDetailList = None  # store order detail object
         self.bill_status = None
         self.session_id = None
+        super().__init__(json)
