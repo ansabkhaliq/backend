@@ -6,7 +6,7 @@ from requests.sessions import Session
 from app.Util import AuthUtil as authUtil
 from app.Resource.UserResource import UserResource
 from app.Service import UserService as user_service
-from app.Model import Product
+from app.Model.User import User
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -26,11 +26,9 @@ def login_post():
         return jsonify(result)
 
     data = request.get_json(silent=True)
+    user = User(data)
 
-    username = data.get('username')
-    password = data.get('password')
-
-    return jsonify(user_service.validate(username,password))
+    return jsonify(user_service.validate(user.username, user.password))
 
 
 @user.route('/api/logout', methods=['GET'])

@@ -1,4 +1,4 @@
-from . import Model
+from app.Model.Model import Model
 
 class User(Model):
     def __init__(self, json):
