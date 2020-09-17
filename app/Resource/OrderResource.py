@@ -27,7 +27,8 @@ class OrderResource(DatabaseBase):
 
     # NOTE: This method will cause an exception because FK constraints fail due
     # to the supplier org ID being updated from PjSAS to HolySAS. Therefore, it
-    # cannot store a purchase in the database yet
+    # cannot store a purchase in the database yet. Database has to be updated.
+    # Similar to 
     def store_purchase(self, session_id: str, result_code: str, order: Order):
         """
         This methods will insert purchase table and lines tables in the database

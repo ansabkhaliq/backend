@@ -15,13 +15,12 @@ class ProductResource(DatabaseBase):
     A subclass of DatabaseBase, responsible for handling database
     operations regarding products
     
-    # TODO: Update these definitions
     These operations include:
         - Product insertion
         - Product price insertion
-        - Retrieving barcode values
-        - Batch synchronizing product data with the SQUIZZ platform
-        - Batch synchronizing product prices with the SQUIZZ platform
+        - Retrieving product details for a given barcode
+        - Batch synchronizing product data from the SQUIZZ platform
+        - Batch synchronizing product prices from the SQUIZZ platform
     """
 
     def __init__(self):

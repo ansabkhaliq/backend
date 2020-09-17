@@ -37,7 +37,7 @@ def retrieve_products():
 def retrieve_prices():
     if not authUtil.validate_login_session():
         return redirect(url_for('auth.login'))
-    return product_service.retrieve_prices()
+    return jsonify(product_service.retrieve_prices())
 
 
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that

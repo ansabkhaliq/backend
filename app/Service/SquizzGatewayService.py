@@ -81,7 +81,8 @@ class SquizzGatewayService:
         params = {
             "session_id": session_id,
             "supplier_org_id": self.supplier_org_id,
-            "data_type_id": data_type
+            "data_type_id": data_type,
+            "customer_account_code": "TESTDEBTOR"  # Hardcoded customer account code for now
         }
         
         response = self.requests.get("https://api.squizz.com/rest/1/org/retrieve_esd/" + session_id, params=params).json()
