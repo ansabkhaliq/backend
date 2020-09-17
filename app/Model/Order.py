@@ -3,7 +3,7 @@ from app.Model.Model import Model
 class Order(Model):
     def __init__(self, json):
         self.id = None
-        self.keyPurchaseOrderId = None
+        self.keyPurchaseOrderID = None
         self.organizationId = None
         self.keySupplierAccountID = None
         self.supplierOrgId = None
@@ -28,7 +28,7 @@ class Order(Model):
         self.billingCountryName = None
         self.billingPostcode = None
         self.isDropship = None
-        self.orderDetailList = None  # store order detail object
-        self.bill_status = None
-        self.session_id = None
+        self.lines = None  # store order detail object (From Emmanuel: had to 
+        self.session_id = None                         # change this to lines for SQUIZZ API purchase endpoint)
+        self.bill_status = None                       
         super().__init__(json)

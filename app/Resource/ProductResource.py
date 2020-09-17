@@ -15,6 +15,7 @@ class ProductResource(DatabaseBase):
     A subclass of DatabaseBase, responsible for handling database
     operations regarding products
     
+    # TODO: Update these definitions
     These operations include:
         - Product insertion
         - Product price insertion
@@ -114,7 +115,7 @@ class ProductResource(DatabaseBase):
         logger.info('completed store_prices')
         result = {
             'status': 'success',
-            'message': 'successfully stored product pricess',
+            'message': 'successfully stored product prices',
             'data': {
                 'failed': failedToStore
             }

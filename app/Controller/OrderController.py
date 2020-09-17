@@ -19,7 +19,7 @@ def submit_purchase_order():
 
     data = request.get_json(silent=True)
     session_key = data['sessionKey']
-    order_details = [OrderDetail(order_detail) for order_detail in data['lines']]
+    order_details = [OrderDetail(line) for line in data['lines']]
     return jsonify(order_service.submit_order(session_key, order_details))
 
 

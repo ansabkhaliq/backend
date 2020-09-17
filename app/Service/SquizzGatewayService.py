@@ -5,6 +5,8 @@ from typing import Tuple, Optional
 from app.Model.Product import Product
 from app.Model.Category import Category
 from app.Model.Price import Price
+from app.Model.Order import Order
+import json
 
 
 logger = logging.getLogger(__name__)
@@ -32,7 +34,7 @@ class SquizzGatewayService:
         try:
             data = self.requests.post(self.base_url + "/org/create_session", data = parameter, headers=header).json()    
             if data["result"] == "SUCCESS" and data["result_code"] == "SERVER_SUCCESS":
-                logger.info('created a sessoion in squizz')
+                logger.info("Created a session in SQUIZZ")
                 return data["session_id"], "LOGIN_SUCCESS"
             else:
                 logger.debug('cannot create a sessoion in squizz'+ data["result_code"])
@@ -44,12 +46,12 @@ class SquizzGatewayService:
 
 
     # Web Service Endpoint: Destroy Organisation API Session
-    def destory_session(self, session_id: str) -> bool:
+    def destroy_session(self, session_id: str) -> bool:
         if session_id is None:
             return False
         data = self.requests.get(self.base_url + "/org/destroy_session/" + session_id).json()
         if data["result"] == "SUCCESS":
-            logger.info("session destroyed")
+            logger.info(f"Session with ID {session_id} destroyed")
             return True
         else:
             logger.debug("Could not destroy organisation API session")
@@ -101,8 +103,9 @@ class SquizzGatewayService:
 
         # I just hardcoded the CustomerAccountCode (we had three, just took one for now), this needs to be generic now. As based on a specific customer we will submit the order. Previously we only had 1 customer so
         # the team was not mentioning the customer. Now we have three.
-        purchaseURL = "https://api.squizz.com/rest/1/org/procure_purchase_order_from_supplier/" + session_id +"?supplier_org_id="+self.supplier_org_id \
-                      + "&customer_account_code=TESTDEBTOR"
+        purchaseURL = ("https://api.squizz.com/rest/1/org/procure_purchase_order_from_supplier/" 
+                       + session_id + "?supplier_org_id=" + self.supplier_org_id
+                       + "&customer_account_code=TESTDEBTOR")
 
         keyPurchaseOrderID = int(time.time() * 1000000) 
         # Not mandotary details are are hard code for now.
@@ -141,7 +144,7 @@ class SquizzGatewayService:
             "billingCountryCodeISO3":"AUS",
             "instructions":"Leave goods at the back entrance",
             "isDropship":"N", 
-            "lines": [order_detail.json() for order_detail in order_details] # jsonValue['lines']
+            "lines": [json.loads(order_detail.json()) for order_detail in order_details]
         }
         result = {
             "version": 1.2,
@@ -151,7 +154,7 @@ class SquizzGatewayService:
             "totalDataRecords": 1,
             "configs": {},
             "dataRecords": [parameter]
-            }
+        }
         data = self.requests.post(purchaseURL, json=result, headers=header).json()
         # return the result code of purchase
-        return data["result_code"], result
+        return data["result_code"], Order(parameter)

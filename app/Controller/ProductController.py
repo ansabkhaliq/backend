@@ -29,6 +29,7 @@ def retrieve_products():
         return redirect(url_for('auth.login'))
     return jsonify(product_service.retrieve_products())
 
+
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
 # This method is repsonbile for getting the latest product prices from SQUIZZ platform and updating the table in the local database
@@ -37,6 +38,7 @@ def retrieve_prices():
     if not authUtil.validate_login_session():
         return redirect(url_for('auth.login'))
     return product_service.retrieve_prices()
+
 
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
@@ -47,6 +49,7 @@ def update_products():
         return redirect(url_for('auth.login'))
 
     return jsonify(product_service.update_products())
+    
 
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
