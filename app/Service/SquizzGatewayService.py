@@ -3,6 +3,8 @@ import requests
 import time
 from typing import Tuple, Optional
 from app.Model.Product import Product
+from app.Model.Category import Category
+from app.Model.Price import Price
 
 
 logger = logging.getLogger(__name__)
@@ -69,8 +71,10 @@ class SquizzGatewayService:
             return False
     
 
-    # Web Service Endpoint: Product Price Retrieve API
-    def get_product_list(self, data_type: int) -> Tuple[bool, Optional[list]]:
+    # Web Service Endpoint: Retrieve Organisation Data
+    def retrieve_organisation_data(self, data_type: int) -> Tuple[bool, Optional[list]]:
+        assert(data_type == 3 or data_type == 8 or data_type == 37)
+
         session_id, _ = self.create_session()
         params = {
             "session_id": session_id,
@@ -78,13 +82,18 @@ class SquizzGatewayService:
             "data_type_id": data_type
         }
         
-        data = self.requests.get("https://api.squizz.com/rest/1/org/retrieve_esd/" + session_id, params=params).json()
-        if data["resultStatus"] == 1:
-            productList = [Product(dataRecord) for dataRecord in data['dataRecords']]
-            return True, productList
-        else:
-            return False, None
-    
+        response = self.requests.get("https://api.squizz.com/rest/1/org/retrieve_esd/" + session_id, params=params).json()
+        if response["resultStatus"] == 1:
+            if data_type == 3:
+                data = [Product(entry) for entry in response['dataRecords']]
+            elif data_type == 8:
+                data = [Category(entry) for entry in response['dataRecords']]
+            else:
+                data = [Price(entry) for entry in response['dataRecords']]
+            return True, data
+
+        return False, None
+
 
     # Web Service Endpoint: Purchase Submit API
     def submit_purchase(self, session_id, order_details) -> Tuple[bool, Optional[list]]:
