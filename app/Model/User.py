@@ -1,8 +1,9 @@
 from app.Model.Model import Model
 
+
 class User(Model):
     def __init__(self, json):
-        self.UUID = None  # using UUID Or auto increment?
+        self.id = None  # using UUID Or auto increment?
         self.org_id = None
         self.userName = None
         self.password = None

@@ -1,7 +1,5 @@
-from app.Model.Model import Model
-
-class OrderDetail(Model):
-    def __init__(self, json):
+class OrderDetail:
+    def __init__(self):
         self.id = None  # autoincrement pk
         self.lineType = None  # don't understand all the type is PRODUCT
         self.keyProductID = None  # Unique key in product
@@ -13,5 +11,4 @@ class OrderDetail(Model):
         self.priceTotalExTax = None
         self.productCode = None  # same with product code in product
         self.productId = None  # our own product_id
-        self.orderId=None #store the relationship of order
-        super().__init__(json)
+        self.orderId = None  # store the relationship of order

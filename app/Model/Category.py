@@ -1,5 +1,6 @@
 from app.Model.Model import Model
 
+
 class Category(Model):
     def __init__(self, json):
         self.id = 0
