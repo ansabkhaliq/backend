@@ -1,6 +1,5 @@
 import logging
 import datetime
-import json
 from app import config
 from app.Resource.DatabaseBase import DatabaseBase
 from app.Model.Order import Order
@@ -38,93 +37,123 @@ class OrderResource(DatabaseBase):
              result_code: response from SQUIZZ indicating purchase success or failure
              purchase_list: products listed in the purchase
         """
-        now = datetime.datetime.now()
-        dateTime = now.strftime("%Y-%m-%d  %H:%M:%S")
-        supplierAccountCode = config.SUPPLIER_ORG_ID
-        createdDate = dateTime
-        failedToStore = []
-
-        # search the user organization ID based on session ID from seesion table
-        search_query = "SELECT customers_org_id FROM squizz_app.session WHERE id=%s"
+        
+        # Search the user organization ID based on session ID from sessions table
+        organizationId = None
+        search_query = "SELECT OrganizationId FROM squizz_app.sessions WHERE SessionKey=%s"
         try:
-            tempCustomer = self.run_query(search_query, [session_id], False)
-            # get cutomer organization ID
-            customerAccountCode = tempCustomer[0]["customers_org_id"]
+            result = self.run_query(search_query, [session_id], False)
+            if result:
+                organizationId = result[0]['OrganizationId']
         except Exception as e:
             self.connection.rollback()
-            logger.error('Session not found', e)
+            logger.error(f'Could not find session with ID {session_id}', e)
 
-        # Insert the purchase records. lines are store as strings in this table for fast lookup.
-        orderDetails = [OrderDetail(entry) for entry in order.lines]
-        for orderDetail in orderDetails:
-            keyProductID = orderDetail.productId
-            uri_search_query = "SELECT * FROM squizz_app.products WHERE keyProductID=%s"
-            try:
-                uri = self.run_query(uri_search_query, [keyProductID], False)
-                orderDetail.uri_small  = uri[0]['uri_small']
-                orderDetail.uri_medium = uri[0]['uri_medium']
-                orderDetail.uri_large  = uri[0]['uri_large']
-            except Exception as e:
-                self.connection.rollback()
-                logger.error('URI search error', e)
+        # Insert the order into the 'orders' table
+        insert_query = ( 
+        """INSERT into squizz_app.orders(SupplierOrganizationId, CreatedOnDate, 
+           (Instructions, DeliveryOrganizationName, DeliveryContact, DeliveryEmail,
+           DeliveryAddress1, DeliveryAddress2, DeliveryAddress3, DeliveryRegionName,
+           DeliveryCountryName, DeliveryPostCode, BillingContact, BillingEmail,
+           BillingOrganizationName, BillingAddress1, BillingAddress2, BillingAddress3,
+           BillingRegionName, BillingCountryName, BillingPostCode, IsDropship, BillStatus, OrganizationId)
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""")
 
-        insert_query = "INSERT INTO squizz_app.purchase(keyPurchaseOrderID, supplierAccountCode, " \
-                       "customerAccountCode, keySupplierAccountID, createdDate, bill_status, " \
-                       "deliveryContact, deliveryAddress1, deliveryAddress2, deliveryAddress3, session_id, line) " \
-                       "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         values = [
-            order.keyPurchaseOrderID,
-            supplierAccountCode,
-            customerAccountCode,
-            supplierAccountCode,
-            createdDate,
-            result_code,
-            "+6144433332222",
-            "Unit 5",
-            "22 Bourkie Street",
-            "Melbourne",
-            session_id,
-            json.dumps([orderDetail.__dict__ for orderDetail in orderDetails])
+            config.SUPPLIER_ORG_ID,
+            datetime.datetime.now().strftime("%Y-%m-%d  %H:%M:%S"),
+            order.instructions,
+            order.deliveryOrgName,
+            order.deliveryContact,
+            order.deliveryEmail,
+            order.deliveryAddress1,
+            order.deliveryAddress2,
+            order.deliveryAddress3,
+            order.deliveryRegionName,
+            order.deliveryCountryName,
+            order.deliveryPostcode,
+            order.billingContact,
+            order.billingEmail,
+            order.billingOrgName,
+            order.billingAddress1,
+            order.billingAddress2,
+            order.billingAddress3,
+            order.billingRegionName,
+            order.billingCountryName,
+            order.billingPostcode,
+            order.isDropship,
+            order.bill_status,
+            organizationId
         ]
+
         try:
             self.run_query(insert_query, values, True)
         except Exception as e:
             self.connection.rollback()
-            logger.error('Exception occurred when insert new purchase order', e)
+            logger.error('Exception occurred when inserting order', e)
+
+        # Get the id of the inserted order
+        orderId = self.cursor.lastrowid
         
-        # insert table 'lines'
+        # Insert each item (and associated info) in the order into the 'orderdetails' table
+        failedToStore = []
+        orderDetails = [OrderDetail(entry) for entry in order.lines]
         try:
             for orderDetail in orderDetails:
-                # insertion query for table 'lines'
-                insert_query = "INSERT INTO squizz_app.lines(lineType, purchase_keyPurchaseOrderID, keyProductID,"\
-                               "quantity, priceTotalExTax, products_id) VALUES (%s, %s, %s, %s, %s, %s)"
+                # Set the orderID field for order detail
+                orderDetail.orderId = orderId
+
+                # Retrieve the product ID from 'products' table and set it
+                # within the orderDetail object
+                search_query = "SELECT Id from products WHERE KeyProductId=%s"
+                values = [orderDetail.keyProductID]
+                try:
+                    product = self.run_query(insert_query, values, True)[0]
+                    orderDetail.productId = product['Id']
+                except Exception as e:
+                    self.connection.rollback()
+                    failedToStore.append(orderDetail.productCode + "error:" +
+                                         f" could not find product with keyProductID {orderDetail.keyProductID}")
+                    continue
+                
+                # Insert an order detail record for the product in the order
+                insert_query = (
+                    """INSERT into squizz_app.orderdetails(KeyProductId, ProductName,
+                       Quantity, UnitPrice, TotalPrice, TotalPriceIncTax, TotalPriceExTax,
+                       ProductCode, OrderId, ProductId)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""")
+
                 values = [
-                    orderDetail.lineType,
-                    order.keyPurchaseOrderID,
-                    orderDetail.productId,
+                    orderDetail.keyProductID,
+                    orderDetail.productName,
                     orderDetail.quantity,
+                    orderDetail.unitPrice,
+                    orderDetail.totalPrice,
+                    orderDetail.priceTotalIncTax,
                     orderDetail.priceTotalExTax,
-                    orderDetail.productId + config.SUPPLIER_ORG_ID
+                    orderDetail.productCode,
+                    orderDetail.orderId,
+                    orderDetail.productId
                 ]
+
                 try:
                     self.run_query(insert_query, values, True)
                 except Exception as e:
                     self.connection.rollback()
-                    failedToStore.append(orderDetail.productCode + "error:" + "failed to store the purchase of order")
+                    failedToStore.append(orderDetail.productCode + "error:" + " failed to store order detail for product")
 
         except Exception as e:
-            logger.error('Exception occurred when insert new purchase order', e)
+            logger.error('Exception occurred when inserting order details', e)
             result = {
                 'status': "error",
                 'data': 'null',
-                'Message': 'Exception occurred when adding purchase order'
+                'message': 'Exception occurred when inserting order details'
             }
             return result
 
-        # Only 'SERVER_SUCCESS' means SQUIZZ accept the purchase, others are negative
         result = {
             'status': "success",
-            'message': "successfully added the purchase orders",
+            'message': "Successfully inserted order and order details",
             'data': {
                 'puchaseID': order.keyPurchaseOrderID
             }
@@ -132,57 +161,65 @@ class OrderResource(DatabaseBase):
         return result
 
         
-    def history_order(self, session_id, date_time):
+    def get_order_history(self, session_id, date_time):
         """
         This method will return the last 15 history records from the search time
         Args: 
             session_id: session ID of current user
             data_time: start time of searching
         """
-        customer_search_query = "SELECT customers_org_id FROM squizz_app.session WHERE id=%s"
+        # Retrieve user's organization ID based on session ID from sessions table
+        organizationId = None
+        search_query = "SELECT OrganizationId FROM squizz_app.sessions WHERE SessionKey=%s"
         try:
-            tempCustomer = self.run_query(customer_search_query, [session_id], False)
-            customerAccountCode = tempCustomer[0]["customers_org_id"] # get cutomer organization ID
+            result = self.run_query(search_query, [session_id], False)
+            if result:
+                organizationId = result[0]['OrganizationId']
+
         except Exception as e:
             self.connection.rollback()
-            logger.error('Session not found', e)
+            logger.error(f'Could not find session with ID {session_id}', e)
             result = {
                 'status': "error",
                 'data': 'null',
-                'Message': 'Session invalid, please login again'
+                'Message': 'Invalid session, please try login again'
             }
             return result
-
-        order_search_query = "SELECT keyPurchaseOrderID,createdDate,line," \
-                             "bill_status FROM squizz_app.purchase WHERE " \
-                             "customerAccountCode=%s and createdDate<=%s ORDER BY createdDate DESC LIMIT 15"
+            
+            
+        # Retrieve the organization's previous 15 orders
+        search_query = (
+            """SELECT * FROM orders WHERE CreatedOnDate <= %s
+               ORDER BY CreatedOnDate DESC LIMIT 15"""
+        )
+        values = [organizationId, date_time]
         try:
-            order_info = self.run_query(order_search_query, [customerAccountCode, date_time], False)
-            if order_info is not None:
-                for i in range(0, len(order_info)):
-                    order_info[i]['products'] = list(eval(order_info[i]['line']))
-                    order_info[i].pop('line')
-
-                result = {
-                    'status': "success",
-                    'message': "Successfully retrieved order history",
-                    'data': {
-                        'history_orders': order_info
-                    }
-                }
-                return result
-            else:
-                result = {
-                    'status': "success",
-                    'data': 'null',
-                    'message': "Success, but no data found!"
-                }
-                return result
-        except Exception as e:
-            logger.error('Could not retrieve order history:', e)
+            # For each order, get associated order detail records
+            orders = self.run_query(search_query, values, False)
+            for order in orders:
+                orderObject = Order(order)
+                search_query = "SELECT * FROM orderdetails WHERE OrderId = %s"
+                values = [orderObject.Id]
+                try:
+                    orderDetails = self.run_query(search_query, values, False)
+                    order['orderDetails'] = orderDetails
+                except:
+                    logger.error(f'Could not retrieve order details for order ID {orderObject.Id}')
+            
             result = {
-                'status': "error",
+                'status': 'success',
+                'message': 'Successfully retrieved order history',
+                'data': {
+                    'orderHistory': orders  # TODO: This will cause an issue with the frontend...
+                                            # Need to change frontend to deal with new values being returned for order history API call
+                }
+            }
+        except:
+            logger.error('Could not retrieve order history')
+            result = {
+                'status': 'error',
                 'data': 'null',
                 'Message': 'Exception occurred when retrieving history order' + str(e)
             }
-            return result
+
+        return result

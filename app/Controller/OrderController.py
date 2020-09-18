@@ -24,7 +24,7 @@ def submit_purchase_order():
 
 
 @order.route('/api/history_order', methods=['post'])
-def search_history_order():
+def retrieve_order_history():
     if not authUtil.validate_login_session:
         return redirect(url_for('auth.login'))
 

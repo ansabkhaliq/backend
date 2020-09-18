@@ -3,7 +3,7 @@ from app.Model.Model import Model
 
 class Category(Model):
     def __init__(self, json):
-        self.id = 0
+        self.Id = 0
         self.categoryCode = None
         self.description1 = None
         self.description2 = None

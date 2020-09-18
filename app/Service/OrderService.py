@@ -20,7 +20,7 @@ def submit_order(session_key, order_details) -> dict:
 
 def search_history(data) -> dict:
     try:
-        result = order_resource.history_order(data['session_id'], data['date_time'])
+        result = order_resource.get_order_history(data['session_id'], data['date_time'])
     except Exception as e:
         result = {
             'status': "failure",
