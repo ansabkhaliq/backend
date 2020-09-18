@@ -23,40 +23,44 @@ class UserResource(DatabaseBase):
 
     def validate_username_password(self, username: str, password: str) -> str:
         """
-        Retrieves the customer's organisation ID and password, based on the 
-        the input username, and vaidates the user's identity
+        Validates the user's identity by checking the username and password.
+        If their username and password are correct, then returns the customer's
+        organisation ID
 
         Args:
-            username: taken from user input
-            password: hashed password string
+            username: username (taken from user input)
+            password: password (taken from user input)
         """
-        query = "SELECT customers_org_id, passwd FROM userinfo WHERE username=%s"
+        query = "SELECT OrganizationId, Password FROM users WHERE Username = %s"
         values = [username]
-        result = self.run_query(query, values, False)
-        if result is not None:
-            result = result[0]
-            if check_password_hash(result['passwd'], password):
-                logger.info("Logged in successfully")
-                return result['customers_org_id']
+        try:
+            result = self.run_query(query, values, False)
+            if result:
+                user = result[0]
+                hashed_password = user['Password']
+                if check_password_hash(hashed_password, password):
+                    logger.info("Logged in successfully")
+                    return user['OrganizationId']
+                else:
+                    logger.info("Incorrect username or password entered")
             else:
-                logger.info("Incorrect username or password entered")
-                return None
-        else:
-            logger.info(f"Could not find user '{username}'")
-            return None
-            
+                logger.info(f"Could not find user '{username}'")
 
-    def create_user(self, username: str, password: str):
+
+    def create_user(self, username: str, password: str, org_id: str):
         """
         Creates a new user in the database
 
         Args:
             username: username
-            password: password
+            password: password (raw password string)
+            org_id: SQUIZZ organisation ID
         """
-        org_id = "11EA64D91C6E8F70A23EB6800B5BCB6D"
-        hpassword = generate_password_hash(password)
-        query = "INSERT INTO userinfo (customers_org_id, username, passwd) VALUES (%s,%s,%s)"
-        values = [org_id, username, hpassword]
-        self.run_query(query, values, True)
-        logger.info(f"Successfully created new user '{username}'")
+        hashed_password = generate_password_hash(password)
+        query = "INSERT INTO users(Username, Password, OrganizationId) VALUES (%s, %s, %s)"
+        values = [username, hashed_password, org_id]
+        try:
+            self.run_query(query, values, True)
+            logger.info(f"Successfully created new user '{username}' with organization ID '{org_id}'")
+        except:
+            logger.error(f"Could not insert a new record for user '{username}'")
