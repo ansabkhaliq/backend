@@ -28,7 +28,7 @@ def validate(username: str, password: str) -> dict:
         session.permanent = True
         session['seesion_id'] = session_id
         session['login_session'] = session_id
-        session_resource.store_session(session_id, org_id)
+        session_resource.store_session(username, session_id, org_id)
         logger.info(f"Created a new login session with ID: {session_id}")
         return {'status': "success", 'data': {"session_id": session_id}, "message": "LOGIN_SUCCESS"}
 

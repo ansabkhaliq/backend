@@ -40,7 +40,7 @@ def login_post():
 def logout():
     login_session = session.get('login_session')
     if authUtil.validate_login_session():
-        session_resource.remove_session(login_session)
+        session_resource.delete_session(login_session)
         session.pop('login_session ', None)
         session.pop('session_id ', None)
         session.pop('org_id', None)
