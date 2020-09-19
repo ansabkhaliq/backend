@@ -8,7 +8,7 @@ class Image(Model):
         self.mediumImageLocation = 0
         self.largeImageLocation = None
         self.threeDModelLocation = None
-        self.Is3DModelType = 'N'
+        self.is3DModelType = 'N'
         # Foreign Key for product.
         self.productId = None
         super().__init__(json)

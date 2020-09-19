@@ -206,14 +206,14 @@ class OrderResource(DatabaseBase):
             # For each order, get associated order detail records
             orders = self.run_query(search_query, values, False)
             for order in orders:
-                orderObject = Order(order)
+                orderId = order['id']
                 search_query = "SELECT * FROM orderdetails WHERE OrderId = %s"
-                values = [orderObject.Id]
+                values = [orderId]
                 try:
                     orderDetails = self.run_query(search_query, values, False)
                     order['orderDetails'] = orderDetails
                 except:
-                    logger.error(f'Could not retrieve order details for order ID {orderObject.Id}')
+                    logger.error(f'Could not retrieve order details for order ID {orderId}')
             
             result = {
                 'status': 'success',

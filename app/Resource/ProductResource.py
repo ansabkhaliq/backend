@@ -31,13 +31,13 @@ class ProductResource(DatabaseBase):
     # Insert the products in the 'Products' table. Used when Importing the data from the SQUIZZ organization / supplier
     def store_products(self, product_list: List[Product]):
 
-        insert_query =  ("""INSERT INTO products (KeyProductId, Barcode, BarcodeInner, Description1, Description2, Description3, Description4, 
+        insert_query = """INSERT INTO products (KeyProductId, Barcode, BarcodeInner, Description1, Description2, Description3, Description4, 
                            InternalId, Brand, Height, Depth, Width, Weight, Volume, ProductCondition, IsPriceTaxInclusive, IsKitted, KeyTaxcodeId,
                            StockQuantity, ProductName, KitProductsSetPrice, ProductCode, ProductSearchCode, StockLowQuantity, AverageCost, ProductDrop,
                            PackQuantity, SupplierOrganizationId, KeySellUnitID                       
-                           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""")
+                           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
-        failedToStore = []
+        failed_to_store = []
 
         for product in product_list:
             try:
@@ -76,14 +76,14 @@ class ProductResource(DatabaseBase):
 
             except Exception as e:
                 logger.error("exception", e)
-                failedToStore.append(product.keyProductID + "error: " + str(e))
+                failed_to_store.append(product.keyProductID + "error: " + str(e))
 
         logger.info('completed store_products')
         result = {
             'status': "success",
             'message': "successfully stored products",
             'data': {
-                'failed': failedToStore
+                'failed': failed_to_store
             }, 
         }
 
@@ -91,18 +91,18 @@ class ProductResource(DatabaseBase):
 
     # Insert the products prices in the 'Prices' table. Used when Importing the data from
     # the SQUIZZ organization / supplier
-    # todo: we can't just add prices, we need to know the customer as well for which we are adding the price
-    #  for now its only for single record (only 1 customer).
+    # todo: (For SQ-Koala) we can't just add prices, we need to know the customer as well for which we are
+    #  adding the price for now its only for single record (only 1 customer).
     def store_prices(self, price_list: List[Price]):
-        insert_query = ("""INSERT INTO prices (KeyProductId, keySellUnitID, Price, ReferenceId, 
+        insert_query = """INSERT INTO prices (KeyProductId, keySellUnitID, Price, ReferenceId, 
                           ReferenceType, ProductId) 
-                          VALUES (%s, %s, %s, %s, %s, %s)""")
+                          VALUES (%s, %s, %s, %s, %s, %s)"""
 
         # Get the Product from the Products table, as we need to insert the record ID
         # when adding the data to Price Table
         search_query = "SELECT * FROM products WHERE keyProductID=%s"
 
-        failedToStore = []
+        failed_to_store = []
 
         for price in price_list:
             # First, search in the product table to check whether this product exists.
@@ -128,16 +128,16 @@ class ProductResource(DatabaseBase):
                     self.run_query(insert_query, values, True)
                 except Exception as e:
                     logger.error("Exception", e)
-                    failedToStore.append(price.keyProductID + "error: " + str(e))
+                    failed_to_store.append(price.keyProductID + "error: " + str(e))
             else:
-                failedToStore.append(price.keyProductID + " error:" + " product does not exist")
+                failed_to_store.append(price.keyProductID + " error:" + " product does not exist")
 
         logger.info('completed store_prices')
         result = {
             'status': 'success',
             'message': 'successfully stored product prices',
             'data': {
-                'failed': failedToStore
+                'failed': failed_to_store
             }
         }
         return result
@@ -148,52 +148,36 @@ class ProductResource(DatabaseBase):
 
         search_query = """SELECT * FROM products JOIN prices ON products.Id = prices.ProductId 
                           WHERE products.Barcode = %s"""
-        product_record = self.run_query(search_query % barcode, [], False)
+        values = [barcode]
+        product_record = self.run_query(search_query, values, False)
 
         try:
             if product_record is not None:
 
                 # get the images for the product
                 search_image_query = """Select * From Images where ProductId = %s """
-                image_records = self.run_query(search_image_query % product_record[0]['Id'], [], False)
+                values = [product_record[0]['Id']]
+                image_records = self.run_query(search_image_query, values, False)
                 product = product_record[0]
 
                 # If product has images, send back the products with images, otherwise just product details
                 if image_records is not None:
-                    # todo this is wrong, as we can now have multiple images, but for now doing it like this.
-                    #  In next pass will fix. Also create new model
-                    barcode_product = BarcodeProduct()
-                    barcode_product.productName = product['productName']
-                    barcode_product.keyProductId = product['keyProductID']
-                    barcode_product.productCode = product['productCode']
-                    barcode_product.price = product['price']
-
-                    # todo. hopefully am doing it right? need to confirm
-                    barcode_product.imageList = [Image(entry) for entry in image_records]
-
-                    # todo: converting Model in to Json. hopefully correct? Need to confirm.
-                    data = barcode_product.json()
+                    barcode_product = BarcodeProduct(product)
+                    barcode_product.imageList = image_records
 
                     result = {
                         'status': "success",
                         'message': "successfully retrieved product",
-                        'data': data
+                        'data': barcode_product
                     }
                 # No Image found for the product so just send the product details
                 else:
-                    barcode_product = BarcodeProduct()
-                    barcode_product.productName = product['productName']
-                    barcode_product.keyProductId = product['keyProductID']
-                    barcode_product.productCode = product['productCode']
-                    barcode_product.price = product['price']
-
-                    # todo: converting Model in to Json. hopefully correct? Need to confirm.
-                    data = barcode_product.json()
+                    barcode_product = BarcodeProduct(product)
 
                     result = {
                         'status': "success",
                         'message': "successfully retrieved product",
-                        'data': data
+                        'data': barcode_product
                     }
             else:
                 result = {
@@ -204,7 +188,7 @@ class ProductResource(DatabaseBase):
         except Exception as e:
             result = {
                 'status': "error",
-                'data':'null', 
+                'data': 'null',
                 'Message': str(e)
             }
 
@@ -281,13 +265,13 @@ class ProductResource(DatabaseBase):
                 # We are going to update entire product. Since, we are not using ORM, this is ideal way
                 # needs to be updated or not. So to avoid loss of data, just update the entire record
                 # Since the Id is not auto-incremented, we won't update that, but update other things.
-                update_query = (""" UPDATE products SET KeyProductId = %s, Barcode = %s, BarcodeInner = %s, Description1  = %s, 
+                update_query = """ UPDATE products SET KeyProductId = %s, Barcode = %s, BarcodeInner = %s, Description1  = %s, 
                                     Description2 = %s, Description3 = %s, Description4 = %s, InternalId = %s, Brand = %s, 
                                     Height = %s, Depth = %s, Width = %s, Weight = %s, Volume = %s, ProductCondition = %s, 
                                     IsPriceTaxInclusive = %s, IsKitted = %s, KeyTaxcodeId = %s, StockQuantity = %s, ProductName = %s, 
                                     KitProductsSetPrice = %s, ProductCode = %s, ProductSearchCode = %s, StockLowQuantity = %s, 
                                     AverageCost = %s, ProductDrop = %s, PackQuantity = %s, SupplierOrganizationId = %s, KeySellUnitID = %s
-                                    WHERE keyProductID=%s""")
+                                    WHERE keyProductID = %s"""
 
                 try:
                     self.run_query(update_query, latest_record, True)

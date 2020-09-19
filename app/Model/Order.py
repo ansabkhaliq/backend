@@ -2,7 +2,7 @@ from app.Model.Model import Model
 
 class Order(Model):
     def __init__(self, json):
-        self.Id = None
+        self.id = None
         self.keyPurchaseOrderID = None
         self.organizationId = None
         self.keySupplierAccountID = None
