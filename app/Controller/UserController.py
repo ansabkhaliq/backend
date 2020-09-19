@@ -22,12 +22,17 @@ session_resource = SessionResource()
 @user.route('/api/login', methods=['POST'])
 def login_post():
     if authUtil.validate_login_session():
-        result = {'status': "success", 'data': {"session_id": session.get('login_session')}, "message": "LOGIN_EXIST"}
+        result = {
+            'status': "success",
+            "message": "LOGIN_EXIST",
+            'data': {
+                "session_id": session.get('login_session')
+            }
+        }
         return jsonify(result)
 
     data = request.get_json(silent=True)
     user = User(data)
-
     return jsonify(user_service.validate(user.username, user.password))
 
 
@@ -42,6 +47,6 @@ def logout():
         logger.info("Session has been deleted")
         result = {'status': "success", "message": "LOGOUT_SUCCESS"}
         return jsonify(result)
-    else:
-        result = {'status': "failure", "message": "LOGOUT_FAILURE"}
-        return jsonify(result)
+
+    result = {'status': "failure", "message": "LOGOUT_FAILURE"}
+    return jsonify(result)

@@ -20,6 +20,6 @@ class Model:
 
     def json(self):
         """
-        Deserializes the subclass model object into a JSON string
+        Serializes the subclass model object into a JSON string
         """
         return json.dumps(self.__dict__)

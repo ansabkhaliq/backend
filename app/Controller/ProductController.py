@@ -23,36 +23,39 @@ def get_barcode_product():
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
 # This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database
-@product.route('/retrieveproduct', methods=['GET'])
-def retrieve_product():
+@product.route('/retrieveProducts', methods=['GET'])
+def retrieve_products():
     if not authUtil.validate_login_session():
         return redirect(url_for('auth.login'))
-    return jsonify(product_service.retrieve_product())
+    return jsonify(product_service.retrieve_products())
+
 
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
 # This method is repsonbile for getting the latest product prices from SQUIZZ platform and updating the table in the local database
-@product.route('/retrieveprice', methods=['GET'])
-def retrieve_product_price():
+@product.route('/retrievePrices', methods=['GET'])
+def retrieve_prices():
     if not authUtil.validate_login_session():
         return redirect(url_for('auth.login'))
-    return product_service.retrieve_product_price()
+    return jsonify(product_service.retrieve_prices())
+
 
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
 # This method is repsonbile for getting the product update from SQUIZZ platform and updating the table in the local database
-@product.route('/updateproduct', methods=['GET'])
-def update_product():
+@product.route('/updateProducts', methods=['GET'])
+def update_products():
     if not authUtil.validate_login_session():
         return redirect(url_for('auth.login'))
 
-    return jsonify(product_service.update_product())
+    return jsonify(product_service.update_products())
+    
 
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
 # This method is repsonbile for getting the latest product prices from SQUIZZ platform and updating the table in the local database
-@product.route('/updateprice', methods=['GET'])
+@product.route('/updatePrices', methods=['GET'])
 def update_product_price():
     if not authUtil.validate_login_session():
         return redirect(url_for('auth.login'))
-    return jsonify(product_service.update_product_price())
+    return jsonify(product_service.update_prices())
