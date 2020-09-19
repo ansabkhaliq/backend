@@ -28,7 +28,7 @@ class Order(Model):
         self.billingCountryName = None
         self.billingPostcode = None
         self.isDropship = None
-        self.lines = None  # store order detail object (From Emmanuel: had to 
-        self.session_id = None                         # change this to lines for SQUIZZ API purchase endpoint)
+        self.lines = None  # store order detail object
+        self.session_id = None                        
         self.bill_status = None                       
         super().__init__(json)

@@ -40,19 +40,22 @@ class OrderResource(DatabaseBase):
         
         # Search the user organization ID based on session ID from sessions table
         organizationId = None
-        search_query = "SELECT OrganizationId FROM squizz_app.sessions WHERE SessionKey=%s"
+        search_query = """SELECT organizations.OrganizationId AS org_id 
+                          FROM sessions INNER JOIN organizations
+                          ON organizations.Id = sessions.OrganizationId
+                          WHERE SessionKey=%s"""
         try:
             result = self.run_query(search_query, [session_id], False)
             if result:
-                organizationId = result[0]['OrganizationId']
+                organizationId = result[0]['org_id']
         except Exception as e:
             self.connection.rollback()
             logger.error(f'Could not find session with ID {session_id}', e)
 
         # Insert the order into the 'orders' table
         insert_query = ( 
-        """INSERT into squizz_app.orders(SupplierOrganizationId, CreatedOnDate, 
-           (Instructions, DeliveryOrganizationName, DeliveryContact, DeliveryEmail,
+        """INSERT into orders (SupplierOrganizationId, CreatedOnDate, 
+           Instructions, DeliveryOrganizationName, DeliveryContact, DeliveryEmail,
            DeliveryAddress1, DeliveryAddress2, DeliveryAddress3, DeliveryRegionName,
            DeliveryCountryName, DeliveryPostCode, BillingContact, BillingEmail,
            BillingOrganizationName, BillingAddress1, BillingAddress2, BillingAddress3,
@@ -97,7 +100,7 @@ class OrderResource(DatabaseBase):
         
         # Insert each item (and associated info) in the order into the 'orderdetails' table
         failedToStore = []
-        orderDetails = [OrderDetail(entry) for entry in order.lines]
+        orderDetails = [OrderDetail(entry) for entry in order.lines]  # Lines are equal to order details
         try:
             for orderDetail in orderDetails:
                 # Set the orderID field for order detail
@@ -105,11 +108,14 @@ class OrderResource(DatabaseBase):
 
                 # Retrieve the product ID from 'products' table and set it
                 # within the orderDetail object
-                search_query = "SELECT Id from products WHERE KeyProductId=%s"
+                search_query = "SELECT Id, ProductName, ProductCode from products WHERE KeyProductId=%s"
                 values = [orderDetail.keyProductID]
                 try:
                     product = self.run_query(insert_query, values, True)[0]
-                    orderDetail.productId = product['Id']
+                    if product:
+                        orderDetail.productId = product['Id']
+                        orderDetail.productName = product['ProductName']
+                        orderDetail.productCode = product['ProductCode']
                 except Exception as e:
                     self.connection.rollback()
                     failedToStore.append(orderDetail.productCode + "error:" +
@@ -118,9 +124,9 @@ class OrderResource(DatabaseBase):
                 
                 # Insert an order detail record for the product in the order
                 insert_query = (
-                    """INSERT into squizz_app.orderdetails(KeyProductId, ProductName,
-                       Quantity, UnitPrice, TotalPrice, TotalPriceIncTax, TotalPriceExTax,
-                       ProductCode, OrderId, ProductId)
+                    """INSERT into orderdetails (KeyProductId, ProductName,
+                       Quantity, UnitPrice, TotalPrice, TotalPriceIncTax, 
+                       TotalPriceExTax, ProductCode, OrderId, ProductId)
                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""")
 
                 values = [
@@ -146,7 +152,7 @@ class OrderResource(DatabaseBase):
             logger.error('Exception occurred when inserting order details', e)
             result = {
                 'status': "error",
-                'data': 'null',
+                'data': failedToStore,
                 'message': 'Exception occurred when inserting order details'
             }
             return result
@@ -155,7 +161,7 @@ class OrderResource(DatabaseBase):
             'status': "success",
             'message': "Successfully inserted order and order details",
             'data': {
-                'puchaseID': order.keyPurchaseOrderID
+                'puchaseID': order.Id
             }
         }
         return result
@@ -168,13 +174,16 @@ class OrderResource(DatabaseBase):
             session_id: session ID of current user
             data_time: start time of searching
         """
-        # Retrieve user's organization ID based on session ID from sessions table
+        # Search the user organization ID based on session ID from sessions table
         organizationId = None
-        search_query = "SELECT OrganizationId FROM squizz_app.sessions WHERE SessionKey=%s"
+        search_query = """SELECT organizations.OrganizationId AS org_id 
+                          FROM sessions INNER JOIN organizations
+                          ON organizations.Id = sessions.OrganizationId
+                          WHERE SessionKey=%s"""
         try:
             result = self.run_query(search_query, [session_id], False)
             if result:
-                organizationId = result[0]['OrganizationId']
+                organizationId = result[0]['org_id']
 
         except Exception as e:
             self.connection.rollback()
@@ -187,10 +196,10 @@ class OrderResource(DatabaseBase):
             return result
             
             
-        # Retrieve the organization's previous 15 orders
+        # Retrieve the organization's previous 30 orders
         search_query = (
             """SELECT * FROM orders WHERE CreatedOnDate <= %s
-               ORDER BY CreatedOnDate DESC LIMIT 15"""
+               ORDER BY CreatedOnDate DESC LIMIT 30"""
         )
         values = [organizationId, date_time]
         try:

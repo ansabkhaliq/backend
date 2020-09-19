@@ -31,7 +31,10 @@ class UserResource(DatabaseBase):
             username: username (taken from user input)
             password: password (taken from user input)
         """
-        query = "SELECT OrganizationId, Password FROM users WHERE Username = %s"
+        query = """SELECT organizations.OrganizationId AS org_id, password 
+                   FROM organizations INNER JOIN users ON organizations.id = users.OrganizationId
+                   WHERE username = %s"""
+
         values = [username]
         try:
             result = self.run_query(query, values, False)
@@ -40,7 +43,7 @@ class UserResource(DatabaseBase):
                 hashed_password = user['Password']
                 if check_password_hash(hashed_password, password):
                     logger.info("Logged in successfully")
-                    return user['OrganizationId']
+                    return user['org_id']
                 else:
                     logger.info("Incorrect username or password entered")
             else:
@@ -56,6 +59,8 @@ class UserResource(DatabaseBase):
             password: password (raw password string)
             org_id: SQUIZZ organisation ID
         """
+        # TODO: (For SQ-Koala) Need to query organization table to get the record Id and then add it
+        # to the user record.
         hashed_password = generate_password_hash(password)
         query = "INSERT INTO users(Username, Password, OrganizationId) VALUES (%s, %s, %s)"
         values = [username, hashed_password, org_id]
