@@ -219,7 +219,7 @@ class OrderResource(DatabaseBase):
             result = {
                 'status': 'error',
                 'data': 'null',
-                'Message': 'Exception occurred when retrieving history order' + str(e)
+                'Message': 'Exception occurred when retrieving history order'
             }
 
         return result
