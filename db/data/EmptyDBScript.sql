@@ -97,6 +97,7 @@ CREATE TABLE Products
   ProductDrop VARCHAR(45),
   PackQuantity decimal(10,2),
   SupplierOrganizationId VARCHAR(80) NOT NULL,  
+  KeySellUnitID VARCHAR(50),
   PRIMARY KEY (Id),  
   UNIQUE (KeyProductId)
 );

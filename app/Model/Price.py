@@ -4,14 +4,13 @@ class Price(Model):
     def __init__(self, json):
         # primary key
         self.id = 0
-        # foreignkey--connect to product
         self.keyProductID = None
-        # foreignkey -- connect to unit
         self.keySellUnitID = None
-        # price
         self.price = 0
-        # I don't know the meaning since it occurs every where
+        # Contract Reference ID (not all customers will have it)
         self.referenceID = None
+        # Contract Reference Type (not all customers will have it)
         self.referenceType = None
+        # foreignkey--connect to product
         self.productId = None
         super().__init__(json)
