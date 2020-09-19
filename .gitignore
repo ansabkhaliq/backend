@@ -5,3 +5,8 @@ __pycache__
 venv
 static/node_modules
 .pytest_cache
+/.venv/
+/.idea/
+*.iml
+*.iml
+.idea/COMP90082-Software-Project.iml

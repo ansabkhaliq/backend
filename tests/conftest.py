@@ -1,11 +1,8 @@
 import os
 import tempfile
 import pytest
-
 from app import create_app , session
 
-
-from datasources.iam import IAM
 
 @pytest.fixture
 def apps():
