@@ -2,13 +2,13 @@ from app.Model.Model import Model
 
 class Order(Model):
     def __init__(self, json):
-        self.id = None
+        self.Id = None
         self.keyPurchaseOrderID = None
         self.organizationId = None
         self.keySupplierAccountID = None
         self.supplierOrgId = None
         self.createdDate = None
-        self.instruction = None
+        self.instructions = None
         self.deliveryOrgName = None
         self.deliveryContact = None
         self.deliveryEmail = None
