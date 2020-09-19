@@ -48,6 +48,8 @@ class UserResource(DatabaseBase):
                     logger.info("Incorrect username or password entered")
             else:
                 logger.info(f"Could not find user '{username}'")
+        except:
+            logger.error("Could validate username and password")
 
 
     def create_user(self, username: str, password: str, org_id: str):
