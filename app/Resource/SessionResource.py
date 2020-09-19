@@ -38,6 +38,8 @@ class SessionResource(DatabaseBase):
             result = self.run_query(query, values, False)
             if result:
                 userId = result[0]['Id']
+        except:
+            logger.error("Could not find user")
 
         # Insert new session record in 'sessions' table
         query = "INSERT INTO sessions(SessionKey, DateTime, UserId, OrganizationId) VALUES (%s, %s, %s, %s)"
