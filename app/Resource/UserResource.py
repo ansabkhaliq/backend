@@ -40,7 +40,7 @@ class UserResource(DatabaseBase):
             result = self.run_query(query, values, False)
             if result:
                 user = result[0]
-                hashed_password = user['Password']
+                hashed_password = user['password']
                 if check_password_hash(hashed_password, password):
                     logger.info("Logged in successfully")
                     return user['org_id']
@@ -48,7 +48,7 @@ class UserResource(DatabaseBase):
                     logger.info("Incorrect username or password entered")
             else:
                 logger.info(f"Could not find user '{username}'")
-        except:
+        except Exception as e:
             logger.error("Could validate username and password")
 
 

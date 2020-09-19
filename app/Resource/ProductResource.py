@@ -34,7 +34,7 @@ class ProductResource(DatabaseBase):
         insert_query = """INSERT INTO products (KeyProductId, Barcode, BarcodeInner, Description1, Description2, Description3, Description4, 
                            InternalId, Brand, Height, Depth, Width, Weight, Volume, ProductCondition, IsPriceTaxInclusive, IsKitted, KeyTaxcodeId,
                            StockQuantity, ProductName, KitProductsSetPrice, ProductCode, ProductSearchCode, StockLowQuantity, AverageCost, ProductDrop,
-                           PackQuantity, SupplierOrganizationId, KeySellUnitID                       
+                           PackQuantity, SupplierOrganizationId, KeySellUnitID)                       
                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
         failed_to_store = []
@@ -53,12 +53,13 @@ class ProductResource(DatabaseBase):
                     product.brand,
                     product.height,
                     product.depth,
+                    product.width,
                     product.weight,
                     product.volume,
                     product.productCondition,
                     product.isPriceTaxInclusive,
                     product.isKitted,
-                    product.keyTaxCodeID,
+                    product.keyTaxcodeID,
                     product.stockQuantity,
                     product.name,
                     product.kitProductsSetPrice,
@@ -123,7 +124,7 @@ class ProductResource(DatabaseBase):
                         price.price,
                         price.referenceID,
                         price.referenceType,
-                        product_record[0]['Id']
+                        product_record[0]['id']
                     ]
                     self.run_query(insert_query, values, True)
                 except Exception as e:
@@ -146,7 +147,8 @@ class ProductResource(DatabaseBase):
     # todo we need to update the frontend as the response has changed for this method
     def get_product_by_barcode(self, barcode):
 
-        search_query = """SELECT * FROM products JOIN prices ON products.Id = prices.ProductId 
+        search_query = """SELECT products.id, products.productName, products.productCode, prices.keyProductID, prices.price 
+                          FROM products JOIN prices ON products.id = prices.Productid 
                           WHERE products.Barcode = %s"""
         values = [barcode]
         product_record = self.run_query(search_query, values, False)
@@ -155,13 +157,15 @@ class ProductResource(DatabaseBase):
             if product_record is not None:
 
                 # get the images for the product
-                search_image_query = """Select * From Images where ProductId = %s """
-                values = [product_record[0]['Id']]
+                search_image_query = """Select * From Images where productId = %s """
+                values = [product_record[0]['id']]
                 image_records = self.run_query(search_image_query, values, False)
                 product = product_record[0]
 
                 # If product has images, send back the products with images, otherwise just product details
                 if image_records is not None:
+                    # We have to convert decimal into float as we python cannot serialize decimal values
+                    product['price'] = float(product['price'])
                     barcode_product = BarcodeProduct(product)
                     barcode_product.imageList = image_records
 
@@ -172,12 +176,14 @@ class ProductResource(DatabaseBase):
                     }
                 # No Image found for the product so just send the product details
                 else:
+                    # We have to convert decimal into float as we python cannot serialize decimal values
+                    product['price'] = float(product['price'])
                     barcode_product = BarcodeProduct(product)
 
                     result = {
                         'status': "success",
                         'message': "successfully retrieved product",
-                        'data': barcode_product
+                        'data': barcode_product.__dict__
                     }
             else:
                 result = {
@@ -232,7 +238,6 @@ class ProductResource(DatabaseBase):
                 value_inserted += 1
             else:
                 latest_record = [
-                    product.keyProductID,
                     product.barcode,
                     product.barcodeInner,
                     product.description1,
@@ -243,12 +248,13 @@ class ProductResource(DatabaseBase):
                     product.brand,
                     product.height,
                     product.depth,
+                    product.width,
                     product.weight,
                     product.volume,
                     product.productCondition,
                     product.isPriceTaxInclusive,
                     product.isKitted,
-                    product.keyTaxCodeID,
+                    product.keyTaxcodeID,
                     product.stockQuantity,
                     product.name,
                     product.kitProductsSetPrice,
@@ -259,13 +265,14 @@ class ProductResource(DatabaseBase):
                     product.drop,
                     product.packQuantity,
                     config.SUPPLIER_ORG_ID,
-                    product.keySellUnitID
+                    product.keySellUnitID,
+                    product.keyProductID
                 ]
 
                 # We are going to update entire product. Since, we are not using ORM, this is ideal way
                 # needs to be updated or not. So to avoid loss of data, just update the entire record
                 # Since the Id is not auto-incremented, we won't update that, but update other things.
-                update_query = """ UPDATE products SET KeyProductId = %s, Barcode = %s, BarcodeInner = %s, Description1  = %s, 
+                update_query = """ UPDATE products SET Barcode = %s, BarcodeInner = %s, Description1  = %s, 
                                     Description2 = %s, Description3 = %s, Description4 = %s, InternalId = %s, Brand = %s, 
                                     Height = %s, Depth = %s, Width = %s, Weight = %s, Volume = %s, ProductCondition = %s, 
                                     IsPriceTaxInclusive = %s, IsKitted = %s, KeyTaxcodeId = %s, StockQuantity = %s, ProductName = %s, 
@@ -320,7 +327,8 @@ class ProductResource(DatabaseBase):
                         price.keySellUnitID,
                         price.price,
                         price.referenceID,
-                        price.referenceType
+                        price.referenceType,
+                        price.keyProductID
                     ]
 
                     update_query = """UPDATE prices SET keySellUnitID = %s, Price = %s, ReferenceId = %s, 

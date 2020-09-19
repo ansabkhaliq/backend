@@ -30,5 +30,5 @@ class Order(Model):
         self.isDropship = None
         self.lines = None  # store order detail object
         self.session_id = None                        
-        self.bill_status = None                       
+        self.billStatus = None
         super().__init__(json)

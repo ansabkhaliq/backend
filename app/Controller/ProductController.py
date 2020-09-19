@@ -10,7 +10,7 @@ from flask import (
 
 product = Blueprint('product', __name__)
 
-@product.route('/api/price', methods=['POST'])
+@product.route('/api/barcode', methods=['POST'])
 def get_barcode_product():
     if not authUtil.validate_login_session():
         return redirect(url_for('auth.login'))

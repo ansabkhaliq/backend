@@ -38,21 +38,30 @@ class SessionResource(DatabaseBase):
             result = self.run_query(query, values, False)
             if result:
                 userId = result[0]['Id']
-        except:
+        except Exception as e:
             logger.error("Could not find user")
 
-        # Insert new session record in 'sessions' table
-        query = "INSERT INTO sessions(SessionKey, DateTime, UserId, OrganizationId) VALUES (%s, %s, %s, %s)"
-        values = [
-            session_id,
-            datetime.datetime.now().strftime("%Y-%m-%d  %H:%M:%S"),
-            userId,
-            org_id
-        ]
+        search_query = "Select * from organizations where organizationId = %s"
+        values = [org_id]
         try:
-            self.run_query(query, values, True)
-        except:
-            logger.error("Could not store session in database")
+            result = self.run_query(search_query, values, False)
+        except Exception as e:
+            logger.error("Could not find organization")
+
+        if result is not None:
+            org_record_id = result[0]['id']
+            # Insert new session record in 'sessions' table
+            query = "INSERT INTO sessions(SessionKey, DateTime, UserId, OrganizationId) VALUES (%s, %s, %s, %s)"
+            values = [
+                session_id,
+                datetime.datetime.now().strftime("%Y-%m-%d  %H:%M:%S"),
+                userId,
+                org_record_id
+            ]
+            try:
+                self.run_query(query, values, True)
+            except Exception as e:
+                logger.error("Could not store session in database")
 
 
     def validate_session(self, session_id: str, org_id: str):
@@ -63,14 +72,20 @@ class SessionResource(DatabaseBase):
             session_id: a SQUIZZ session ID string
             org_id: the organisation ID of the user
         """
-        query = "SELECT count(*) as num FROM sessions WHERE SessionKey = %s and OrganizationId = %s"
+        query = """SELECT count(*) as num FROM sessions join organizations 
+                   on organizations.id = sessions.organizationId
+                   WHERE SessionKey = %s and organizations.OrganizationId = %s"""
         values = [session_id, org_id]
-        result = self.run_query(query, values, False)
-        if result and result[0]['num'] > 0:
-            return True
-        else:
-            logger.info("Could not find an existing session for the given user")
-            return False
+        try:
+            result = self.run_query(query, values, False)
+            if result and result[0]['num'] > 0:
+                return True
+            else:
+                logger.info("Could not find an existing session for the given user")
+                return False
+        except Exception as e:
+            logger.log("Cannot validate session")
+
 
 
     def delete_session(self, session_id: str):

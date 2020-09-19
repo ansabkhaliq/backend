@@ -39,15 +39,15 @@ class OrderResource(DatabaseBase):
         """
         
         # Search the user organization ID based on session ID from sessions table
-        organizationId = None
-        search_query = """SELECT organizations.OrganizationId AS org_id 
+        organization_id = None
+        search_query = """SELECT organizations.id AS org_id 
                           FROM sessions INNER JOIN organizations
                           ON organizations.Id = sessions.OrganizationId
                           WHERE SessionKey=%s"""
         try:
             result = self.run_query(search_query, [session_id], False)
             if result:
-                organizationId = result[0]['org_id']
+                organization_id = result[0]['org_id']
         except Exception as e:
             self.connection.rollback()
             logger.error(f'Could not find session with ID {session_id}', e)
@@ -85,8 +85,8 @@ class OrderResource(DatabaseBase):
             order.billingCountryName,
             order.billingPostcode,
             order.isDropship,
-            order.bill_status,
-            organizationId
+            result_code,
+            organization_id
         ]
 
         try:
@@ -97,7 +97,8 @@ class OrderResource(DatabaseBase):
 
         # Get the id of the inserted order
         orderId = self.cursor.lastrowid
-        
+        order.id = orderId
+
         # Insert each item (and associated info) in the order into the 'orderdetails' table
         failedToStore = []
         orderDetails = [OrderDetail(entry) for entry in order.lines]  # Lines are equal to order details
@@ -108,14 +109,14 @@ class OrderResource(DatabaseBase):
 
                 # Retrieve the product ID from 'products' table and set it
                 # within the orderDetail object
-                search_query = "SELECT Id, ProductName, ProductCode from products WHERE KeyProductId=%s"
+                search_query = "SELECT id, productName, productCode from products WHERE KeyProductId=%s"
                 values = [orderDetail.keyProductID]
                 try:
-                    product = self.run_query(insert_query, values, True)[0]
+                    product = self.run_query(search_query, values, True)[0]
                     if product:
-                        orderDetail.productId = product['Id']
-                        orderDetail.productName = product['ProductName']
-                        orderDetail.productCode = product['ProductCode']
+                        orderDetail.productId = product['id']
+                        orderDetail.productName = product['productName']
+                        orderDetail.productCode = product['productCode']
                 except Exception as e:
                     self.connection.rollback()
                     failedToStore.append(orderDetail.productCode + "error:" +
@@ -161,7 +162,7 @@ class OrderResource(DatabaseBase):
             'status': "success",
             'message': "Successfully inserted order and order details",
             'data': {
-                'puchaseID': order.Id
+                'puchaseID': order.id
             }
         }
         return result
@@ -176,7 +177,7 @@ class OrderResource(DatabaseBase):
         """
         # Search the user organization ID based on session ID from sessions table
         organizationId = None
-        search_query = """SELECT organizations.OrganizationId AS org_id 
+        search_query = """SELECT organizations.id AS org_id 
                           FROM sessions INNER JOIN organizations
                           ON organizations.Id = sessions.OrganizationId
                           WHERE SessionKey=%s"""
@@ -198,7 +199,7 @@ class OrderResource(DatabaseBase):
             
         # Retrieve the organization's previous 30 orders
         search_query = (
-            """SELECT * FROM orders WHERE CreatedOnDate <= %s
+            """SELECT * FROM orders WHERE organizationId = %s and CreatedOnDate <= %s 
                ORDER BY CreatedOnDate DESC LIMIT 30"""
         )
         values = [organizationId, date_time]
@@ -206,14 +207,14 @@ class OrderResource(DatabaseBase):
             # For each order, get associated order detail records
             orders = self.run_query(search_query, values, False)
             for order in orders:
-                orderId = order['id']
+                order_id = order['id']
                 search_query = "SELECT * FROM orderdetails WHERE OrderId = %s"
-                values = [orderId]
+                values = [order_id]
                 try:
-                    orderDetails = self.run_query(search_query, values, False)
-                    order['orderDetails'] = orderDetails
-                except:
-                    logger.error(f'Could not retrieve order details for order ID {orderId}')
+                    order_details = self.run_query(search_query, values, False)
+                    order['lines'] = order_details
+                except Exception as e:
+                    logger.error(f'Could not retrieve order details for order ID {order_id}')
             
             result = {
                 'status': 'success',

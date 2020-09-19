@@ -21,7 +21,7 @@ class Product(Model):
         self.productCondition = None
         self.keyProductID = None
         self.keySellUnitID = None
-        self.keyTaxCodeID = None
+        self.keyTaxcodeID = None
         self.kitProductsSetPrice = None
         self.name = None
         self.productCode = None
