@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `squizz_app` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `squizz_app`;
 -- MySQL dump 10.13  Distrib 8.0.21, for Win64 (x86_64)
 --
 -- Host: localhost    Database: squizz_app
@@ -16,6 +14,43 @@ USE `squizz_app`;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `addresses`
+--
+
+DROP TABLE IF EXISTS `addresses`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `addresses` (
+  `Id` bigint NOT NULL AUTO_INCREMENT,
+  `DeliveryContact` varchar(50) DEFAULT NULL,
+  `DeliveryOrgName` varchar(50) DEFAULT NULL,
+  `DeliveryEmail` varchar(100) DEFAULT NULL,
+  `DeliveryFax` varchar(50) DEFAULT NULL,
+  `DeliveryAddress1` varchar(100) DEFAULT NULL,
+  `DeliveryAddress2` varchar(100) DEFAULT NULL,
+  `DeliveryAddress3` varchar(100) DEFAULT NULL,
+  `DeliveryPostcode` varchar(30) DEFAULT NULL,
+  `DeliveryRegionName` varchar(60) DEFAULT NULL,
+  `DeliveryCountryName` varchar(60) DEFAULT NULL,
+  `DeliveryCountryCodeISO2` varchar(20) DEFAULT NULL,
+  `DeliveryCountryCodeISO3` varchar(20) DEFAULT NULL,
+  `OrganizationId` bigint NOT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `OrganizationId` (`OrganizationId`),
+  CONSTRAINT `addresses_ibfk_1` FOREIGN KEY (`OrganizationId`) REFERENCES `organizations` (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `addresses`
+--
+
+LOCK TABLES `addresses` WRITE;
+/*!40000 ALTER TABLE `addresses` DISABLE KEYS */;
+/*!40000 ALTER TABLE `addresses` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `categories`
@@ -290,11 +325,8 @@ CREATE TABLE `products` (
   `ProductDrop` varchar(45) DEFAULT NULL,
   `PackQuantity` decimal(10,2) DEFAULT NULL,
   `SupplierOrganizationId` varchar(80) NOT NULL,
-  `SellUnitId` bigint DEFAULT NULL,
   PRIMARY KEY (`Id`),
-  UNIQUE KEY `KeyProductId` (`KeyProductId`),
-  KEY `SellUnitId` (`SellUnitId`),
-  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`SellUnitId`) REFERENCES `sellunits` (`Id`)
+  UNIQUE KEY `KeyProductId` (`KeyProductId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -317,13 +349,16 @@ DROP TABLE IF EXISTS `sellunits`;
 CREATE TABLE `sellunits` (
   `Id` bigint NOT NULL AUTO_INCREMENT,
   `KeySellUnitId` varchar(50) NOT NULL,
-  `BaseQuantity` decimal(10,2) NOT NULL,
-  `IsBaseUnit` enum('Y','N') NOT NULL,
-  `IsPricedOffBaseUnit` enum('Y','N') NOT NULL,
+  `BaseQuantity` float NOT NULL,
+  `IsBaseUnit` char(1) NOT NULL,
+  `IsPricedOffBaseUnit` char(1) NOT NULL,
   `KeySellUnitParentId` varchar(50) DEFAULT NULL,
   `SellUnitCode` varchar(10) NOT NULL,
   `SellUnitLabel` varchar(10) NOT NULL,
-  PRIMARY KEY (`Id`)
+  `ProductId` bigint NOT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `ProductId` (`ProductId`),
+  CONSTRAINT `sellunits_ibfk_1` FOREIGN KEY (`ProductId`) REFERENCES `products` (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -401,4 +436,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-09-17 22:36:08
+-- Dump completed on 2020-09-19 16:27:54
