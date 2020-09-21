@@ -162,11 +162,12 @@ class ProductResource(DatabaseBase):
                 image_records = self.run_query(search_image_query, values, False)
                 product = product_record[0]
 
+                # We have to convert decimal into float as we python cannot serialize decimal values
+                product['price'] = float(product['price'])
+                barcode_product = BarcodeProduct(product)
+
                 # If product has images, send back the products with images, otherwise just product details
                 if image_records is not None:
-                    # We have to convert decimal into float as we python cannot serialize decimal values
-                    product['price'] = float(product['price'])
-                    barcode_product = BarcodeProduct(product)
                     barcode_product.imageList = image_records
 
                     result = {
@@ -176,9 +177,6 @@ class ProductResource(DatabaseBase):
                     }
                 # No Image found for the product so just send the product details
                 else:
-                    # We have to convert decimal into float as we python cannot serialize decimal values
-                    product['price'] = float(product['price'])
-                    barcode_product = BarcodeProduct(product)
 
                     result = {
                         'status': "success",
