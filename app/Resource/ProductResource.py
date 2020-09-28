@@ -2,8 +2,8 @@ import logging
 import datetime
 from app import config
 from app.Resource.DatabaseBase import DatabaseBase
-from app.Model.Product import Product
 from app.Model.Price import Price
+from app.Model.Product import Product
 from app.Model.BarcodeProduct import BarcodeProduct
 from app.Model.Image import Image
 from typing import List
@@ -21,6 +21,7 @@ class ProductResource(DatabaseBase):
         - Product insertion
         - Product price insertion
         - Retrieving product details for a given barcode
+        - Retrieveing product details for a given Product ID
         - Batch synchronizing product data from the SQUIZZ platform
         - Batch synchronizing product prices from the SQUIZZ platform
     """
@@ -152,53 +153,30 @@ class ProductResource(DatabaseBase):
                           WHERE products.Barcode = %s"""
         values = [barcode]
         product_record = self.run_query(search_query, values, False)
+        return product_record[0]
 
-        try:
-            if product_record is not None:
+    # This method is used to retrieve the product based on the product id provided from the frontend.
+    # todo we need to update the frontend as the response has changed for this method
+    def get_product_by_id(self, prodID):
+        search_query = """SELECT products.id, products.barcode,products.productCode, products.productName,
+                          prices.keyProductID, prices.price 
+                          FROM products JOIN prices ON products.id = prices.Productid 
+                          WHERE products.Id = %s"""
+        
+        values = [prodID]
+        product_record = self.run_query(search_query, values, False)
+        return product_record[0]
+        
 
-                # get the images for the product
-                search_image_query = """Select * From Images where productId = %s """
-                values = [product_record[0]['id']]
-                image_records = self.run_query(search_image_query, values, False)
-                product = product_record[0]
+    def get_product_images_by_id(self, id):
 
-                # If product has images, send back the products with images, otherwise just product details
-                if image_records is not None:
-                    # We have to convert decimal into float as we python cannot serialize decimal values
-                    product['price'] = float(product['price'])
-                    barcode_product = BarcodeProduct(product)
-                    barcode_product.imageList = image_records
+        search_image_query = """Select * From Images where productId = %s """
+        values = [id]
+        image_records = self.run_query(search_image_query, values, False)
+        return image_records
+        
 
-                    result = {
-                        'status': "success",
-                        'message': "successfully retrieved product",
-                        'data': barcode_product
-                    }
-                # No Image found for the product so just send the product details
-                else:
-                    # We have to convert decimal into float as we python cannot serialize decimal values
-                    product['price'] = float(product['price'])
-                    barcode_product = BarcodeProduct(product)
 
-                    result = {
-                        'status': "success",
-                        'message': "successfully retrieved product",
-                        'data': barcode_product.__dict__
-                    }
-            else:
-                result = {
-                    'status': "error",
-                    'data': 'null',
-                    'Message': "No data found"
-                }
-        except Exception as e:
-            result = {
-                'status': "error",
-                'data': 'null',
-                'Message': str(e)
-            }
-
-        return result
 
     # This method is used to update the products that are stored in the database. Updated product infromation is fetched
     # from the SQUIZZ API.

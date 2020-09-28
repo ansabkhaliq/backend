@@ -1,6 +1,7 @@
 
 from app.Resource.ProductResource import ProductResource
 from app.Util import AuthUtil as authUtil
+from app.Model.Product import Product
 
 product_resource = ProductResource()
 
@@ -35,7 +36,91 @@ def retrieve_prices() -> dict:
 
 
 def get_product_by_barcode(barcode) -> dict:
-    return product_resource.get_product_by_barcode(barcode)
+   
+    # Get Product Details
+    product_record = product_resource.get_product_by_barcode(barcode)
+
+    # Get Product images
+    image_records = get_product_images(product_record['id'])
+    try:
+        if product_record is not None:
+
+
+            # Converting Decimal to float (Python serializable)
+            product_record['price'] = float(product_record['price'])
+
+
+            # Packing data in the Model
+            product_record = Product(product_record)
+            if(image_records is not None):
+                product_record.imageList = image_records[0]
+
+            result = {
+                'status': "success",
+                'message': "successfully retrieved product",
+                'data': product_record.__dict__
+            }
+
+        else:
+            result = {
+                'status': "error",
+                'data': 'null',
+                'Message': "No data found"
+            }
+    except Exception as e:
+        result = {
+            'status': "error",
+            'data': 'null',
+            'Message': str(e)
+        }
+
+    return result
+
+
+def get_product_by_id(id) -> dict:
+
+    # Get Product Details
+    product_record = product_resource.get_product_by_id(id)
+
+    # Get Product images
+    image_records = get_product_images(product_record['id'])
+    try:
+        if product_record is not None:
+
+
+            # Converting Decimal to float (Python serializable)
+            product_record['price'] = float(product_record['price'])
+
+
+            # Packing data in the Model
+            product_record = Product(product_record)
+            product_record.imageList = image_records
+            
+            result = {
+                'status': "success",
+                'message': "successfully retrieved product",
+                'data': product_record.__dict__
+            }
+
+        else:
+            result = {
+                'status': "error",
+                'data': 'null',
+                'Message': "No data found"
+            }
+    except Exception as e:
+        result = {
+            'status': "error",
+            'data': 'null',
+            'Message': str(e)
+        }
+
+    return result
+
+
+def get_product_images(id) -> dict:
+    image_records = product_resource.get_product_images_by_id(id)
+    return image_records
 
 
 def update_products() -> dict:
