@@ -152,6 +152,8 @@ class ProductResource(DatabaseBase):
                           WHERE products.Barcode = %s"""
         values = [barcode]
         product_record = self.run_query(search_query, values, False)
+        if product_record is None:
+            return None
         return product_record[0]
 
 
@@ -164,6 +166,8 @@ class ProductResource(DatabaseBase):
         
         values = [productCode]
         product_record = self.run_query(search_query, values, False)
+        if product_record is None:
+            return None
         return product_record[0]
         
 
