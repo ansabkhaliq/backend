@@ -148,7 +148,7 @@ class ProductResource(DatabaseBase):
     # todo we need to update the frontend as the response has changed for this method
     def get_product_by_barcode(self, barcode):
 
-        search_query = """SELECT products.id, products.productName, products.productCode, prices.keyProductID, prices.price 
+        search_query = """SELECT products.id, products.barcode, products.productName, products.productCode, prices.keyProductID, prices.price 
                           FROM products JOIN prices ON products.id = prices.Productid 
                           WHERE products.Barcode = %s"""
         values = [barcode]
