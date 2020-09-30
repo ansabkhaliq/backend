@@ -40,11 +40,11 @@ def get_product_by_barcode(barcode) -> dict:
     # Get Product Details
     product_record = product_resource.get_product_by_barcode(barcode)
 
-    # Get Product images
-    image_records = get_product_images(product_record['id'])
+
     try:
         if product_record is not None:
-
+            # Get Product images
+            image_records = get_product_images(product_record['id'])
 
             # Converting Decimal to float (Python serializable)
             product_record['price'] = float(product_record['price'])
@@ -82,11 +82,11 @@ def get_product_by_id(id) -> dict:
     # Get Product Details
     product_record = product_resource.get_product_by_id(id)
 
-    # Get Product images
-    image_records = get_product_images(product_record['id'])
+
     try:
         if product_record is not None:
-
+            # Get Product images
+            image_records = get_product_images(product_record['id'])
 
             # Converting Decimal to float (Python serializable)
             product_record['price'] = float(product_record['price'])

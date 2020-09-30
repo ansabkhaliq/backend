@@ -153,6 +153,8 @@ class ProductResource(DatabaseBase):
                           WHERE products.Barcode = %s"""
         values = [barcode]
         product_record = self.run_query(search_query, values, False)
+        if product_record is None:
+            return None
         return product_record[0]
 
     # This method is used to retrieve the product based on the product id provided from the frontend.
@@ -165,6 +167,8 @@ class ProductResource(DatabaseBase):
         
         values = [prodID]
         product_record = self.run_query(search_query, values, False)
+        if product_record is None:
+            return None
         return product_record[0]
         
 
