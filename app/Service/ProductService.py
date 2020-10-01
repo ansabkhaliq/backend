@@ -52,7 +52,7 @@ def get_product_by_barcode(barcode) -> dict:
 
             # Packing data in the Model
             product_record = Product(product_record)
-            if(image_records is not None):
+            if image_records is not None:
                 product_record.imageList = image_records[0]
 
             result = {
@@ -77,10 +77,10 @@ def get_product_by_barcode(barcode) -> dict:
     return result
 
 
-def get_product_by_id(id) -> dict:
+def get_product_by_product_code(productCode) -> dict:
 
     # Get Product Details
-    product_record = product_resource.get_product_by_id(id)
+    product_record = product_resource.get_product_by_product_code(productCode)
 
 
     try:
@@ -94,7 +94,8 @@ def get_product_by_id(id) -> dict:
 
             # Packing data in the Model
             product_record = Product(product_record)
-            product_record.imageList = image_records
+            if image_records is not None:
+                product_record.imageList = image_records[0]
             
             result = {
                 'status': "success",

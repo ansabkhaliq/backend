@@ -17,7 +17,7 @@ API_ORG_KEY = "3a62ea5aa2d8845a72dd030369dd571d5123567f70fa76b5bc3bcdf103e3307cc
 SUPPLIER_ORG_ID = "11EAF2251136B090BB69B6800B5BCB6D"
 
 # MySQL Environment Variables
-HOST = "localhost"
-USER = "root"
-PASSWORD = "123456"
+HOST = "squizz-db.cuftfgbgib1y.us-east-1.rds.amazonaws.com"
+USER = "admin"
+PASSWORD = "12345678"
 DB_NAME = "squizz_app"
