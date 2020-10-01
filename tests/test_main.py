@@ -45,11 +45,11 @@ def test_product():
         test_login()
     base_url = "http://127.0.0.1:5000/"
     url = 'api/product'
-    para = '?sessionKey=' + squizz_sessions[0] + '&id=1'
+    para = '?sessionKey=' + squizz_sessions[0] + '&productCode=01248'
     response = s.get(base_url + url + para)
     json_response = json.loads(response.text)
     assert json_response['status'] == "success"
-    para = '?sessionKey=' + squizz_sessions[0] + '&id=-1'
+    para = '?sessionKey=' + squizz_sessions[0] + '&productCode=-1'
     response = s.get(base_url + url + para)
     json_response = json.loads(response.text)
     assert json_response['status'] == "error"
