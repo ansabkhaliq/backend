@@ -170,7 +170,7 @@ class ProductResource(DatabaseBase):
 
     def get_product_images_by_id(self, id):
 
-        search_image_query = """Select * From Images where productId = %s """
+        search_image_query = """Select * From images where productId = %s """
         values = [id]
         image_records = self.run_query(search_image_query, values, False)
         return image_records
