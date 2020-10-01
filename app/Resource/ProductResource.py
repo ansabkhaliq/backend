@@ -144,8 +144,7 @@ class ProductResource(DatabaseBase):
         }
         return result
 
-    # This method is used to retrieve the product based on the barcode provided from the frontend.
-    # todo we need to update the frontend as the response has changed for this method
+
     def get_product_by_barcode(self, barcode):
 
         search_query = """SELECT products.id, products.barcode, products.productName, products.productCode, prices.keyProductID, prices.price 
@@ -155,15 +154,15 @@ class ProductResource(DatabaseBase):
         product_record = self.run_query(search_query, values, False)
         return product_record[0]
 
-    # This method is used to retrieve the product based on the product id provided from the frontend.
-    # todo we need to update the frontend as the response has changed for this method
-    def get_product_by_id(self, prodID):
-        search_query = """SELECT products.id, products.barcode,products.productCode, products.productName,
+
+
+    def get_product_by_product_code(self, productCode):
+        search_query = """SELECT products.id, products.barcode, products.productCode, products.productName,
                           prices.keyProductID, prices.price 
-                          FROM products JOIN prices ON products.id = prices.Productid 
-                          WHERE products.Id = %s"""
+                          FROM products JOIN prices ON products.id = prices.productId
+                          WHERE products.productCode = %s"""
         
-        values = [prodID]
+        values = [productCode]
         product_record = self.run_query(search_query, values, False)
         return product_record[0]
         
