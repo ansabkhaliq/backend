@@ -18,14 +18,14 @@ def submit_order(session_key, order_details) -> dict:
     }
 
 
-def search_history(data) -> dict:
+def get_order_history(session_id) -> dict:
     try:
-        result = order_resource.get_order_history(data['session_id'], data['date_time'])
+        result = order_resource.get_order_history(session_id)
     except Exception as e:
         result = {
-            'status': "failure",
+            'status': 'failure',
             'data': 'null',
-            'Message': "Invalid session, please login again"
+            'message': "Invalid session, please login again"
         }
 
     return result

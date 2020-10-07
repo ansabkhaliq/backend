@@ -23,11 +23,6 @@ class OrderResource(DatabaseBase):
         super().__init__()
 
 
-
-    # NOTE: This method will cause an exception because FK constraints fail due
-    # to the supplier org ID being updated from PjSAS to HolySAS. Therefore, it
-    # cannot store a purchase in the database yet. Database has to be updated.
-    # Similar to 
     def store_purchase(self, session_id: str, result_code: str, order: Order):
         """
         This methods will insert purchase table and lines tables in the database
@@ -109,7 +104,8 @@ class OrderResource(DatabaseBase):
 
                 # Retrieve the product ID from 'products' table and set it
                 # within the orderDetail object
-                search_query = "SELECT id, productName, productCode from products WHERE KeyProductId=%s"
+                search_query = """SELECT id, productName, productCode
+                                  FROM products WHERE keyProductId=%s"""
                 values = [orderDetail.keyProductID]
                 try:
                     product = self.run_query(search_query, values, True)[0]
@@ -168,19 +164,19 @@ class OrderResource(DatabaseBase):
         return result
 
         
-    def get_order_history(self, session_id, date_time):
+    def get_order_history(self, session_id):
         """
-        This method will return the last 15 history records from the search time
-        Args: 
-            session_id: session ID of current user
-            data_time: start time of searching
+        This method will return all order records from the database
+
+        Args:
+            session_id: session ID of current authenticated user
         """
         # Search the user organization ID based on session ID from sessions table
         organizationId = None
         search_query = """SELECT organizations.id AS org_id 
                           FROM sessions INNER JOIN organizations
                           ON organizations.Id = sessions.OrganizationId
-                          WHERE SessionKey=%s"""
+                          WHERE sessionKey=%s"""
         try:
             result = self.run_query(search_query, [session_id], False)
             if result:
@@ -190,19 +186,18 @@ class OrderResource(DatabaseBase):
             self.connection.rollback()
             logger.error(f'Could not find session with ID {session_id}', e)
             result = {
-                'status': "error",
-                'data': 'null',
-                'Message': 'Invalid session, please try login again'
+                'status': 'error',
+                'orders': None,
+                'message': 'Invalid session, please try login again'
             }
             return result
             
             
         # Retrieve the organization's previous 30 orders
-        search_query = (
-            """SELECT * FROM orders WHERE organizationId = %s and CreatedOnDate <= %s 
-               ORDER BY CreatedOnDate DESC LIMIT 30"""
-        )
-        values = [organizationId, date_time]
+        search_query = """SELECT * FROM orders WHERE organizationId = %s
+                          ORDER BY createdOnDate DESC LIMIT 50"""
+        
+        values = [organizationId]
         try:
             # For each order, get associated order detail records
             orders = self.run_query(search_query, values, False)
@@ -219,17 +214,14 @@ class OrderResource(DatabaseBase):
             result = {
                 'status': 'success',
                 'message': 'Successfully retrieved order history',
-                'data': {
-                    'orderHistory': orders  # TODO: This will cause an issue with the frontend...
-                                            # Need to change frontend to deal with new values being returned for order history API call
-                }
+                'orders': orders
             }
         except:
             logger.error('Could not retrieve order history')
             result = {
                 'status': 'error',
-                'data': 'null',
-                'Message': 'Exception occurred when retrieving history order'
+                'orders': None,
+                'message': 'Exception occurred when retrieving order history'
             }
 
         return result
