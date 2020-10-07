@@ -6,7 +6,7 @@ from app.Service.SquizzGatewayService import SquizzGatewayService
 
 
 # -- Helper functions
-def validate_login_session(login_session=None):
+def validate_login_session():
     """
     Determine whether or not the current user
     has an existing session within the database
@@ -14,10 +14,8 @@ def validate_login_session(login_session=None):
     Args:
         None
     """
-    if not login_session:
-        login_session = session.get('login_session')
-
-    org_id = "11EA64D91C6E8F70A23EB6800B5BCB6D" # session.get('ord_id')
+    login_session = session.get('login_session')
+    org_id = session.get('org_id')
 
     session_resource = SessionResource()
     if session_resource.validate_session(login_session, org_id):

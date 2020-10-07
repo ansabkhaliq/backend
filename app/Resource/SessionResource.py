@@ -78,7 +78,6 @@ class SessionResource(DatabaseBase):
         values = [session_id, org_id]
         try:
             result = self.run_query(query, values, False)
-            print(f"Result =", result)
             if result and result[0]['num'] > 0:
                 return True
             else:
