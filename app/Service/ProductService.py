@@ -3,13 +3,12 @@ from app.Resource.ProductResource import ProductResource
 from app.Util import AuthUtil as authUtil
 from app.Model.Product import Product
 
-product_resource = ProductResource()
-
 
 def retrieve_products() -> dict:
     connection = authUtil.build_connection()
     data_type = 3
     success, product_list = connection.retrieve_organisation_data(data_type)
+    product_resource = ProductResource()
     if success:
         return product_resource.store_products(product_list)
 
@@ -24,7 +23,7 @@ def retrieve_prices() -> dict:
     connection = authUtil.build_connection()
     data_type = 37
     success, price_list = connection.retrieve_organisation_data(data_type)
-
+    product_resource = ProductResource()
     if success:
         return product_resource.store_prices(price_list)
 
@@ -38,6 +37,7 @@ def retrieve_prices() -> dict:
 def get_product_by_barcode(barcode) -> dict:
    
     # Get Product Details
+    product_resource = ProductResource()
     product_record = product_resource.get_product_by_barcode(barcode)
 
 
@@ -80,7 +80,8 @@ def get_product_by_barcode(barcode) -> dict:
 def get_product_by_product_code(productCode) -> dict:
 
     # Get Product Details
-    product_record = product_resource.get_product_by_product_code(productCode)
+    pr = ProductResource()
+    product_record = pr.get_product_by_product_code(productCode)
 
 
     try:
@@ -120,11 +121,13 @@ def get_product_by_product_code(productCode) -> dict:
 
 
 def get_product_images(id) -> dict:
+    product_resource = ProductResource()
     image_records = product_resource.get_product_images_by_id(id)
     return image_records
 
 
 def update_products() -> dict:
+    product_resource = ProductResource()
     connection = authUtil.build_connection()
     data_type = 3
     success, product_list = connection.retrieve_organisation_data(data_type)
@@ -143,6 +146,7 @@ def update_prices() -> dict:
     connection = authUtil.build_connection()
     data_type = 37
     success, price_list = connection.retrieve_organisation_data(data_type)
+    product_resource = ProductResource()
 
     if success:
         return product_resource.update_prices(price_list)

@@ -193,7 +193,7 @@ class OrderResource(DatabaseBase):
             return result
             
             
-        # Retrieve the organization's previous 30 orders
+        # Retrieve the organization's previous 50 orders
         search_query = """SELECT * FROM orders WHERE organizationId = %s
                           ORDER BY createdOnDate DESC LIMIT 50"""
         

@@ -27,7 +27,8 @@ def get_barcode_product():
 # http://127.0.0.1:3000/api/product?sessionKey=8A96E4EF6C4C9ECC4938A7DB816346DC&productCode=01248
 @product.route('/api/product', methods=['GET'])
 def get_product_by_id():
-    if not authUtil.validate_login_session():
+    sessionKey = request.args.get('sessionKey')
+    if not authUtil.validate_login_session(sessionKey):
         return redirect(url_for('auth.login'))
 
     productCode = request.args.get('productCode')

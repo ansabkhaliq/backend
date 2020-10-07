@@ -4,12 +4,9 @@ from app.Resource.UserResource import UserResource
 from app.Resource.SessionResource import SessionResource
 from app.Service.SquizzGatewayService import SquizzGatewayService
 
-user_resource = UserResource()
-session_resource = SessionResource()
-
 
 # -- Helper functions
-def validate_login_session():
+def validate_login_session(login_session=None):
     """
     Determine whether or not the current user
     has an existing session within the database
@@ -17,9 +14,12 @@ def validate_login_session():
     Args:
         None
     """
-    login_session = session.get('login_session')
-    org_id = session.get('org_id')
+    if not login_session:
+        login_session = session.get('login_session')
 
+    org_id = "11EA64D91C6E8F70A23EB6800B5BCB6D" # session.get('ord_id')
+
+    session_resource = SessionResource()
     if session_resource.validate_session(login_session, org_id):
         return True
     return False
