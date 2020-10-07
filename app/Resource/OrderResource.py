@@ -130,7 +130,7 @@ class OrderResource(DatabaseBase):
                     orderDetail.keyProductID,
                     orderDetail.productName,
                     orderDetail.quantity,
-                    orderDetail.unitPrice,
+                    orderDetail.unitPrice,  # Is null for now since SQUIZZ is not returning unitPrice in JSON, however, unit prices are found in totalPriceExTax field in DB
                     orderDetail.totalPrice,
                     orderDetail.priceTotalIncTax,
                     orderDetail.priceTotalExTax,
