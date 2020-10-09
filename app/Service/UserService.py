@@ -7,12 +7,10 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-user_resource = UserResource()
-session_resource = SessionResource()
-
 
 def validate(username: str, password: str) -> dict:
     try:
+        user_resource = UserResource()
         org_id = user_resource.validate_username_password(username, password)
     except AttributeError:
         return {'status': "failure", 'data': {"session_id": None}, "message": "LOGIN_WRONG"}
@@ -28,6 +26,7 @@ def validate(username: str, password: str) -> dict:
         session.permanent = True
         session['seesion_id'] = session_id
         session['login_session'] = session_id
+        session_resource = SessionResource()
         session_resource.store_session(username, session_id, org_id)
         logger.info(f"Created a new login session with ID: {session_id}")
         return {'status': "success", 'data': {"session_id": session_id}, "message": "LOGIN_SUCCESS"}

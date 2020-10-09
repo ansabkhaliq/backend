@@ -4,9 +4,6 @@ from app.Resource.UserResource import UserResource
 from app.Resource.SessionResource import SessionResource
 from app.Service.SquizzGatewayService import SquizzGatewayService
 
-user_resource = UserResource()
-session_resource = SessionResource()
-
 
 # -- Helper functions
 def validate_login_session():
@@ -20,6 +17,7 @@ def validate_login_session():
     login_session = session.get('login_session')
     org_id = session.get('org_id')
 
+    session_resource = SessionResource()
     if session_resource.validate_session(login_session, org_id):
         return True
     return False

@@ -81,7 +81,7 @@ class SessionResource(DatabaseBase):
             if result and result[0]['num'] > 0:
                 return True
             else:
-                logger.info("Could not find an existing session for the given user")
+                logger.info(f"Could not find an existing session {session_id} for the given user with org_id {org_id}")
                 return False
         except Exception as e:
             logger.log("Cannot validate session")
