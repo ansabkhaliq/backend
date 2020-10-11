@@ -96,7 +96,7 @@ def get_product_by_product_code(productCode) -> dict:
             # Packing data in the Model
             product_record = Product(product_record)
             if image_records is not None:
-                product_record.imageList = image_records[0]
+                product_record.imageList = image_records
             
             result = {
                 'status': "success",
