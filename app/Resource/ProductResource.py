@@ -162,9 +162,8 @@ class ProductResource(DatabaseBase):
         search_query = """SELECT products.id, products.barcode, products.productCode, products.productName,
                           prices.keyProductID, prices.price 
                           FROM products JOIN prices ON products.id = prices.productId
-                          WHERE products.productCode = """ + str(productCode)
-        
-        values = []
+                          WHERE products.productCode = %s"""
+        values = [productCode]
         product_record = self.run_query(search_query, values, False)
         if product_record is None:
             return None
