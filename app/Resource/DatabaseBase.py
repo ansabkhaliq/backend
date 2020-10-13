@@ -1,5 +1,7 @@
 import logging
 import pymysql
+from pymysql import IntegrityError
+from werkzeug.exceptions import HTTPException
 from app import config
 
 logger = logging.getLogger(__name__)
@@ -28,7 +30,6 @@ class DatabaseBase:
         self.cursor = self.connection.cursor()
         self.connection.get_autocommit()
 
-
     def run_query(self, query: str, values: list, commit: bool = False):
         """
         Runs an SQL query against the MySQL database and returns the result
@@ -38,7 +39,7 @@ class DatabaseBase:
             values: a list of values for the query
             commit: indicates whether to commit after execution
         """
-        while not self.connection.open :
+        while not self.connection.open:
             self.connection.ping(reconnect=True)
             logger.info("Reconnecting to the database")
         try:
@@ -47,4 +48,26 @@ class DatabaseBase:
                 self.connection.commit()
             return None if not self.cursor.rowcount else self.cursor.fetchall()
         except Exception as e:
-            logger.error("Could not execute the query" , e)
+            logger.error("Could not execute the query", e)
+
+    def run(self, query: str, values: list, commit: bool = False):
+        """
+        Better Exception handling
+        Runs an SQL query against the MySQL database and returns the result
+
+        Args:
+            query: a MySQL query string
+            values: a list of values for the query
+            commit: indicates whether to commit after execution
+        """
+        while not self.connection.open:
+            self.connection.ping(reconnect=True)
+            logger.info("Reconnecting to the database")
+        try:
+            self.cursor.execute(query, values)
+            if commit:
+                self.connection.commit()
+            return None if not self.cursor.rowcount else self.cursor.fetchall()
+        except Exception as e:
+            logger.error("Could not execute the query", e)
+            raise e
