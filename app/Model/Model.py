@@ -20,6 +20,11 @@ class Model:
         for key in self.__dict__:
             if type(self.__dict__[key]) == Decimal:
                 self.__dict__[key] = float(self.__dict__[key])
+            
+            # Need to trim trailing whitespaces for productCode and keyProductId
+            # fields in the JSON returned from the SQUIZZ API for products
+            if key == 'productCode' or key == 'keyProductId':
+                self.__dict__[key] = self.__dict__[key].rstrip()
 
     def json(self):
         """
