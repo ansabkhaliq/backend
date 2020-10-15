@@ -59,17 +59,12 @@ def test_product():
 def test_history_order():
     if len(squizz_sessions) == 0:
         test_login()
-    url = 'api/history_order'
-    headers = {"Content-Type": "application/json"}
-    now = datetime.now()
-    date = now.strftime("%Y/%m/%d %H:%M:%S")
-    data = {'date_time': date}
-    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+    url = 'api/history'
+    response = s.post(base_url + url)
     json_response = json.loads(response.text)
-    assert json_response['status'] == "failure"
-
-    data = {'session_id': squizz_sessions[0], 'date_time': date}
-    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+    assert json_response['status'] == "error"
+    para = '?session_id=' + squizz_sessions[0]
+    response = s.get(base_url + url + para)
     json_response = json.loads(response.text)
     assert json_response['status'] == "success"
 
