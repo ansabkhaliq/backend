@@ -4,11 +4,11 @@ from app.Model.Model import Model
 class OrderDetail(Model):
     def __init__(self, json):
         self.id = None  # autoincrement pk
-        self.lineType = None  # don't understand all the type is PRODUCT
+        self.lineType = None
         self.keyProductID = None  # Unique key in product
         self.productName = None
         self.quantity = None
-        self.unitPrice = None
+        self.unitPrice = None   # Is null for now since SQUIZZ is not returning unitPrice in JSON, however, unit prices are found in totalPriceExTax field in DB
         self.totalPrice = None  # instead priceTotalTax, I use this as totalPrice
         self.priceTotalIncTax = None  # there is no where to record the tax can delete these
         self.priceTotalExTax = None

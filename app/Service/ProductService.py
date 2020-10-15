@@ -3,19 +3,18 @@ from app.Resource.ProductResource import ProductResource
 from app.Util import AuthUtil as authUtil
 from app.Model.Product import Product
 
-product_resource = ProductResource()
-
 
 def retrieve_products() -> dict:
     connection = authUtil.build_connection()
     data_type = 3
     success, product_list = connection.retrieve_organisation_data(data_type)
+    product_resource = ProductResource()
     if success:
         return product_resource.store_products(product_list)
 
     return {
         'status': "error",
-        'data': 'null',
+        'data': None,
         'Message': "Error while retrieving products data from server"
     }
 
@@ -24,13 +23,13 @@ def retrieve_prices() -> dict:
     connection = authUtil.build_connection()
     data_type = 37
     success, price_list = connection.retrieve_organisation_data(data_type)
-
+    product_resource = ProductResource()
     if success:
         return product_resource.store_prices(price_list)
 
     return {
         'status': 'error', 
-        'data': 'null', 
+        'data': None,
         'Message': 'Error while retrieving product prices data from server'
     }
 
@@ -38,6 +37,7 @@ def retrieve_prices() -> dict:
 def get_product_by_barcode(barcode) -> dict:
    
     # Get Product Details
+    product_resource = ProductResource()
     product_record = product_resource.get_product_by_barcode(barcode)
 
 
@@ -53,7 +53,7 @@ def get_product_by_barcode(barcode) -> dict:
             # Packing data in the Model
             product_record = Product(product_record)
             if image_records is not None:
-                product_record.imageList = image_records[0]
+                product_record.imageList = image_records
 
             result = {
                 'status': "success",
@@ -64,13 +64,13 @@ def get_product_by_barcode(barcode) -> dict:
         else:
             result = {
                 'status': "error",
-                'data': 'null',
+                'data': None,
                 'Message': "No data found"
             }
     except Exception as e:
         result = {
             'status': "error",
-            'data': 'null',
+            'data': None,
             'Message': str(e)
         }
 
@@ -80,7 +80,8 @@ def get_product_by_barcode(barcode) -> dict:
 def get_product_by_product_code(productCode) -> dict:
 
     # Get Product Details
-    product_record = product_resource.get_product_by_product_code(productCode)
+    pr = ProductResource()
+    product_record = pr.get_product_by_product_code(productCode)
 
 
     try:
@@ -95,7 +96,7 @@ def get_product_by_product_code(productCode) -> dict:
             # Packing data in the Model
             product_record = Product(product_record)
             if image_records is not None:
-                product_record.imageList = image_records[0]
+                product_record.imageList = image_records
             
             result = {
                 'status': "success",
@@ -106,13 +107,13 @@ def get_product_by_product_code(productCode) -> dict:
         else:
             result = {
                 'status': "error",
-                'data': 'null',
+                'data': None,
                 'Message': "No data found"
             }
     except Exception as e:
         result = {
             'status': "error",
-            'data': 'null',
+            'data': None,
             'Message': str(e)
         }
 
@@ -120,11 +121,13 @@ def get_product_by_product_code(productCode) -> dict:
 
 
 def get_product_images(id) -> dict:
+    product_resource = ProductResource()
     image_records = product_resource.get_product_images_by_id(id)
     return image_records
 
 
 def update_products() -> dict:
+    product_resource = ProductResource()
     connection = authUtil.build_connection()
     data_type = 3
     success, product_list = connection.retrieve_organisation_data(data_type)
@@ -134,7 +137,7 @@ def update_products() -> dict:
     
     return {
         'status': 'error',
-        'data': 'null',
+        'data': None,
         'Message': 'Error while retrieving product from server'
     }
 
@@ -143,12 +146,13 @@ def update_prices() -> dict:
     connection = authUtil.build_connection()
     data_type = 37
     success, price_list = connection.retrieve_organisation_data(data_type)
+    product_resource = ProductResource()
 
     if success:
         return product_resource.update_prices(price_list)
 
     return {
         'status': 'error',
-        'data': 'null',
+        'data': None,
         'Message': "Error while retrieving product price from SQUIZZ server"
     }

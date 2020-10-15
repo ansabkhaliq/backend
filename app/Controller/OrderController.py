@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG)
 order = Blueprint('order', __name__)
 
 
-@order.route('/api/purchase', methods=['post'])
+@order.route('/api/purchase', methods=['POST'])
 def submit_purchase_order():
     if not authUtil.validate_login_session:
         return redirect(url_for('auth.login'))
@@ -32,10 +32,10 @@ def submit_purchase_order():
     return jsonify(order_service.submit_order(session_key, order_details))
 
 
-@order.route('/api/history_order', methods=['post'])
+@order.route('/api/history', methods=['GET', 'POST'])
 def retrieve_order_history():
     if not authUtil.validate_login_session:
         return redirect(url_for('auth.login'))
 
-    data = request.get_json(silent=True)
-    return jsonify(order_service.search_history(data))
+    session_id = request.args.get('session_id')
+    return jsonify(order_service.get_order_history(session_id))
