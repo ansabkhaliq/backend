@@ -77,7 +77,7 @@ class ProductResource(DatabaseBase):
                 self.run_query(insert_query, values, True)
 
             except Exception as e:
-                logger.error("exception", e)
+                logger.error("exception %s", e)
                 failed_to_store.append(product.keyProductID + "error: " + str(e))
 
         logger.info('completed store_products')
@@ -114,7 +114,7 @@ class ProductResource(DatabaseBase):
             try:
                 product_record = self.run_query(search_query, price.keyProductID, False)
             except Exception as e:
-                logger.error('Exception occurred when searching for product record in store_product_level method.', e)
+                logger.error('Exception occurred when searching for product record in store_product_level method. %s', e)
 
             if product_record is not None:
                 # Since we already checked the existence of the product, we could do the insertion.

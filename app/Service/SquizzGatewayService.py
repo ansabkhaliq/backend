@@ -44,7 +44,6 @@ class SquizzGatewayService:
             logger.debug("Could not create organisation API session")
             return None, "SERVER_ERROR_UNKNOWN"
 
-
     # Web Service Endpoint: Destroy Organisation API Session
     def destroy_session(self, session_id: str) -> bool:
         if session_id is None:
@@ -71,10 +70,9 @@ class SquizzGatewayService:
         else:
             logger.debug("Could not validate organisation API session")
             return False
-    
 
     # Web Service Endpoint: Retrieve Organisation Data
-    def retrieve_organisation_data(self, data_type: int) -> Tuple[bool, Optional[list]]:
+    def retrieve_organisation_data(self, data_type: int, customer_code='TESTDEBTOR') -> Tuple[bool, Optional[list]]:
         assert(data_type == 3 or data_type == 8 or data_type == 37)
 
         session_id, _ = self.create_session()
@@ -82,7 +80,7 @@ class SquizzGatewayService:
             "session_id": session_id,
             "supplier_org_id": self.supplier_org_id,
             "data_type_id": data_type,
-            "customer_account_code": "TESTDEBTOR"  # Hardcoded customer account code for now
+            "customer_account_code": customer_code  # Default customer account code is TESTDEBTOR
         }
         
         response = self.requests.get("https://api.squizz.com/rest/1/org/retrieve_esd/" + session_id, params=params).json()

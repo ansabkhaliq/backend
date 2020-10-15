@@ -4,10 +4,10 @@ from app.Util import AuthUtil as authUtil
 from app.Model.Product import Product
 
 
-def retrieve_products() -> dict:
+def retrieve_products(customer_code="TESTDEBTOR") -> dict:
     connection = authUtil.build_connection()
     data_type = 3
-    success, product_list = connection.retrieve_organisation_data(data_type)
+    success, product_list = connection.retrieve_organisation_data(data_type, customer_code=customer_code)
     product_resource = ProductResource()
     if success:
         return product_resource.store_products(product_list)
