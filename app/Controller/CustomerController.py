@@ -34,7 +34,7 @@ def switch_customer():
     if cust_code not in cs.customer_codes:
         return {'message': f'Provided customer code {cust_code} does not exist'}, 404
 
-    if cust_code not in cs.get_used_customer_codes():
+    if cust_code not in cs.list_used_customer_codes():
         return {'message': f'Provided customer code {cust_code} does not match any customer'}, 404
 
     # TODO this is a problematic function, to be fixed
@@ -65,7 +65,7 @@ def create_customer():
     if cust_code not in cs.customer_codes:
         return jsonify({'message': f'Provided customer code {cust_code} does not exist'}), 404
 
-    if cust_code not in cs.get_unused_customer_codes():
+    if cust_code not in cs.list_unused_customer_codes():
         return jsonify({'message': f'Provided customer code {cust_code} is already used'}), 409
 
     new_customer = Customer(cust_data)
@@ -100,7 +100,7 @@ def del_customer(customer_id):
 
 @cust.route('/api/customer_codes', methods=['GET'])
 def list_customers_codes():
-    return {'customer_codes': list(cs.get_unused_customer_codes())}, 200
+    return jsonify(list(cs.list_unused_customer_codes())), 200
 
 
 @cust.route('/api/customer/<customer_id>/addresses', methods=['POST'])
@@ -118,4 +118,5 @@ def create_address(customer_id):
 
 @cust.route('/api/customer/<customer_id>/addresses', methods=['GET'])
 def list_addresses(customer_id):
-    return {}, 200
+    cust_addresses = cs.list_customer_addresses(customer_id)
+    return jsonify([addr.__dict__ for addr in cust_addresses]), 200

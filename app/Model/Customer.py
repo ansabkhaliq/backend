@@ -12,10 +12,8 @@ class Customer(Model):
         self.email = None
         self.nationality_code = None
         self.organization_desc = None
-        if json is not None:
-            super().__init__(json)
-        else:
-            self.id = pk
+
+        super().__init__(json, pk)
 
     @staticmethod
     def table_name():
@@ -37,7 +35,6 @@ class Customer(Model):
         """
         return {
             'id': 'id',
-            'customer_id': 'customer_id',
             'customer_code': 'customer_code',
             'title': 'title',
             'first_name': 'first_name',

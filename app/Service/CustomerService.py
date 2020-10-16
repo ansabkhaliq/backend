@@ -1,5 +1,6 @@
 from app.Resource.SimpleModelResource import SimpleModelResource as SR
 from app.Model.Customer import Customer
+from app.Model.Address import Address
 from app.Util import AuthUtil as authUtil
 from app.Model.Product import Product
 
@@ -15,13 +16,13 @@ customer_codes = {
 }
 
 
-def get_unused_customer_codes():
+def list_unused_customer_codes():
     customers = SR().get_all(Customer)
     used_codes = set([c.customer_code for c in customers])
     return customer_codes - used_codes
 
 
-def get_used_customer_codes():
+def list_used_customer_codes():
     customers = SR().get_all(Customer)
     used_codes = set([c.customer_code for c in customers])
     return used_codes
@@ -62,8 +63,11 @@ def create_customer_with_address(customer, address):
         sr.connection.commit()
 
 
-def get_customer_addresses(customer_id):
-    pass
+def list_customer_addresses(customer_id):
+    SR().get_one_by_id(Customer(pk=customer_id))
+    cust_addr = Address()
+    cust_addr.customer_id = customer_id
+    return SR().find_all(cust_addr)
 
 
 def create_customer_address(customer_id, address):
