@@ -1,19 +1,20 @@
 from werkzeug.exceptions import HTTPException
 
+"""Database Exceptions"""
+
 
 class NotFound(HTTPException):
     def __init__(self, obj):
         self.description = f"{type(obj).__name__} object not found."
         self.code = 404
-        self.response = {
-            'message': self.description
-        }, self.code
+        self.response = {'message': self.description}, self.code
 
 
 class AlreadyExists(HTTPException):
     def __init__(self, obj):
         self.description = f"{type(obj).__name__} already exists. {obj.unique_fields()} must be unique."
         self.code = 409
+        self.response = {'message': self.description}, self.code
 
 
 class OtherException(HTTPException):
@@ -25,9 +26,19 @@ class OtherException(HTTPException):
 
 class ViolateFKConstraint(HTTPException):
     def __init__(self, obj):
-        self.description = f"Violate Referential constraint while within {type(obj).__name__}."
+        self.description = f"Violate Referential constraint while manipulating {type(obj).__name__} obj."
         self.code = 400
         self.response = {'message': self.description}, self.code
 
 
-# exceptions = {NotFound, AlreadyExists, OtherException, ViolateFKConstraint}
+"""Business Logic Exceptions"""
+
+
+class LackRequiredData(HTTPException):
+    """Lack required data"""
+    code = 400
+    description = "Lack required data."
+
+    def __init__(self, msg):
+        self.description = f"Lack required data: '{msg}'."
+        self.response = {'message': self.description}, self.code

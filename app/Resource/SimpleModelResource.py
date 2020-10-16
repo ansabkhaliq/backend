@@ -3,7 +3,7 @@ import datetime
 from pymysql import IntegrityError
 from werkzeug.exceptions import HTTPException
 from app.Resource.DatabaseBase import DatabaseBase
-from .exceptions import *
+from app.Exception.exceptions import *
 
 
 logger = logging.getLogger(__name__)

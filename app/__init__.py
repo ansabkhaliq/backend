@@ -9,7 +9,6 @@ from flask_session import Session
 # https://flask-session.readthedocs.io/en/latest/
 from werkzeug.exceptions import HTTPException
 
-from app.Resource.exceptions import NotFound
 
 sess = Session()
 
@@ -33,6 +32,7 @@ def create_app(test_config=None):
     sess.init_app(app)
 
     # Blueprint for auth routes in our app
+
     from app.Controller import UserController as auth_blueprint
     app.register_blueprint(auth_blueprint.user)
 
@@ -46,10 +46,7 @@ def create_app(test_config=None):
     from .Controller import CustomerController as customer_blueprint
     app.register_blueprint(customer_blueprint.cust)
 
-    # Register Error Handler
-    from app.Resource.exceptions import NotFound, OtherException, AlreadyExists, ViolateFKConstraint
-    from app.Controller.exceptions import LackRequiredData
-    for exception in {NotFound, ViolateFKConstraint, OtherException, LackRequiredData, AlreadyExists}:
-        app.register_error_handler(exception, lambda e: e.response)
+    # Register Exception handler
+    app.register_error_handler(HTTPException, lambda e: e.response)
 
     return app

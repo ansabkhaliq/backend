@@ -3,11 +3,15 @@ Json(Dict) validator
 """
 
 
-def lack_keys(data, required_keys):
+def lack_keys(data, required_keys, prefix=""):
+    if prefix:
+        prefix += "."
     if data is None:
-        return ', '.join(required_keys)
-    keys = ', '.join(filter(lambda key: key not in data, required_keys))
-    return keys
+        lacked_keys = required_keys
+    else:
+        lacked_keys = (filter(lambda key: key not in data, required_keys))
+
+    return ', '.join([f'{prefix}{key}' for key in lacked_keys])
 
 
 # Todo check type

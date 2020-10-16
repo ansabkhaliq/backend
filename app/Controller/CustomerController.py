@@ -2,7 +2,7 @@ from app.Model.Address import Address
 from app.Model.Customer import Customer
 from app.Service import CustomerService as cs
 from app.Service.ProductService import retrieve_products as sync_products
-from .exceptions import LackRequiredData
+from app.Exception.exceptions import LackRequiredData
 from app.Util.validation import lack_keys
 from app.Util import AuthUtil as authUtil
 from flask import (
@@ -42,69 +42,80 @@ def switch_customer():
     return {'message': 'Switch customer successfully'}, 200
 
 
-@cust.route('/api/customers', methods=['GET', 'POST'])
-def customers():
-    # Create a customer
-    if request.method == 'POST':
-        data = request.get_json()
-        cust_data = data.get('customer')
-        addr_data = data.get('address')
-
-        # Check customer necessary keys
-        cust_required = ['customer_code', 'title', 'first_name', 'last_name']
-        cust_lacked = lack_keys(cust_data, cust_required)
-
-        if cust_lacked:
-            raise LackRequiredData(cust_lacked)
-        # Check customer_code
-        cust_code = cust_data['customer_code']
-        if cust_code not in cs.customer_codes:
-            return jsonify({'message': f'Provided customer code {cust_code} does not exist'}), 404
-
-        if cust_code not in cs.get_unused_customer_codes():
-            return jsonify({'message': f'Provided customer code {cust_code} is already used'}), 409
-
-        new_customer = Customer(cust_data)
-
-        # Create customer only
-        if addr_data is None:
-            cs.create_customer(new_customer)
-            return {"customer": new_customer.__dict__}, 201
-
-        # Create customer with address
-        addr_data = data['address']
-        addr_required = ['contact', 'address_line1', 'address_line2', 'postcode', 'country']
-        addr_lacked = lack_keys(addr_data, addr_required)
-        if addr_lacked:
-            raise LackRequiredData(addr_lacked)
-
-        new_address = Address(addr_data)
-        cs.create_customer(new_customer, new_address)
-        return {'customer': new_customer.__dict__, 'address': new_address.__dict__}, 201
-
-    # Get customers list
-    elif request.method == 'GET':
-        all_customers = cs.list_all_customers()
-        return jsonify([c.__dict__ for c in all_customers]), 200
+@cust.route('/api/customers', methods=['GET'])
+def list_customers():
+    all_customers = cs.list_all_customers()
+    return jsonify([c.__dict__ for c in all_customers]), 200
 
 
-@cust.route('/api/customer/<customer_id>', methods=['GET', 'DELETE'])
-def customer(customer_id):
-    # Get specific customer
-    if request.method == 'GET':
-        return cs.get_one_customer(customer_id).__dict__, 200
+@cust.route('/api/customers', methods=['POST'])
+def create_customer():
+    data = request.get_json()
+    cust_data = data.get('customer')
+    addr_data = data.get('address')
 
-    # Delete specific customer
-    if request.method == 'DELETE':
-        cs.delete_customer(customer_id)
-        return {'message': f'Customer {customer_id} deleted'}, 200
+    # Check customer necessary keys
+    cust_required = ['customer_code', 'title', 'first_name', 'last_name']
+    cust_lacked = lack_keys(cust_data, cust_required, prefix='customer')
+
+    if cust_lacked:
+        raise LackRequiredData(cust_lacked)
+    # Check customer_code
+    cust_code = cust_data['customer_code']
+    if cust_code not in cs.customer_codes:
+        return jsonify({'message': f'Provided customer code {cust_code} does not exist'}), 404
+
+    if cust_code not in cs.get_unused_customer_codes():
+        return jsonify({'message': f'Provided customer code {cust_code} is already used'}), 409
+
+    new_customer = Customer(cust_data)
+
+    # Create customer only
+    if addr_data is None:
+        cs.create_customer(new_customer)
+        return {"customer": new_customer.__dict__}, 201
+
+    # Create customer with address
+    addr_data = data['address']
+    addr_required = ['contact', 'address_line1', 'address_line2', 'postcode', 'country']
+    addr_lacked = lack_keys(addr_data, addr_required, prefix='address')
+    if addr_lacked:
+        raise LackRequiredData(addr_lacked)
+
+    new_address = Address(addr_data)
+    cs.create_customer(new_customer, new_address)
+    return {'customer': new_customer.__dict__, 'address': new_address.__dict__}, 201
+
+
+@cust.route('/api/customer/<customer_id>', methods=['GET'])
+def get_customer(customer_id):
+    return cs.get_one_customer(customer_id).__dict__, 200
+
+
+@cust.route('/api/customer/<customer_id>', methods=['DELETE'])
+def del_customer(customer_id):
+    cs.delete_customer(customer_id)
+    return {'message': f'Customer {customer_id} deleted'}, 200
 
 
 @cust.route('/api/customer_codes', methods=['GET'])
-def customers_codes():
-    return cs.get_unused_customer_codes(), 200
+def list_customers_codes():
+    return {'customer_codes': list(cs.get_unused_customer_codes())}, 200
 
 
-@cust.route('/api/customer/<customer_id>/addresses', methods=['GET', 'POST'])
-def customers_addresses(customer_id):
+@cust.route('/api/customer/<customer_id>/addresses', methods=['POST'])
+def create_address(customer_id):
+    data = request.get_json()
+    required = ['contact', 'address_line1', 'address_line2', 'postcode', 'country']
+    lacked = lack_keys(data, required)
+    if lacked:
+        raise LackRequiredData(lacked)
+
+    new_address = Address(data)
+    cs.create_customer_address(customer_id, new_address)
+    return new_address.__dict__, 201
+
+
+@cust.route('/api/customer/<customer_id>/addresses', methods=['GET'])
+def list_addresses(customer_id):
     return {}, 200

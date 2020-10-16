@@ -60,3 +60,12 @@ def create_customer_with_address(customer, address):
         raise e
     else:
         sr.connection.commit()
+
+
+def get_customer_addresses(customer_id):
+    pass
+
+
+def create_customer_address(customer_id, address):
+    address.customer_id = customer_id
+    SR().create(address)
