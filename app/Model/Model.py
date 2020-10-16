@@ -33,36 +33,3 @@ class Model:
         Serializes the subclass model object into a JSON string
         """
         return json.dumps(self.__dict__)
-
-    @staticmethod
-    def get_table_name():
-        return ''
-
-    def create(self):
-        """
-        Save current obj as an new instance into the database
-        Notice: The Model attributes and table name must be same as those in DB
-        Must overwrite the function get_table_name
-        """
-        db = DB()
-        table = self.get_table_name()
-        fields = ','.join(self.__dict__.keys())
-        values = list(self.__dict__.values())
-        place_holders = ('%s,' * len(values))[:-1]
-        query = f"INSERT into {table} ({fields}) VALUES ({place_holders})"
-        db.run(query, values, True)
-
-    def update(self):
-        """
-        Save current obj into database according to the id
-        Notice: The Model attributes and table name must be same as those in DB
-        Must overwrite the function get_table_name
-        """
-        db = DB()
-        table = self.get_table_name()
-        field_set = set(self.__dict__.keys())
-        field_set.remove('id')
-        values = [self.__dict__[field] for field in field_set]
-        sets = ','.join([f'{field}=%s' for field in field_set])
-        query = f"UPDATE {table} SET {sets} WHERE id={self.id}"
-        db.run(query, values, True)

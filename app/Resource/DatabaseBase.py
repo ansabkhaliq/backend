@@ -23,12 +23,12 @@ class DatabaseBase:
                                           db=config.DB_NAME,
                                           charset='utf8mb4',
                                           cursorclass=pymysql.cursors.DictCursor,
-                                          autocommit=True,
+                                          autocommit=False,
                                           read_timeout=None,
                                           write_timeout=None)
 
         self.cursor = self.connection.cursor()
-        self.connection.get_autocommit()
+        # self.connection.get_autocommit()
 
     def run_query(self, query: str, values: list, commit: bool = False):
         """
@@ -48,26 +48,26 @@ class DatabaseBase:
                 self.connection.commit()
             return None if not self.cursor.rowcount else self.cursor.fetchall()
         except Exception as e:
-            logger.error("Could not execute the query", e)
-
-    def run(self, query: str, values: list, commit: bool = False):
-        """
-        Better Exception handling
-        Runs an SQL query against the MySQL database and returns the result
-
-        Args:
-            query: a MySQL query string
-            values: a list of values for the query
-            commit: indicates whether to commit after execution
-        """
-        while not self.connection.open:
-            self.connection.ping(reconnect=True)
-            logger.info("Reconnecting to the database")
-        try:
-            self.cursor.execute(query, values)
-            if commit:
-                self.connection.commit()
-            return None if not self.cursor.rowcount else self.cursor.fetchall()
-        except Exception as e:
-            logger.error("Could not execute the query", e)
+            logger.error("Could not execute the query %s", str(e))
+            self.connection.close()
             raise e
+
+    # TODO to be finalized and tested
+    # def run_as_transaction(self, queries: list):
+    #     """
+    #     Run list of queries as a transaction,
+    #     commit if no errors occurred
+    #     rollback if any error occurred
+    #     Args:
+    #         queries: [{'query': '', 'values': [...]}, ...]
+    #     """
+    #     try:
+    #         for each in queries:
+    #             self.cursor.execute(each['query'], each['values'])
+    #         self.connection.commit()
+    #         self.connection.close()
+    #     except Exception as e:
+    #         self.connection.rollback()
+    #         self.connection.close()
+    #         logger.error("Could not execute the query %s", str(e))
+    #         raise e

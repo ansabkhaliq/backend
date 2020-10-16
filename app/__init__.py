@@ -1,4 +1,4 @@
-import os
+import os, json
 from flask import Flask
 from flask_session import Session
 
@@ -7,9 +7,11 @@ from flask_session import Session
 
 # For more information on Flask sessions:
 # https://flask-session.readthedocs.io/en/latest/
+from werkzeug.exceptions import HTTPException
 
 
 sess = Session()
+
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -30,6 +32,7 @@ def create_app(test_config=None):
     sess.init_app(app)
 
     # Blueprint for auth routes in our app
+
     from app.Controller import UserController as auth_blueprint
     app.register_blueprint(auth_blueprint.user)
 
@@ -39,5 +42,11 @@ def create_app(test_config=None):
 
     from .Controller import OrderController as order_blueprint
     app.register_blueprint(order_blueprint.order)
+
+    from .Controller import CustomerController as customer_blueprint
+    app.register_blueprint(customer_blueprint.cust)
+
+    # Register Exception handler
+    app.register_error_handler(HTTPException, lambda e: e.response)
 
     return app
