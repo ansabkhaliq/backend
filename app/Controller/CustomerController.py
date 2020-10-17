@@ -15,8 +15,11 @@ from flask import (
 
 cust = Blueprint('customer', __name__)
 
+from flask_cors import cross_origin
+
 
 # TODO auth decorator (make session validation a decorator)
+@cross_origin()
 @cust.route('/api/switch_customer', methods=['POST'])
 def switch_customer():
     data = request.get_json()
@@ -43,12 +46,14 @@ def switch_customer():
 
 
 @cust.route('/api/customers', methods=['GET'])
+@cross_origin()
 def list_customers():
     all_customers = cs.list_all_customers()
     return jsonify([c.__dict__ for c in all_customers]), 200
 
 
 @cust.route('/api/customers', methods=['POST'])
+@cross_origin()
 def create_customer():
     data = request.get_json()
     cust_data = data.get('customer')
@@ -88,22 +93,26 @@ def create_customer():
 
 
 @cust.route('/api/customer/<customer_id>', methods=['GET'])
+@cross_origin()
 def get_customer(customer_id):
     return cs.get_one_customer(customer_id).__dict__, 200
 
 
 @cust.route('/api/customer/<customer_id>', methods=['DELETE'])
+@cross_origin()
 def del_customer(customer_id):
     cs.delete_customer(customer_id)
     return {'message': f'Customer {customer_id} deleted'}, 200
 
 
 @cust.route('/api/customer_codes', methods=['GET'])
+@cross_origin()
 def list_customers_codes():
     return {'customer_codes': list(cs.get_unused_customer_codes())}, 200
 
 
 @cust.route('/api/customer/<customer_id>/addresses', methods=['POST'])
+@cross_origin()
 def create_address(customer_id):
     data = request.get_json()
     required = ['contact', 'address_line1', 'address_line2', 'postcode', 'country']
@@ -117,5 +126,6 @@ def create_address(customer_id):
 
 
 @cust.route('/api/customer/<customer_id>/addresses', methods=['GET'])
+@cross_origin()
 def list_addresses(customer_id):
     return {}, 200

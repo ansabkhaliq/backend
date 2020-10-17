@@ -10,10 +10,13 @@ from flask import (
 
 product = Blueprint('product', __name__)
 
+from flask_cors import cross_origin
+
 
 # Example of the API call
 # http://127.0.0.1:3000/api/product?sessionKey=8A96E4EF6C4C9ECC4938A7DB816346DC&barcode=9326243001262
 @product.route('/api/barcode', methods=['GET'])
+@cross_origin()
 def get_barcode_product():
     if not authUtil.validate_login_session():
         return redirect(url_for('auth.login'))
@@ -26,6 +29,7 @@ def get_barcode_product():
 # Example of the API call
 # http://127.0.0.1:3000/api/product?sessionKey=8A96E4EF6C4C9ECC4938A7DB816346DC&productCode=01248
 @product.route('/api/product', methods=['GET'])
+@cross_origin()
 def get_product_by_id():
     if not authUtil.validate_login_session():
         return redirect(url_for('auth.login'))

@@ -7,6 +7,7 @@ from app.Util import AuthUtil as authUtil
 from app.Resource.UserResource import UserResource
 from app.Service import UserService as user_service
 from app.Model.User import User
+from flask_cors import cross_origin
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -20,6 +21,7 @@ session_resource = SessionResource()
 
 # Set routes
 @user.route('/api/login', methods=['POST'])
+@cross_origin()
 def login_post():
     if authUtil.validate_login_session():
         result = {
@@ -37,6 +39,7 @@ def login_post():
 
 
 @user.route('/api/logout', methods=['GET'])
+@cross_origin()
 def logout():
     login_session = session.get('login_session')
     if authUtil.validate_login_session():

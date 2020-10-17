@@ -1,5 +1,6 @@
 import os, json
 from flask import Flask
+from flask_cors import CORS
 from flask_session import Session
 
 # For more information on Flask application factories:
@@ -50,3 +51,7 @@ def create_app(test_config=None):
     app.register_error_handler(HTTPException, lambda e: e.response)
 
     return app
+
+
+app = create_app()
+cors = CORS(app)

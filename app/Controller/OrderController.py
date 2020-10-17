@@ -11,8 +11,11 @@ from flask import (
 
 order = Blueprint('order', __name__)
 
+from flask_cors import cross_origin
+
 
 @order.route('/api/purchase', methods=['POST'])
+@cross_origin()
 def submit_purchase_order():
     if not authUtil.validate_login_session:
         return redirect(url_for('auth.login'))
@@ -24,6 +27,7 @@ def submit_purchase_order():
 
 
 @order.route('/api/history', methods=['GET', 'POST'])
+@cross_origin()
 def retrieve_order_history():
     if not authUtil.validate_login_session:
         return redirect(url_for('auth.login'))
