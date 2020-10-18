@@ -160,7 +160,7 @@ class ProductResource(DatabaseBase):
 
     def get_product_by_product_code(self, productCode):
         search_query = """SELECT products.id, products.barcode, products.productCode, products.productName,
-                          prices.keyProductID, prices.price 
+                          prices.keyProductID, prices.price, products.description1
                           FROM products JOIN prices ON products.id = prices.productId
                           WHERE products.productCode = %s"""
         values = [productCode]
