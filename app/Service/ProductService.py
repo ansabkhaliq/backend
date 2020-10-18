@@ -17,7 +17,7 @@ def retrieve_products(customer_code="TESTDEBTOR") -> dict:
 
     return {
         'status': "error",
-        'data': 'null',
+        'data': None,
         'Message': "Error while retrieving products data from server"
     }
 
@@ -32,7 +32,7 @@ def retrieve_prices() -> dict:
 
     return {
         'status': 'error', 
-        'data': 'null', 
+        'data': None,
         'Message': 'Error while retrieving product prices data from server'
     }
 
@@ -56,7 +56,7 @@ def get_product_by_barcode(barcode) -> dict:
             # Packing data in the Model
             product_record = Product(product_record)
             if image_records is not None:
-                product_record.imageList = image_records[0]
+                product_record.imageList = image_records
 
             result = {
                 'status': "success",
@@ -67,13 +67,13 @@ def get_product_by_barcode(barcode) -> dict:
         else:
             result = {
                 'status': "error",
-                'data': 'null',
+                'data': None,
                 'Message': "No data found"
             }
     except Exception as e:
         result = {
             'status': "error",
-            'data': 'null',
+            'data': None,
             'Message': str(e)
         }
 
@@ -110,13 +110,13 @@ def get_product_by_product_code(productCode) -> dict:
         else:
             result = {
                 'status': "error",
-                'data': 'null',
+                'data': None,
                 'Message': "No data found"
             }
     except Exception as e:
         result = {
             'status': "error",
-            'data': 'null',
+            'data': None,
             'Message': str(e)
         }
 
@@ -140,7 +140,7 @@ def update_products() -> dict:
     
     return {
         'status': 'error',
-        'data': 'null',
+        'data': None,
         'Message': 'Error while retrieving product from server'
     }
 
@@ -156,7 +156,7 @@ def update_prices(customer_code='TESTDEBTOR') -> dict:
 
     return {
         'status': 'error',
-        'data': 'null',
+        'data': None,
         'Message': "Error while retrieving product price from SQUIZZ server"
     }
 

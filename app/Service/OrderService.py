@@ -12,7 +12,7 @@ def submit_order(session_key, order_details) -> dict:
     
     return {
         'status': "error",
-        'data': 'null',
+        'data': None,
         'Message': "Error while sending purchase to SQUIZZ server"
     }
 
@@ -24,7 +24,7 @@ def get_order_history(session_id) -> dict:
     except Exception as e:
         result = {
             'status': 'failure',
-            'data': 'null',
+            'data': None,
             'message': "Invalid session, please login again"
         }
 

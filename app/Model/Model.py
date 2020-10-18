@@ -31,6 +31,9 @@ class Model:
                 if type(self.__dict__[key]) == Decimal:
                     self.__dict__[key] = float(self.__dict__[key])
 
+                if key == 'productCode' or key == 'keyProductId':
+                    self.__dict__[key] = self.__dict__[key].rstrip()
+
         elif pk is not None:
             self.id = pk
 
