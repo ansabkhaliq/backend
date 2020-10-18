@@ -10,22 +10,6 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-# def exec_ok(msg="Successfully executed", data=None):
-#     return {
-#         'success': True,
-#         'message': msg,
-#         'data': data
-#     }
-#
-#
-# def exec_fail(msg="Execution failed", data=None):
-#     return {
-#         'success': False,
-#         'message': msg,
-#         'data': data
-#     }
-
-
 class SimpleModelResource(DatabaseBase):
     """
     A subclass of DatabaseBase, responsible for handling database
@@ -84,10 +68,14 @@ class SimpleModelResource(DatabaseBase):
             )
             return ret_obj
 
-    def get_all(self, cls):
+    def list_all(self, cls, fields=None):
         """return all records by the given class"""
         table = cls.table_name()
-        query = f'SELECT * FROM {table}'
+        if fields is None:
+            fields_str = '*'
+        else:
+            fields_str = ','.join(fields)
+        query = f'SELECT {fields_str} FROM {table}'
         obj_dict_list = self.run_query(query, [], False)
         if obj_dict_list is None:
             return []
@@ -99,8 +87,7 @@ class SimpleModelResource(DatabaseBase):
 
         return obj_list
 
-    # TODO batch insert
-    def create(self, obj, commit=True):
+    def insert(self, obj, commit=True):
         """
         Save current obj as an new instance into the database
 
@@ -108,6 +95,10 @@ class SimpleModelResource(DatabaseBase):
         table = obj.table_name()
         obj_dict = obj.__dict__.copy()
         del obj_dict['id']
+        for key in list(obj_dict.keys()):
+            if key not in obj.fields_mapping():
+                del obj_dict[key]
+
         fields = map(
             lambda x: obj.fields_mapping()[x],
             obj_dict.keys()
@@ -131,6 +122,34 @@ class SimpleModelResource(DatabaseBase):
         except Exception as e:
             logger.error(f'Create record for table {table} failed: {str(e)}')
             raise OtherException(obj)
+
+    # TODO to finalise
+    def batch_insert(self, obj_list, batch_size=5000, commit=True):
+        """Insert records one by one for now"""
+        total = len(obj_list)
+        if total == 0:
+            return
+        table = obj_list[0].table_name()
+        success = 0
+        failed = 0
+        failed_list = []
+        for obj in obj_list:
+            try:
+                self.insert(obj, commit=commit)
+            except Exception as e:
+                failed += 1
+                failed_list.append(obj)
+                logger.error(f'Create record for table {table} failed: {str(e)}')
+            else:
+                success += 1
+
+        logger.info(f"Batch insert into table '{table}', num of success [{success}/{total}]")
+        return {
+            'total': total,
+            'success': success,
+            'failed': failed,
+            'failed_objs': failed_list
+        }
 
     def update(self, obj, commit=True):
         """
@@ -225,3 +244,12 @@ class SimpleModelResource(DatabaseBase):
             raise MultipleRecordsFound(obj)
         else:
             return ret_list[0]
+
+    def truncate(self, cls, commit=True):
+        """Clear tables"""
+        try:
+            self.run_query(f'DELETE FROM {cls.table_name()}', [], commit)
+        except Exception as e:
+            logger.error(f'Unexpected error while executing query: {self.cursor._last_executed}\n%s', e)
+            raise OtherException(cls())
+

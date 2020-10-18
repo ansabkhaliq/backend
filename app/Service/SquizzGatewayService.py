@@ -26,7 +26,6 @@ class SquizzGatewayService:
         self.supplier_org_id = supplier_org_id
         self.requests = requests.Session()
 
-
     # Web Service Endpoint: Create Organisation API Session
     def create_session(self) -> Tuple[str, str]:
         header = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -37,11 +36,11 @@ class SquizzGatewayService:
                 logger.info("Created a session in SQUIZZ")
                 return data["session_id"], "LOGIN_SUCCESS"
             else:
-                logger.debug('cannot create a sessoion in squizz'+ data["result_code"])
+                logger.debug('cannot create a session in squizz'+ data["result_code"])
                 return None, data["result_code"]
         
         except Exception as e:
-            logger.debug("Could not create organisation API session")
+            logger.debug("Could not create organisation API session. %s", e)
             return None, "SERVER_ERROR_UNKNOWN"
 
     # Web Service Endpoint: Destroy Organisation API Session
@@ -55,7 +54,6 @@ class SquizzGatewayService:
         else:
             logger.debug("Could not destroy organisation API session")
             return False
-
 
     # Web Service Endpoint: Validate Organisation API Session
     def validate_session(self, session_id: str) -> bool:
@@ -94,7 +92,6 @@ class SquizzGatewayService:
             return True, data
 
         return False, None
-
 
     # Web Service Endpoint: Purchase Submit API
     def submit_purchase(self, session_id, order_details) -> Tuple[bool, Optional[list]]:

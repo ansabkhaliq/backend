@@ -1,4 +1,7 @@
-
+from app.Model.CateProd import CateProd
+from app.Model.Category import Category
+from app.Model.Price import Price
+from app.Resource.SimpleModelResource import SimpleModelResource as SR
 from app.Resource.ProductResource import ProductResource
 from app.Util import AuthUtil as authUtil
 from app.Model.Product import Product
@@ -142,10 +145,10 @@ def update_products() -> dict:
     }
 
 
-def update_prices() -> dict:
+def update_prices(customer_code='TESTDEBTOR') -> dict:
     connection = authUtil.build_connection()
     data_type = 37
-    success, price_list = connection.retrieve_organisation_data(data_type)
+    success, price_list = connection.retrieve_organisation_data(data_type, customer_code)
     product_resource = ProductResource()
 
     if success:
@@ -155,4 +158,89 @@ def update_prices() -> dict:
         'status': 'error',
         'data': 'null',
         'Message': "Error while retrieving product price from SQUIZZ server"
+    }
+
+
+def restore_category():
+    connection = authUtil.build_connection()
+    status, categories = connection.retrieve_organisation_data(8)
+
+    if not status:
+        return {
+            'status': 'Failed',
+            'message': 'Retrieve data from squizz failed.'
+        }
+
+    sr = SR()
+    try:
+        # Rewrite categories
+        sr.truncate(CateProd, False)
+        sr.truncate(Category, False)
+        sr.batch_insert(categories, commit=False)
+
+        # Traverse products and convert to key, id pairs
+        prod_key_id = {}
+        for product in sr.list_all(Product):
+            prod_key_id[product.keyProductID] = product.id
+
+        # Rewrite category product relationships
+        for category in categories:
+            if category.keyCategoryParentID is None:
+                continue
+            if category.keyProductIDs is None:
+                continue
+            print(category.keyProductIDs)
+            for productKey in category.keyProductIDs:
+                cate_prod_rel = CateProd({'categoryId': category.id, 'productId': prod_key_id[productKey]})
+                sr.insert(cate_prod_rel, commit=False)
+
+    except Exception as e:
+        sr.connection.rollback()
+        sr.cursor.close()
+        raise e
+    else:
+        sr.connection.commit()
+        sr.cursor.close()
+
+    return {
+        'status': 'Success',
+        'message': 'Category data Updated'
+    }
+
+
+def restore_prices(customer_code="TESTDEBTOR"):
+    connection = authUtil.build_connection()
+    status, prices = connection.retrieve_organisation_data(37, customer_code)
+    if not status:
+        return {
+            'status': 'Failed',
+            'message': 'Retrieve data from squizz failed.'
+        }
+
+    sr = SR()
+    try:
+        # Truncate prices
+        sr.truncate(Price, False)
+
+        # Traverse products and convert to key, id pairs
+        prod_key_id = {}
+        for product in sr.list_all(Product, ['keyProductId', 'id']):
+            prod_key_id[product.keyProductID] = product.id
+
+        # Rewrite prices
+        for price in prices:
+            price.productId = prod_key_id[price.keyProductID]
+            sr.insert(price, False)
+
+    except Exception as e:
+        sr.connection.rollback()
+        sr.cursor.close()
+        raise e
+    else:
+        sr.connection.commit()
+        sr.cursor.close()
+
+    return {
+        'status': 'Success',
+        'message': 'Price data Updated.'
     }

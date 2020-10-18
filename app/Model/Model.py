@@ -25,7 +25,8 @@ class Model:
                 if k not in attrs:
                     del obj[k]
 
-            self.__dict__.update(json.loads(json.dumps(obj)))
+            # self.__dict__.update(json.loads(json.dumps(obj)))
+            self.__dict__.update(obj)
             for key in self.__dict__:
                 if type(self.__dict__[key]) == Decimal:
                     self.__dict__[key] = float(self.__dict__[key])

@@ -6,7 +6,7 @@ import pytest
 
 new_customer_id = 0
 new_address_id = 0
-current_customer_number = len(SR().get_all(C))
+current_customer_number = len(SR().list_all(C))
 
 """
 Run this Test as a whole, do not run them separately
@@ -36,10 +36,10 @@ def test_create():
         'country': 'Australia'
     })
 
-    cust_result = sr.create(new_customer)
+    cust_result = sr.insert(new_customer)
     new_customer_id = new_customer.id
     new_address.customer_id = new_customer_id
-    addr_result = sr.create(new_address)
+    addr_result = sr.insert(new_address)
     new_address_id = new_address.id
 
     assert cust_result.id == new_customer_id
@@ -48,7 +48,7 @@ def test_create():
     assert addr_result.customer_id == new_address.customer_id == new_customer_id
     assert addr_result.postcode == 'VIC0000'
     with pytest.raises(AlreadyExists):
-        sr.create(new_customer)
+        sr.insert(new_customer)
 
     # Violate referential integrity
     bad_address = Addr({
@@ -62,11 +62,11 @@ def test_create():
     })
 
     with pytest.raises(ViolateFKConstraint):
-        sr.create(bad_address)
+        sr.insert(bad_address)
 
 
 def test_get_all():
-    ret_objs = SR().get_all(C)
+    ret_objs = SR().list_all(C)
 
     assert len(ret_objs) == 1 + current_customer_number
     assert ret_objs[-1].customer_code == 'Test1'
@@ -98,7 +98,7 @@ def test_delete():
     del_obj = C(pk=new_customer_id)
     SR().delete(del_obj)
 
-    assert len(SR().get_all(C)) == current_customer_number
+    assert len(SR().list_all(C)) == current_customer_number
     with pytest.raises(NotFound):
         SR().get_one_by_id(del_obj)
     with pytest.raises(NotFound):

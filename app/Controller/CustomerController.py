@@ -1,7 +1,7 @@
 from app.Model.Address import Address
 from app.Model.Customer import Customer
 from app.Service import CustomerService as cs
-from app.Service.ProductService import retrieve_products as sync_products
+from app.Service.ProductService import restore_prices as sync_products_prices
 from app.Exception.exceptions import LackRequiredData
 from app.Util.validation import lack_keys
 from app.Util import AuthUtil as authUtil
@@ -38,7 +38,7 @@ def switch_customer():
         return jsonify({'message': f'Provided customer code {cust_code} does not match any customer'}), 404
 
     # TODO this is a problematic function, to be fixed
-    sync_products(customer_code=cust_code)
+    sync_products_prices(cust_code)
     return jsonify({'message': 'Switch customer successfully'}), 200
 
 
@@ -119,4 +119,10 @@ def create_address(customer_id):
 @cust.route('/api/customer/<customer_id>/addresses', methods=['GET'])
 def list_addresses(customer_id):
     cust_addresses = cs.list_customer_addresses(customer_id)
-    return jsonify([addr.json() for addr in cust_addresses]), 200
+    return jsonify([addr.__dict__ for addr in cust_addresses]), 200
+
+
+@cust.route('/api/customer/<customer_id>/address/<address_id>', methods=['DELETE'])
+def del_address(customer_id, address_id):
+    cs.delete_address(customer_id, address_id)
+    return jsonify({'message': f'Address {address_id} deleted'})
