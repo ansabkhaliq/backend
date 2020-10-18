@@ -32,7 +32,8 @@ class Model:
                     self.__dict__[key] = float(self.__dict__[key])
 
                 if key == 'productCode' or key == 'keyProductId':
-                    self.__dict__[key] = self.__dict__[key].rstrip()
+                    if self.__dict__[key] is not None:
+                        self.__dict__[key] = self.__dict__[key].rstrip()
 
         elif pk is not None:
             self.id = pk
