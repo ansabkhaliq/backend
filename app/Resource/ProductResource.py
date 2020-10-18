@@ -144,7 +144,6 @@ class ProductResource(DatabaseBase):
         }
         return result
 
-
     def get_product_by_barcode(self, barcode):
 
         search_query = """SELECT products.id, products.barcode, products.productName, products.productCode, prices.keyProductID, prices.price 
@@ -155,8 +154,6 @@ class ProductResource(DatabaseBase):
         if product_record is None:
             return None
         return product_record[0]
-
-
 
     def get_product_by_product_code(self, productCode):
         search_query = """SELECT products.id, products.barcode, products.productCode, products.productName,
@@ -176,9 +173,6 @@ class ProductResource(DatabaseBase):
         values = [id]
         image_records = self.run_query(search_image_query, values, False)
         return image_records
-        
-
-
 
     # This method is used to update the products that are stored in the database. Updated product infromation is fetched
     # from the SQUIZZ API.

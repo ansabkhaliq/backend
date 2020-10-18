@@ -1,7 +1,7 @@
 from app.Model.Address import Address
 from app.Model.Customer import Customer
 from app.Service import CustomerService as cs
-from app.Service.ProductService import retrieve_products as sync_products
+from app.Service.ProductService import restore_prices as sync_products_prices
 from app.Exception.exceptions import LackRequiredData
 from app.Util.validation import lack_keys
 from app.Util import AuthUtil as authUtil
@@ -32,14 +32,14 @@ def switch_customer():
         raise LackRequiredData('customer_code')
 
     if cust_code not in cs.customer_codes:
-        return {'message': f'Provided customer code {cust_code} does not exist'}, 404
+        return jsonify({'message': f'Provided customer code {cust_code} does not exist'}), 404
 
-    if cust_code not in cs.get_used_customer_codes():
-        return {'message': f'Provided customer code {cust_code} does not match any customer'}, 404
+    if cust_code not in cs.list_used_customer_codes():
+        return jsonify({'message': f'Provided customer code {cust_code} does not match any customer'}), 404
 
     # TODO this is a problematic function, to be fixed
-    sync_products(customer_code=cust_code)
-    return {'message': 'Switch customer successfully'}, 200
+    sync_products_prices(cust_code)
+    return jsonify({'message': 'Switch customer successfully'}), 200
 
 
 @cust.route('/api/customers', methods=['GET'])
@@ -65,7 +65,7 @@ def create_customer():
     if cust_code not in cs.customer_codes:
         return jsonify({'message': f'Provided customer code {cust_code} does not exist'}), 404
 
-    if cust_code not in cs.get_unused_customer_codes():
+    if cust_code not in cs.list_unused_customer_codes():
         return jsonify({'message': f'Provided customer code {cust_code} is already used'}), 409
 
     new_customer = Customer(cust_data)
@@ -73,7 +73,7 @@ def create_customer():
     # Create customer only
     if addr_data is None:
         cs.create_customer(new_customer)
-        return {"customer": new_customer.__dict__}, 201
+        return jsonify({"customer": new_customer.__dict__}), 201
 
     # Create customer with address
     addr_data = data['address']
@@ -84,23 +84,23 @@ def create_customer():
 
     new_address = Address(addr_data)
     cs.create_customer(new_customer, new_address)
-    return {'customer': new_customer.__dict__, 'address': new_address.__dict__}, 201
+    return jsonify({'customer': new_customer.__dict__, 'address': new_address.__dict__}), 201
 
 
 @cust.route('/api/customer/<customer_id>', methods=['GET'])
 def get_customer(customer_id):
-    return cs.get_one_customer(customer_id).__dict__, 200
+    return cs.get_one_customer(customer_id).json(), 200
 
 
 @cust.route('/api/customer/<customer_id>', methods=['DELETE'])
 def del_customer(customer_id):
     cs.delete_customer(customer_id)
-    return {'message': f'Customer {customer_id} deleted'}, 200
+    return jsonify({'message': f'Customer {customer_id} deleted'}), 200
 
 
 @cust.route('/api/customer_codes', methods=['GET'])
 def list_customers_codes():
-    return {'customer_codes': list(cs.get_unused_customer_codes())}, 200
+    return jsonify(list(cs.list_unused_customer_codes())), 200
 
 
 @cust.route('/api/customer/<customer_id>/addresses', methods=['POST'])
@@ -113,9 +113,16 @@ def create_address(customer_id):
 
     new_address = Address(data)
     cs.create_customer_address(customer_id, new_address)
-    return new_address.__dict__, 201
+    return new_address.json(), 201
 
 
 @cust.route('/api/customer/<customer_id>/addresses', methods=['GET'])
 def list_addresses(customer_id):
-    return {}, 200
+    cust_addresses = cs.list_customer_addresses(customer_id)
+    return jsonify([addr.__dict__ for addr in cust_addresses]), 200
+
+
+@cust.route('/api/customer/<customer_id>/address/<address_id>', methods=['DELETE'])
+def del_address(customer_id, address_id):
+    cs.delete_address(customer_id, address_id)
+    return jsonify({'message': f'Address {address_id} deleted'})

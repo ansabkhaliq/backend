@@ -16,10 +16,7 @@ class Address(Model):
         self.region = None
         self.country = None
 
-        if json is not None:
-            super().__init__(json)
-        else:
-            self.id = pk
+        super().__init__(json, pk)
 
     @staticmethod
     def table_name():
