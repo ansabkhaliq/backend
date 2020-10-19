@@ -1,7 +1,12 @@
 import logging
 import datetime
+
+import math
+
 from app import config
+from app.Exception.exceptions import OtherException, PaginationError
 from app.Resource.DatabaseBase import DatabaseBase
+from app.Resource.SimpleModelResource import SimpleModelResource as SR
 from app.Model.Price import Price
 from app.Model.Product import Product
 from app.Model.BarcodeProduct import BarcodeProduct
@@ -167,10 +172,13 @@ class ProductResource(DatabaseBase):
         return product_record[0]
         
 
-    def get_product_images_by_id(self, id):
-
-        search_image_query = """Select * From images where productId = %s """
-        values = [id]
+    def get_product_images_by_id(self, productId):
+        if isinstance(productId, list):
+            search_image_query = """Select * From images where productId IN %s """
+            values = [str(tuple(productId))]
+        else:
+            search_image_query = """Select * From images where productId = %s """
+            values = [productId]
         image_records = self.run_query(search_image_query, values, False)
         return image_records
 
@@ -327,3 +335,49 @@ class ProductResource(DatabaseBase):
             },
         }
         return result
+
+    def list_products_by_category(self, category_id, page=None, page_size=None):
+        count = 0
+        if page is None:
+            paging_str = ''
+        else:
+            paging_str = f'LIMIT {(page - 1) * page_size}, {page_size}'
+            count_query = f'SELECT COUNT(*) as count FROM categoryproducts WHERE categoryId = {category_id}'
+            count = self.run_query(count_query, [], False)[0]['count']
+            total_pages = math.ceil(count / page_size)
+            if total_pages == 0:
+                total_pages = 1
+            if page > total_pages or page < 1:
+                raise PaginationError()
+
+        prod_query = f'SELECT products.*, prices.price FROM products \
+        JOIN prices ON products.id = prices.productId WHERE products.id IN (\
+        SELECT productId FROM categoryproducts WHERE categoryId = {category_id}\
+        ) {paging_str}'
+
+        try:
+            products = self.run_query(prod_query, [], False)
+            products = [] if products is None else products
+            items = []
+            for p in products:
+                price = float(p['price'])
+                del p['price']
+                model = SR.to_model(Product, p)
+                model.price = price
+                items.append(model)
+            if page is None:
+                return items
+            else:
+                return {
+                    "total_pages": total_pages, "total_items": count,
+                    "page_num": page, "page_items": len(items),
+                    "items": items
+                }
+        except Exception as e:
+            self.cursor.close()
+            logger.error('Exception occurred when retrieving products by category %s', e)
+            # raise e
+            raise OtherException(Product())
+
+    def list_products(self, page, page_size):
+        pass

@@ -86,7 +86,6 @@ def get_product_by_product_code(productCode) -> dict:
     pr = ProductResource()
     product_record = pr.get_product_by_product_code(productCode)
 
-
     try:
         if product_record is not None:
             # Get Product images
@@ -94,7 +93,6 @@ def get_product_by_product_code(productCode) -> dict:
 
             # Converting Decimal to float (Python serializable)
             product_record['price'] = float(product_record['price'])
-
 
             # Packing data in the Model
             product_record = Product(product_record)
@@ -244,3 +242,29 @@ def restore_prices(customer_code="TESTDEBTOR"):
         'status': 'Success',
         'message': 'Price data Updated.'
     }
+
+
+def list_all_categories():
+    # Parent categories
+    p_cate_list = []
+    # Children categories
+    c_cate_dict = {}
+
+    # Retrieve all categories
+    for category in SR().list_all(Category):
+        if category.keyCategoryParentID is None:
+            p_cate_list.append(category)
+        else:
+            if category.keyCategoryParentID not in c_cate_dict:
+                c_cate_dict[category.keyCategoryParentID] = [category]
+            else:
+                c_cate_dict[category.keyCategoryParentID].append(category)
+
+    return p_cate_list, c_cate_dict
+
+
+def list_all_products(category_id=None, page=None, page_size=20):
+    if category_id is None:
+        return SR().list_all(Product, page=page)
+    else:
+        return ProductResource().list_products_by_category(category_id, page, page_size)

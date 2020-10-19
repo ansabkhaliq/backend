@@ -1,5 +1,7 @@
 import logging
 import datetime
+
+import math
 from pymysql import IntegrityError
 from werkzeug.exceptions import HTTPException
 from app.Resource.DatabaseBase import DatabaseBase
@@ -68,24 +70,40 @@ class SimpleModelResource(DatabaseBase):
             )
             return ret_obj
 
-    def list_all(self, cls, fields=None):
+    def list_all(self, cls, fields=None, page=None, page_size=20):
         """return all records by the given class"""
         table = cls.table_name()
+
         if fields is None:
             fields_str = '*'
         else:
             fields_str = ','.join(fields)
-        query = f'SELECT {fields_str} FROM {table}'
-        obj_dict_list = self.run_query(query, [], False)
-        if obj_dict_list is None:
-            return []
-        obj_list = []
-        for ele in obj_dict_list:
-            obj_list.append(cls(
-                {cls.fields_mapping()[k]: ele[k] for k in ele}
-            ))
 
-        return obj_list
+        if page is None:
+            paging_str = ''
+        else:
+            paging_str = f'LIMIT {(page - 1) * page_size}, {page_size}'
+            count_query = f'SELECT COUNT(*) AS count FROM {table}'
+            count = self.run_query(count_query, [], False)[0]['count']
+            total_pages = math.ceil(count / page_size)
+            if total_pages == 0:
+                total_pages = 1
+            if page > total_pages or page < 1:
+                raise PaginationError()
+
+        query = f'SELECT {fields_str} FROM {table} {paging_str}'
+        obj_dict_list = self.run_query(query, [], False)
+        obj_dict_list = [] if obj_dict_list is None else obj_dict_list
+        obj_list = [self.to_model(cls, obj_dict) for obj_dict in obj_dict_list]
+
+        if page is None:
+            return obj_list
+        else:
+            return {
+                "total_pages": total_pages, "total_items": count,
+                "page_num": page, "page_items": len(obj_list),
+                "items": obj_list
+            }
 
     def insert(self, obj, commit=True):
         """
@@ -192,11 +210,13 @@ class SimpleModelResource(DatabaseBase):
         query = f'DELETE FROM {table} WHERE id=%s'
         self.run_query(query, [obj.id], commit)
 
-    def find_all(self, obj):
+    def find_all(self, obj, page=None, page_size=20):
         """
         Exact match records by obj, do not support filtering Nulls.
 
         :param  obj
+        :param  page page number
+        :param  page_size page size
         :return exact one obj
         :raise  OtherException
         """
@@ -216,7 +236,12 @@ class SimpleModelResource(DatabaseBase):
         where_clause = 'WHERE ' + ' AND '.join(
             [f'{field}=%s' for field in fields]
         )
-        query = f'SELECT * FROM {table} {where_clause}'
+        if page is None:
+            paging_str = ''
+        else:
+            paging_str = f'LIMIT {(page - 1) * page_size}, {page_size}'
+
+        query = f'SELECT * FROM {table} {where_clause} {paging_str}'
         try:
             ret_list = self.run_query(query, values, False)
             if ret_list is None:

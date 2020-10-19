@@ -16,16 +16,14 @@ customer_codes = {
 }
 
 
-def list_unused_customer_codes():
-    customers = SR().list_all(Customer)
-    used_codes = set([c.customer_code for c in customers])
-    return customer_codes - used_codes
-
-
 def list_used_customer_codes():
     customers = SR().list_all(Customer)
     used_codes = set([c.customer_code for c in customers])
     return used_codes
+
+
+def list_unused_customer_codes():
+    return customer_codes - list_used_customer_codes()
 
 
 def list_all_customers():

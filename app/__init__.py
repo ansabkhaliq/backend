@@ -1,5 +1,5 @@
 import os, json
-from flask import Flask
+from flask import Flask, jsonify
 from flask_session import Session
 
 # For more information on Flask application factories:
@@ -47,6 +47,6 @@ def create_app(test_config=None):
     app.register_blueprint(customer_blueprint.cust)
 
     # Register Exception handler
-    app.register_error_handler(HTTPException, lambda e: e.response)
+    app.register_error_handler(HTTPException, lambda e: (jsonify({'message': e.description}), e.code))
 
     return app

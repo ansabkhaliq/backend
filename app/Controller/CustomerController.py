@@ -100,7 +100,14 @@ def del_customer(customer_id):
 
 @cust.route('/api/customer_codes', methods=['GET'])
 def list_customers_codes():
-    return jsonify(list(cs.list_unused_customer_codes())), 200
+    params = request.args
+    used = params.get('used')
+    if used is None:
+        return jsonify(list(cs.customer_codes)), 200
+    elif int(used) == 1:
+        return jsonify(list(cs.list_used_customer_codes())), 200
+    else:
+        return jsonify(list(cs.list_unused_customer_codes())), 200
 
 
 @cust.route('/api/customer/<customer_id>/addresses', methods=['POST'])
