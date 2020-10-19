@@ -3,6 +3,11 @@ from app.Resource.ProductResource import ProductResource
 from app.Resource.UserResource import UserResource
 from app.Resource.ModelMetadataResource import ModelMetadataResource
 from app.Util import AuthUtil as authUtil
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def retrieve_products(customer_code="TESTDEBTOR") -> dict:
@@ -172,16 +177,38 @@ def import_metadata(data) -> dict:
         product_resource = ProductResource()
         product_id = product_resource.get_product_id_by_product_code(code)
         if product_id is None:
-            errormessage += str(code) + ", "
+            errormessage += '"' + code + '" '
             continue
         model_metadata_resource = ModelMetadataResource()
-        status_code = model_metadata_resource.insert_metadata(product_id, code, str(product['ProductParameters']))
-        if status_code == 1:
-            errormessage += code + ", "
+        res = model_metadata_resource.get_metadata_by_product_code(code)
+        json_dict = {}
+        for element in product['ProductParameters']:
+            json_dict[element['Key']] = element['Value']
+        json_string = json.dumps(json_dict)
+        json_string.replace('\'', '\"')
+
+        if res is not None:
+            status_code = model_metadata_resource.update_metadata(code, str(json_string))
+            if status_code == 0:
+                errormessage += '\"' + code + '\" '
+            continue
+        status_code = model_metadata_resource.insert_metadata(product_id, code, str(json_string))
+        if status_code == 0:
+            errormessage += '\"' + code + '\" '
             continue
     if errormessage == "":
         return {"status": "success", "message": "import success"}
     else:
         return {"status": "partial success",
-                "message": "product code with" + errormessage + "failed to upload, please check the product code or "
-                                                                "try again"}
+                "message": "product code with " + errormessage + "failed to upload, please check the product code or "
+                                                                 "try again"}
+
+
+def get_metadata_by_product_code(productCode) -> dict:
+    model_metadata_resource = ModelMetadataResource()
+    result = model_metadata_resource.get_metadata_by_product_code(productCode)
+    if result is None:
+        return {"found": "false"}
+    meta_json = str(result['meta_json_string'])
+
+    return {"found": "true", "json_data": json.loads(meta_json)}

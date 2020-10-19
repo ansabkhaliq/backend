@@ -79,3 +79,84 @@ def test_logout():
     json_response = json.loads(response.text)
     assert json_response['status'] == "success"
     squizz_sessions.pop()
+
+
+def test_import():
+    url = '/metadata/import'
+    headers = {"Content-Type": "application/json"}
+    data = {
+        "Username": "user1",
+        "Password": "squizz",
+        "Products": [
+            {
+                "Code": "CFP-600-12",
+                "ProductParameters": [{
+                    "Key": "Name",
+                    "Value": "CFP - 600/12 Swirl Diffusers  with  Low Profile Plenum 250 Spigot"
+                }, {
+                    "Key": "URL",
+                    "Value": "http://www.holyoake.com"
+                }, {
+                    "Key": "Type Comments",
+                    "Value": "Holyoake Swirl Diffuser CFP-600/12 c/w Low Profile Plenum."
+                }, {
+                    "Key": "Static Pressure Min",
+                    "Value": "2 Pa"
+                }, {
+                    "Key": "Static Pressure Max",
+                    "Value": "28 Pa"
+                }, {
+                    "Key": "Noise Level NC Min",
+                    "Value": "5 NC"
+                }, {
+                    "Key": "Noise Level NC Max",
+                    "Value": "32NC"
+                }, {
+                    "Key": "Model",
+                    "Value": "CFP-600/12 Low Profile complete with low profile plenum."
+                }, {
+                    "Key": "Min Flow (Hvac Air Flow Liters Per Second)",
+                    "Value": "25.000000000000"
+                }, {
+                    "Key": "Max Flow (Hvac Air Flow Liters Per Second)",
+                    "Value": "200.000000000000"
+                }, {
+                    "Key": "Material Body",
+                    "Value": "Holyoake-Aluminium"
+                }, {
+                    "Key": "Material - Face",
+                    "Value": "Holyoake White"
+                }, {
+                    "Key": "Manufacturer",
+                    "Value": "Holyoake"
+                }, {
+                    "Key": "d_r (Length Millimeters)",
+                    "Value": "125.000000000000"
+                }, {
+                    "Key": "Inlet Spigot Diameter (Length Millimeters)",
+                    "Value": "250.000000000000"
+                }, {
+                    "Key": "Plenum Box Height (Length Millimeters)",
+                    "Value": "250.000000000000"
+                }, {
+                    "Key": "Holyoake Product Range",
+                    "Value": "Holyoake Swirl Diffusers."
+                }, {
+                    "Key": "Flow Nom (Hvac Air Flow Liters Per Second)",
+                    "Value": "112.500000000000"
+                }, {
+                    "Key": "Diffuser Width (Length Millimeters)",
+                    "Value": "595.000000000000"
+                }, {
+                    "Key": "Plenum Box Width (Length Millimeters)",
+                    "Value": "570.000000000000"
+                }, {
+                    "Key": "Description",
+                    "Value": "Radial Swirl Diffusers, Ceiling Fixed Pattern shall be Holyoake Model CFP-600/12.  Ceiling Radial Swirl Diffusers shall be designed for use in Variable Air Volume (VAV) systems with Highly Turbulent Radial  Air Flow Pattern and shall be suitable for ceiling heights of 2.4 to 4m. Ceiling Radial Swirl Diffusers shall maintain a COANDA effect at reduced air volumes and provide uniform temperature gradients throughout the occupied space. Diffusers shall be finished in powder coat and fitted with accessories and dampers where indicated as manufactured by Holyoake"
+                }]
+            }
+
+        ]
+    }
+    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+    json_response = json.loads(response.text)
