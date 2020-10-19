@@ -34,7 +34,6 @@ def get_product_by_id():
 # This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database
 @product.route('/retrieveProducts', methods=['GET'])
 def retrieve_products():
-
     return jsonify(product_service.retrieve_products())
 
 
@@ -43,7 +42,6 @@ def retrieve_products():
 # This method is repsonbile for getting the latest product prices from SQUIZZ platform and updating the table in the local database
 @product.route('/retrievePrices', methods=['GET'])
 def retrieve_prices():
-
     return jsonify(product_service.retrieve_prices())
 
 
@@ -52,8 +50,6 @@ def retrieve_prices():
 # This method is repsonbile for getting the product update from SQUIZZ platform and updating the table in the local database
 @product.route('/updateProducts', methods=['GET'])
 def update_products():
-
-
     return jsonify(product_service.update_products())
     
 
@@ -62,7 +58,6 @@ def update_products():
 # This method is repsonbile for getting the latest product prices from SQUIZZ platform and updating the table in the local database
 @product.route('/updatePrices', methods=['GET'])
 def update_product_price():
-
     return jsonify(product_service.update_prices())
 
 @product.route('/metadata/import',methods=['POST'])
