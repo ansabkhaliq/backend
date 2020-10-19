@@ -20,7 +20,6 @@ class SessionResource(DatabaseBase):
     def __init__(self):
         super().__init__()
 
-
     def store_session(self, username: str, session_id: str, org_id: str):
         """
         Inserts a new session record within the database
@@ -63,7 +62,6 @@ class SessionResource(DatabaseBase):
             except Exception as e:
                 logger.error("Could not store session in database")
 
-
     def validate_session(self, session_id: str, org_id: str):
         """
         This method validates whether session_id exists already in the database
@@ -85,8 +83,6 @@ class SessionResource(DatabaseBase):
                 return False
         except Exception as e:
             logger.log("Cannot validate session")
-
-
 
     def delete_session(self, session_id: str):
         """

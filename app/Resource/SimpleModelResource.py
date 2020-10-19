@@ -10,43 +10,50 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 
-# def exec_ok(msg="Successfully executed", data=None):
-#     return {
-#         'success': True,
-#         'message': msg,
-#         'data': data
-#     }
-#
-#
-# def exec_fail(msg="Execution failed", data=None):
-#     return {
-#         'success': False,
-#         'message': msg,
-#         'data': data
-#     }
-
-
 class SimpleModelResource(DatabaseBase):
     """
     A subclass of DatabaseBase, responsible for handling database
     operations regarding simple Models (customer, address, etc.)
+    ** Notice **, to use this resource, the model must:
+            implement the fields mapping            get_fields_mapping()
+            specify the corresponding table name    get_table_name()
+
+            please refer the Customer and the Address Model
 
     These operations include:
         - Insert Record
         - Update Record
         - Delete Record
-        - Retrieve Record by auto increment id
+        - Retrieve Record by auto increment id(pk)
+        - Retrieve Record(s) by multiple fields using Model obj
     """
 
     def __init__(self):
         super().__init__()
 
+    @staticmethod
+    def to_dict(obj):
+        """
+        Read field names as well as corresponding values
+
+        :param obj: Model obj
+        :return: field_value_dict -> dict
+        """
+        fields_mapping = obj.fields_mapping()
+        obj_dict = obj.__dict__.copy()
+        field_value_dict = {fields_mapping[k]: obj_dict[k] for k in obj_dict}
+        return field_value_dict
+
+    @staticmethod
+    def to_model(cls, obj_dict):
+        return cls(
+            {cls.fields_mapping()[k]: obj_dict[k] for k in obj_dict}
+        )
+
     def get_one_by_id(self, obj):
         """
         Retrieve on record from specific table in database
-        Notice:
-            Must set the fields mapping get_fields_mapping()
-            Must overwrite the function get_table_name()
+
         """
         obj_type = type(obj)
         table = obj.table_name()
@@ -61,10 +68,14 @@ class SimpleModelResource(DatabaseBase):
             )
             return ret_obj
 
-    def get_all(self, cls):
+    def list_all(self, cls, fields=None):
         """return all records by the given class"""
         table = cls.table_name()
-        query = f'SELECT * FROM {table}'
+        if fields is None:
+            fields_str = '*'
+        else:
+            fields_str = ','.join(fields)
+        query = f'SELECT {fields_str} FROM {table}'
         obj_dict_list = self.run_query(query, [], False)
         if obj_dict_list is None:
             return []
@@ -76,17 +87,18 @@ class SimpleModelResource(DatabaseBase):
 
         return obj_list
 
-    # TODO batch insert
-    def create(self, obj, commit=True):
+    def insert(self, obj, commit=True):
         """
         Save current obj as an new instance into the database
-        Notice:
-            The Must set the fields mapping get_fields_mapping()
-            Must overwrite the function get_table_name
+
         """
         table = obj.table_name()
         obj_dict = obj.__dict__.copy()
         del obj_dict['id']
+        for key in list(obj_dict.keys()):
+            if key not in obj.fields_mapping():
+                del obj_dict[key]
+
         fields = map(
             lambda x: obj.fields_mapping()[x],
             obj_dict.keys()
@@ -111,12 +123,38 @@ class SimpleModelResource(DatabaseBase):
             logger.error(f'Create record for table {table} failed: {str(e)}')
             raise OtherException(obj)
 
+    # TODO to finalise
+    def batch_insert(self, obj_list, batch_size=5000, commit=True):
+        """Insert records one by one for now"""
+        total = len(obj_list)
+        if total == 0:
+            return
+        table = obj_list[0].table_name()
+        success = 0
+        failed = 0
+        failed_list = []
+        for obj in obj_list:
+            try:
+                self.insert(obj, commit=commit)
+            except Exception as e:
+                failed += 1
+                failed_list.append(obj)
+                logger.error(f'Create record for table {table} failed: {str(e)}')
+            else:
+                success += 1
+
+        logger.info(f"Batch insert into table '{table}', num of success [{success}/{total}]")
+        return {
+            'total': total,
+            'success': success,
+            'failed': failed,
+            'failed_objs': failed_list
+        }
+
     def update(self, obj, commit=True):
         """
         Save current obj into database according to the id
-        Notice:
-            Must set the fields mapping get_fields_mapping()
-            Must overwrite the function get_table_name
+
         """
         self.get_one_by_id(obj)
         table = obj.table_name()
@@ -147,21 +185,71 @@ class SimpleModelResource(DatabaseBase):
     def delete(self, obj, commit=True):
         """
         Delete current obj from database according to the id
-        Notice:
-            Must set the fields mapping get_fields_mapping()
-            Must overwrite the function get_table_name()
+
         """
         obj = self.get_one_by_id(obj)
         table = obj.table_name()
         query = f'DELETE FROM {table} WHERE id=%s'
         self.run_query(query, [obj.id], commit)
 
-    # TODO
-    def get_one(self, obj):
+    def find_all(self, obj):
         """
-        Exact match one record by obj (excludes field id)
+        Exact match records by obj, do not support filtering Nulls.
 
-        :param obj:
-        :return:
+        :param  obj
+        :return exact one obj
+        :raise  OtherException
         """
-        pass
+        table = obj.table_name()
+        cls = type(obj)
+        fv_dict = self.to_dict(obj)
+        for k, v in list(fv_dict.items()):
+            if v is None:
+                del fv_dict[k]
+
+        if len(fv_dict) == 0:
+            return []
+
+        fields = fv_dict.keys()
+        values = list(fv_dict.values())
+
+        where_clause = 'WHERE ' + ' AND '.join(
+            [f'{field}=%s' for field in fields]
+        )
+        query = f'SELECT * FROM {table} {where_clause}'
+        try:
+            ret_list = self.run_query(query, values, False)
+            if ret_list is None:
+                return []
+
+            obj_list = [self.to_model(cls, record) for record in ret_list]
+            return obj_list
+
+        except Exception as e:
+            logger.error(f'Unexpected error while executing query: {self.cursor._last_executed}\n%s', e)
+            raise OtherException(obj)
+
+    def find_one(self, obj):
+        """
+        Exact match one record by obj, do not support filtering Nulls.
+
+        :param  obj
+        :return exact one obj
+        :raise  MultipleRecordsFound, OtherException, NotFound
+        """
+        ret_list = self.find_all(obj)
+        if len(ret_list) == 0:
+            raise NotFound(obj)
+        elif len(ret_list) > 1:
+            raise MultipleRecordsFound(obj)
+        else:
+            return ret_list[0]
+
+    def truncate(self, cls, commit=True):
+        """Clear tables"""
+        try:
+            self.run_query(f'DELETE FROM {cls.table_name()}', [], commit)
+        except Exception as e:
+            logger.error(f'Unexpected error while executing query: {self.cursor._last_executed}\n%s', e)
+            raise OtherException(cls())
+

@@ -74,3 +74,21 @@ def import_metadata():
 def get_metadata_by_product_code():
     productCode = request.args.get('productCode')
     return jsonify(product_service.get_metadata_by_product_code(productCode))
+
+
+@product.route('/updateCategories', methods=['GET'])
+def update_product_categories():
+    if not authUtil.validate_login_session():
+        return redirect(url_for('auth.login'))
+
+    return jsonify(product_service.restore_category())
+
+
+@product.route('/api/categories', methods=['GET'])
+def list_categories():
+    pass
+
+
+@product.route('/api/category/<category_id>/products', methods=['GET'])
+def list_products(category_id):
+    pass

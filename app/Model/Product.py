@@ -37,4 +37,51 @@ class Product(Model):
         self.priceList = None  # store price object
         self.sellUnitsIdList = None  # sell the SellUnitIds (new table)
         self.imageList = None  # List to store the images associated with the product
+        self.supplierOrganizationId = None
+        self.priceList = None
         super().__init__(json)
+
+    @staticmethod
+    def table_name():
+        return 'products'
+
+    @staticmethod
+    def fields_mapping():
+        return {
+            'id': 'id',
+            'barcode': 'barcode',
+            'barcodeInner': 'barcodeInner',
+            'description1': 'description1',
+            'description2': 'description2',
+            'description3': 'description3',
+            'description4': 'description4',
+            'height': 'height',
+            'internalId': 'internalID',
+            'internalID': 'internalId',
+            'brand': 'brand',
+            'depth': 'depth',
+            'weight': 'weight',
+            'width': 'width',
+            'volume': 'volume',
+            'isKitted': 'isKitted',
+            'isPriceTaxInclusive': 'isPriceTaxInclusive',
+            'productCondition': 'productCondition',
+            'keyProductID': 'keyProductId',
+            'keyProductId': 'keyProductID',
+            'keySellUnitID': 'keySellUnitID',
+            'keyTaxcodeId': 'keyTaxcodeID',
+            'keyTaxcodeID': 'keyTaxcodeId',
+            'kitProductsSetPrice': 'kitProductsSetPrice',
+            'productCode': 'productCode',
+            'name': 'productName',
+            'productName': 'name',
+            'productSearchCode': 'productSearchCode',
+            'averageCost': 'averageCost',
+            'drop': 'productDrop',
+            'productDrop': 'drop',
+            'packQuantity': 'packQuantity',
+            'selfLowQuantity': 'selfLowQuantity',
+            'stockLowQuantity': 'stockLowQuantity',
+            'stockQuantity': 'stockQuantity',
+            'supplierOrganizationId': 'supplierOrganizationId'
+        }
