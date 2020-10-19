@@ -169,7 +169,8 @@ def import_metadata(data) -> dict:
     errormessage = ""
     for product in product_list:
         code = product['Code']
-        product_id = ProductResource.get_product_id_by_product_code(code)
+        product_resource = ProductResource()
+        product_id = product_resource.get_product_id_by_product_code(code)
         if product_id is None:
             errormessage += str(code) + ", "
             continue

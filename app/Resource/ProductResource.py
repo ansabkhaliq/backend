@@ -173,7 +173,7 @@ class ProductResource(DatabaseBase):
                           WHERE productCode = %s"""
         values = [productCode]
         product_record = self.run_query(search_query, values, False)
-        logger.debug({product_record})
+        logger.debug(product_record)
         if product_record is None:
             return None
         return product_record[0]['id']
