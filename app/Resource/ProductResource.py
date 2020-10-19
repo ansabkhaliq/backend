@@ -86,7 +86,7 @@ class ProductResource(DatabaseBase):
             'message': "successfully stored products",
             'data': {
                 'failed': failed_to_store
-            }, 
+            },
         }
 
         return result
@@ -114,7 +114,8 @@ class ProductResource(DatabaseBase):
             try:
                 product_record = self.run_query(search_query, price.keyProductID, False)
             except Exception as e:
-                logger.error('Exception occurred when searching for product record in store_product_level method. %s', e)
+                logger.error('Exception occurred when searching for product record in store_product_level method. %s',
+                             e)
 
             if product_record is not None:
                 # Since we already checked the existence of the product, we could do the insertion.
@@ -144,7 +145,6 @@ class ProductResource(DatabaseBase):
         }
         return result
 
-
     def get_product_by_barcode(self, barcode):
 
         search_query = """SELECT products.id, products.barcode, products.productName, products.productCode, prices.keyProductID, prices.price 
@@ -156,8 +156,6 @@ class ProductResource(DatabaseBase):
             return None
         return product_record[0]
 
-
-
     def get_product_by_product_code(self, productCode):
         search_query = """SELECT products.id, products.barcode, products.productCode, products.productName,
                           prices.keyProductID, prices.price 
@@ -168,7 +166,17 @@ class ProductResource(DatabaseBase):
         if product_record is None:
             return None
         return product_record[0]
-        
+
+    def get_product_id_by_product_code(self, productCode):
+        search_query = """SELECT id 
+                          FROM products
+                          WHERE productCode = %s"""
+        values = [productCode]
+        product_record = self.run_query(search_query, values, False)
+        logger.debug({product_record})
+        if product_record is None:
+            return None
+        return product_record[0]['id']
 
     def get_product_images_by_id(self, id):
 
@@ -176,9 +184,6 @@ class ProductResource(DatabaseBase):
         values = [id]
         image_records = self.run_query(search_image_query, values, False)
         return image_records
-        
-
-
 
     # This method is used to update the products that are stored in the database. Updated product infromation is fetched
     # from the SQUIZZ API.
@@ -267,12 +272,13 @@ class ProductResource(DatabaseBase):
                     self.connection.rollback()
                     logger.error('Exception occurred when updating product table', e)
                     value_not_inserted += 1
-                    failed_to_store.append(product.keyProductID + " error:" + " error occurred while updating: " + str(e))
+                    failed_to_store.append(
+                        product.keyProductID + " error:" + " error occurred while updating: " + str(e))
 
         self.connection.close()
         logger.info('This is the value updated: %d' % value_inserted)
         logger.info('This is the value not updated: %d' % value_not_inserted)
-        result = {'status': "success", 'data': {'failed':failed_to_store}, 'message': "successfully updated products"}
+        result = {'status': "success", 'data': {'failed': failed_to_store}, 'message': "successfully updated products"}
         logger.info('Successfully synchronized latest products data from the SQUIZZ API')
         return result
 
@@ -323,7 +329,7 @@ class ProductResource(DatabaseBase):
             except Exception as e:
                 logger.error('Exception occurred when search price in price_level', e)
                 failed_to_store.append(price.keyProductID + "error:" + "failed to update price")
-                
+
         logger.info("Successfully updated 'price_level' table")
         result = {
             'status': "success",

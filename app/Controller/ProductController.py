@@ -73,3 +73,8 @@ def update_product_price():
     if not authUtil.validate_login_session():
         return redirect(url_for('auth.login'))
     return jsonify(product_service.update_prices())
+
+@product.route('/metadata/import',methods=['POST'])
+def import_metadata():
+    data = request.get_json(silent=True)
+    return jsonify(product_service.import_metadata(data))
