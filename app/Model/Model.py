@@ -1,5 +1,7 @@
 import json
 from decimal import Decimal
+from pymysql import IntegrityError
+from app.Resource.DatabaseBase import DatabaseBase as DB
 
 class Model:
     """
