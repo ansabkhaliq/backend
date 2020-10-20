@@ -16,5 +16,31 @@ class Category(Model):
         self.metaKeywords = None
         self.name = None
         self.ordering = 0
-        self.productList = None  # store product object
+        self.keyProductIDs = None  # store product object
         super().__init__(json)
+
+    @staticmethod
+    def table_name():
+        return 'categories'
+
+    @staticmethod
+    def fields_mapping():
+        return {
+            'id': 'id',
+            'categoryCode': 'categoryCode',
+            'description1': 'description1',
+            'description2': 'description2',
+            'description3': 'description3',
+            'description4': 'description4',
+            'internalId': 'internalID',
+            'internalID': 'internalId',
+            'keyCategoryId': 'keyCategoryID',
+            'keyCategoryID': 'keyCategoryId',
+            'keyCategoryParentId': 'keyCategoryParentID',
+            'keyCategoryParentID': 'keyCategoryParentId',
+            'metaDescription': 'metaDescription',
+            'metaKeywords': 'metaKeywords',
+            'name': 'categoryName',
+            'categoryName': 'name',
+            'ordering': 'ordering'
+        }

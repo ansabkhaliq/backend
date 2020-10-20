@@ -1,5 +1,6 @@
 from app.Model.Model import Model
 
+
 class Price(Model):
     def __init__(self, json):
         # primary key
@@ -14,3 +15,22 @@ class Price(Model):
         # foreignkey--connect to product
         self.productId = None
         super().__init__(json)
+
+    @staticmethod
+    def table_name():
+        return 'prices'
+
+    @staticmethod
+    def fields_mapping():
+        return {
+            'id': 'id',
+            'keyProductID': 'keyProductId',
+            'keyProductId': 'keyProductID',
+            'keySellUnitID': 'keySellUnitId',
+            'keySellUnitId': 'keySellUnitID',
+            'price': 'price',
+            'referenceID': 'referenceId',
+            'referenceId': 'referenceID',
+            'referenceType': 'referenceType',
+            'productId': 'productId'
+        }

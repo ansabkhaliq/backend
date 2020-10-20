@@ -77,7 +77,7 @@ class ProductResource(DatabaseBase):
                 self.run_query(insert_query, values, True)
 
             except Exception as e:
-                logger.error("exception", e)
+                logger.error("exception %s", e)
                 failed_to_store.append(product.keyProductID + "error: " + str(e))
 
         logger.info('completed store_products')
@@ -114,7 +114,7 @@ class ProductResource(DatabaseBase):
             try:
                 product_record = self.run_query(search_query, price.keyProductID, False)
             except Exception as e:
-                logger.error('Exception occurred when searching for product record in store_product_level method.', e)
+                logger.error('Exception occurred when searching for product record in store_product_level method. %s', e)
 
             if product_record is not None:
                 # Since we already checked the existence of the product, we could do the insertion.
@@ -144,7 +144,6 @@ class ProductResource(DatabaseBase):
         }
         return result
 
-
     def get_product_by_barcode(self, barcode):
 
         search_query = """SELECT products.id, products.barcode, products.productName, products.productCode, prices.keyProductID, prices.price 
@@ -156,11 +155,9 @@ class ProductResource(DatabaseBase):
             return None
         return product_record[0]
 
-
-
     def get_product_by_product_code(self, productCode):
         search_query = """SELECT products.id, products.barcode, products.productCode, products.productName,
-                          prices.keyProductID, prices.price 
+                          prices.keyProductID, prices.price, products.description1
                           FROM products JOIN prices ON products.id = prices.productId
                           WHERE products.productCode = %s"""
         values = [productCode]
@@ -176,9 +173,6 @@ class ProductResource(DatabaseBase):
         values = [id]
         image_records = self.run_query(search_image_query, values, False)
         return image_records
-        
-
-
 
     # This method is used to update the products that are stored in the database. Updated product infromation is fetched
     # from the SQUIZZ API.

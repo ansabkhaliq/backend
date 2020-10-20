@@ -26,7 +26,6 @@ class SquizzGatewayService:
         self.supplier_org_id = supplier_org_id
         self.requests = requests.Session()
 
-
     # Web Service Endpoint: Create Organisation API Session
     def create_session(self) -> Tuple[str, str]:
         header = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -37,13 +36,12 @@ class SquizzGatewayService:
                 logger.info("Created a session in SQUIZZ")
                 return data["session_id"], "LOGIN_SUCCESS"
             else:
-                logger.debug('cannot create a sessoion in squizz'+ data["result_code"])
+                logger.debug('cannot create a session in squizz'+ data["result_code"])
                 return None, data["result_code"]
         
         except Exception as e:
-            logger.debug("Could not create organisation API session")
+            logger.debug("Could not create organisation API session. %s", e)
             return None, "SERVER_ERROR_UNKNOWN"
-
 
     # Web Service Endpoint: Destroy Organisation API Session
     def destroy_session(self, session_id: str) -> bool:
@@ -56,7 +54,6 @@ class SquizzGatewayService:
         else:
             logger.debug("Could not destroy organisation API session")
             return False
-
 
     # Web Service Endpoint: Validate Organisation API Session
     def validate_session(self, session_id: str) -> bool:
@@ -71,10 +68,9 @@ class SquizzGatewayService:
         else:
             logger.debug("Could not validate organisation API session")
             return False
-    
 
     # Web Service Endpoint: Retrieve Organisation Data
-    def retrieve_organisation_data(self, data_type: int) -> Tuple[bool, Optional[list]]:
+    def retrieve_organisation_data(self, data_type: int, customer_code='TESTDEBTOR') -> Tuple[bool, Optional[list]]:
         assert(data_type == 3 or data_type == 8 or data_type == 37)
 
         session_id, _ = self.create_session()
@@ -82,7 +78,7 @@ class SquizzGatewayService:
             "session_id": session_id,
             "supplier_org_id": self.supplier_org_id,
             "data_type_id": data_type,
-            "customer_account_code": "TESTDEBTOR"  # Hardcoded customer account code for now
+            "customer_account_code": customer_code  # Default customer account code is TESTDEBTOR
         }
         
         response = self.requests.get("https://api.squizz.com/rest/1/org/retrieve_esd/" + session_id, params=params).json()
@@ -96,7 +92,6 @@ class SquizzGatewayService:
             return True, data
 
         return False, None
-
 
     # Web Service Endpoint: Purchase Submit API
     def submit_purchase(self, session_id, order_details) -> Tuple[bool, Optional[list]]:
