@@ -233,8 +233,8 @@
 ### 3.1 Retrieve product by product barcode
 
 - **Request** 
-    Send **GET** to `/api/barcode`
-    take **barcode** as parameter e.g. `/api/barcode?barcode=933044000895`
+    - Send **GET** to `/api/barcode`
+    - Take **barcode** as parameter e.g. `/api/barcode?barcode=933044000895`
 
 - **Response**
 
@@ -286,8 +286,8 @@
 
 - **Request** 
 
-    Send **GET** to `/api/product`
-    take **productCode** as parameter e.g. `/api/barcode?productCode=CFP-600-20`
+   - Send **GET** to `/api/product`
+   - Take **productCode** as parameter e.g. `/api/barcode?productCode=CFP-600-20`
 
 - **Response**
     ```JSON
@@ -338,45 +338,30 @@
 
 - **Request** 
 
-    Send **GET** to `/api/metadata/get`
-    take **productCode** as parameter e.g. `/api/metadata/get?productCode=CFP-600-12`
+    - Send **GET** to `/api/metadata/get`
+    - Take **productCode** as parameter e.g. `/api/metadata/get?productCode=CFP-600-12`
 
 - **Response**
     ```JSON
     {
     "found": "true",
     "json_data": {
-        "Description": "Radial Swirl Diffusers, Ceiling Fixed Pattern shall be Holyoake Model CFP-600/12.  Ceiling Radial Swirl Diffusers shall be designed for use in Variable Air Volume (VAV) systems with Highly Turbulent Radial  Air Flow Pattern and shall be suitable for ceiling heights of 2.4 to 4m. Ceiling Radial Swirl Diffusers shall maintain a COANDA effect at reduced air volumes and provide uniform temperature gradients throughout the occupied space. Diffusers shall be finished in powder coat and fitted with accessories and dampers where indicated as manufactured by Holyoake",
         "Diffuser Width (Length Millimeters)": "595.000000000000",
         "Flow Nom (Hvac Air Flow Liters Per Second)": "112.500000000000",
         "Holyoake Product Range": "Holyoake Swirl Diffusers.",
         "Inlet Spigot Diameter (Length Millimeters)": "250.000000000000",
         "Manufacturer": "Holyoake",
-        "Material - Face": "Holyoake White",
-        "Material Body": "Holyoake-Aluminium",
-        "Max Flow (Hvac Air Flow Liters Per Second)": "200.000000000000",
-        "Min Flow (Hvac Air Flow Liters Per Second)": "25.000000000000",
-        "Model": "CFP-600/12 Low Profile complete with low profile plenum.",
-        "Name": "CFP - 600/12 Swirl Diffusers  with  Low Profile Plenum 250 Spigot",
-        "Noise Level NC Max": "32NC",
-        "Noise Level NC Min": "5 NC",
-        "Plenum Box Height (Length Millimeters)": "250.000000000000",
-        "Plenum Box Width (Length Millimeters)": "570.000000000000",
-        "Static Pressure Max": "28 Pa",
-        "Static Pressure Min": "2 Pa",
-        "Type Comments": "Holyoake Swirl Diffuser CFP-600/12 c/w Low Profile Plenum.",
-        "URL": "http://www.holyoake.com",
-        "d_r (Length Millimeters)": "125.000000000000"
+       ...
     }
 }
     ```
     
 ### 3.4 Retrieve product from squizz api
-  **This is not a api that front end can assess.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.
-    This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database **
+  **This is not a api that front end can assess.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
+   **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
 - **Request** 
-    Before retrieve data from squizz api, you should log in first 
-    Send **GET** to `/retrieveProduct`
+    - Before retrieve data from squizz api, you should log in first 
+    - Send **GET** to `/retrieveProduct`
   
 - **Response**  
   ```JSON
@@ -390,7 +375,7 @@
   ```
   ### 3.5 Retrieve product price from squizz api
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
-  **This method is repsonbile for getting the latest price from SQUIZZ platform and updating the table in the local database **
+  **This method is repsonbile for getting the latest price from SQUIZZ platform and updating the table in the local database**
 - **Request** 
     Before retrieve data from squizz api, you should log in first 
     Send **GET** to `/retrievePrices`
@@ -407,10 +392,10 @@
   ```
   ### 3.6 Update product from squizz api
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
-  **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database **
+  **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
 - **Request** 
-    Before retrieve data from squizz api, you should log in first 
-    Send **GET** to `/updateProducts`
+   - Before retrieve data from squizz api, you should log in first 
+   - Send **GET** to `/updateProducts`
    
 - **Response**  
   ```JSON
@@ -424,7 +409,7 @@
   ```
   ### 3.7 Update product price from squizz api
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
-  **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database **
+  **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
 - **Request** 
     Before retrieve data from squizz api, you should log in first 
     Send **GET** to `/updateProducts`
@@ -441,17 +426,17 @@
   ```
   ### 3.8 import metadata
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
-  **This method is repsonbile for getting the latest  3d model's metadata **
+  **This method is repsonbile for getting the latest  3d model's metadata**
 - **Request** 
  
-    Send **POST** to `/updateProducts`
-    Header:
+   - Send **POST** to `/updateProducts`
+    - Request Header:
     ```JSON
     {"Content-Type":"application/json"}
     ```
-    request body:
+    - Request body:
     ``` JSON
-{
+        {
         "Username": "user1",
         "Password": "squizz",
         "Products": [
@@ -461,70 +446,14 @@
                     "Key": "Name",
                     "Value": "CFP - 600/12 Swirl Diffusers  with  Low Profile Plenum 250 Spigot"
                 }, {
-                    "Key": "URL",
-                    "Value": "http://www.holyoake.com"
-                }, {
-                    "Key": "Type Comments",
-                    "Value": "Holyoake Swirl Diffuser CFP-600/12 c/w Low Profile Plenum."
-                }, {
-                    "Key": "Static Pressure Min",
-                    "Value": "2 Pa"
-                }, {
-                    "Key": "Static Pressure Max",
-                    "Value": "28 Pa"
-                }, {
-                    "Key": "Noise Level NC Min",
-                    "Value": "5 NC"
-                }, {
-                    "Key": "Noise Level NC Max",
-                    "Value": "32NC"
-                }, {
-                    "Key": "Model",
-                    "Value": "CFP-600/12 Low Profile complete with low profile plenum."
-                }, {
-                    "Key": "Min Flow (Hvac Air Flow Liters Per Second)",
-                    "Value": "25.000000000000"
-                }, {
-                    "Key": "Max Flow (Hvac Air Flow Liters Per Second)",
-                    "Value": "200.000000000000"
-                }, {
-                    "Key": "Material Body",
-                    "Value": "Holyoake-Aluminium"
-                }, {
-                    "Key": "Material - Face",
-                    "Value": "Holyoake White"
-                }, {
-                    "Key": "Manufacturer",
-                    "Value": "Holyoake"
-                }, {
-                    "Key": "d_r (Length Millimeters)",
-                    "Value": "125.000000000000"
-                }, {
-                    "Key": "Inlet Spigot Diameter (Length Millimeters)",
-                    "Value": "250.000000000000"
-                }, {
-                    "Key": "Plenum Box Height (Length Millimeters)",
-                    "Value": "250.000000000000"
-                }, {
-                    "Key": "Holyoake Product Range",
-                    "Value": "Holyoake Swirl Diffusers."
-                }, {
-                    "Key": "Flow Nom (Hvac Air Flow Liters Per Second)",
-                    "Value": "112.500000000000"
-                }, {
-                    "Key": "Diffuser Width (Length Millimeters)",
-                    "Value": "595.000000000000"
-                }, {
-                    "Key": "Plenum Box Width (Length Millimeters)",
-                    "Value": "570.000000000000"
-                }, {
-                    "Key": "Description",
-                    "Value": "Radial Swirl Diffusers, Ceiling Fixed Pattern shall be Holyoake Model CFP-600/12.  Ceiling Radial Swirl Diffusers shall be designed for use in Variable Air Volume (VAV) systems with Highly Turbulent Radial  Air Flow Pattern and shall be suitable for ceiling heights of 2.4 to 4m. Ceiling Radial Swirl Diffusers shall maintain a COANDA effect at reduced air volumes and provide uniform temperature gradients throughout the occupied space. Diffusers shall be finished in powder coat and fitted with accessories and dampers where indicated as manufactured by Holyoake"
-                }]
+                  ...
+                },
+                ]
+            },{
+            ...
             }
-
-        ]
-    }
+          ]
+        }
     ```
 - **Response**  
   ```JSON
@@ -534,4 +463,95 @@
   }
   ```
 ## 4. Order API
-
+  ### 4.1： Make an order
+-  **Request**
+  - Send **POST** to `/api/purchase`
+  - Request Header:
+     ``` JSON
+     {"Content-Type": "application/json"}
+     ```
+    - Request Body:
+     ```JSON
+     {"lines":[
+         {            "barcode": "9326243001224",
+                      "depth": 0,
+                      "height": 0,
+                      "id": 5,
+                      "keyProductID": "21479231981826",
+                      "lineType": "PRODUCT",
+                      "price": 8.23,
+                      "priceTotalExTax": 8.23,
+                      "productCode": "01224",
+                      "productCondition": null,
+                      "productName": "Tarpaulin 240cm x 300cm (8' x 10')",
+                      "productSearchCode": null,
+                      "quantity": 1,
+                      "stockLowQuantity": 0,
+                      "stockQuantity": 0,
+                      "totalPrice": 8.23,
+                      "unitPrice": 8.23,
+                      "volume": 0,
+                      "weight": 0,
+                      "width": 0},{
+                      ...
+                      }
+          ],
+          "sessionKey":"785BC1EC135931064EC38E81A0D85952"
+        }
+        ```
+   **Response**:
+        ``` JSON
+          {
+          "data": {
+          "puchaseID": 35
+          },
+          "message": "Successfully inserted order and order details",
+          "status": "success"
+        }
+        
+        ```
+   ### 4.2 get history order
+- **Request** 
+  - Send **GET** to `/api/history`
+  - Take session_id as parameter e.g: `/api/history?session_id=785BC1EC135931064EC38E81A0D85952`
+  
+  - **Response**
+    ``` JSON
+    {
+    "message": "Successfully retrieved order history",
+    "orders": [
+        {
+            "billStatus": "SERVER_SUCCESS",
+            "id": 33,
+            "instructions": "Leave goods at the back entrance",
+            "isDropship": "N",
+            "lines": [
+                {
+                    "id": 30,
+                    "keyProductId": "CRA350",
+                    "orderId": 33,
+                    "productCode": "CRA350",
+                    "productId": 3504,
+                    "productName": "Circular Louvred Diffuser",
+                    "quantity": 1.00,
+                    "totalPrice": 29.99,
+                    "totalPriceExTax": 29.99,
+                    "totalPriceIncTax": null,
+                    "unitPrice": 29.99
+                },
+                {
+                ...
+                }
+            ],
+            "organizationId": 1,
+            "supplierOrganizationId": "11EAF2251136B090BB69B6800B5BCB6D"
+        },
+       {
+       ...
+       }
+    ],
+    "status": "success"
+}
+    ```
+    
+  
