@@ -158,7 +158,7 @@ class OrderResource(DatabaseBase):
             'status': "success",
             'message': "Successfully inserted order and order details",
             'data': {
-                'puchaseID': order.id
+                'purchaseID': order.id
             }
         }
         return result

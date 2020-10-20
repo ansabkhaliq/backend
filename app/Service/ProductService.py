@@ -64,7 +64,7 @@ def get_product_by_barcode(barcode) -> dict:
 
             result = {
                 'status': "success",
-                'message': "successfully retrieved product",
+                'Message': "successfully retrieved product",
                 'data': product_record.__dict__
             }
 
