@@ -335,7 +335,7 @@
   }
   ```
 
-  ### 3.3 Retrieve product metadata by product code
+### 3.3 Retrieve product metadata by product code
 
 - **Request** 
 
