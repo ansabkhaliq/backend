@@ -8,7 +8,10 @@ from flask import (
     jsonify,
     url_for
 )
+import logging
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 order = Blueprint('order', __name__)
 
 
@@ -16,6 +19,12 @@ order = Blueprint('order', __name__)
 def submit_purchase_order():
 
     data = request.get_json(silent=True)
+    if not (data.__contains__('sessionKey') and data.__contains__('lines')):
+        return jsonify({
+            'status': "failure",
+            'data': 'null',
+            'Message': "Invalid data"
+        })
     session_key = data['sessionKey']
     order_details = [OrderDetail(line) for line in data['lines']]
     return jsonify(order_service.submit_order(session_key, order_details))
