@@ -14,8 +14,6 @@ order = Blueprint('order', __name__)
 
 @order.route('/api/purchase', methods=['POST'])
 def submit_purchase_order():
-    if not authUtil.validate_login_session:
-        return redirect(url_for('auth.login'))
 
     data = request.get_json(silent=True)
     session_key = data['sessionKey']
@@ -25,8 +23,6 @@ def submit_purchase_order():
 
 @order.route('/api/history', methods=['GET', 'POST'])
 def retrieve_order_history():
-    if not authUtil.validate_login_session:
-        return redirect(url_for('auth.login'))
 
     session_id = request.args.get('session_id')
     return jsonify(order_service.get_order_history(session_id))

@@ -2,9 +2,16 @@ from app.Model.CateProd import CateProd
 from app.Model.Category import Category
 from app.Model.Price import Price
 from app.Resource.SimpleModelResource import SimpleModelResource as SR
-from app.Resource.ProductResource import ProductResource
-from app.Util import AuthUtil as authUtil
 from app.Model.Product import Product
+from app.Resource.ProductResource import ProductResource
+from app.Resource.UserResource import UserResource
+from app.Resource.ModelMetadataResource import ModelMetadataResource
+from app.Util import AuthUtil as authUtil
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def retrieve_products(customer_code="TESTDEBTOR") -> dict:
@@ -31,18 +38,16 @@ def retrieve_prices() -> dict:
         return product_resource.store_prices(price_list)
 
     return {
-        'status': 'error', 
+        'status': 'error',
         'data': None,
         'Message': 'Error while retrieving product prices data from server'
     }
 
 
 def get_product_by_barcode(barcode) -> dict:
-   
     # Get Product Details
     product_resource = ProductResource()
     product_record = product_resource.get_product_by_barcode(barcode)
-
 
     try:
         if product_record is not None:
@@ -52,7 +57,6 @@ def get_product_by_barcode(barcode) -> dict:
             # Converting Decimal to float (Python serializable)
             product_record['price'] = float(product_record['price'])
 
-
             # Packing data in the Model
             product_record = Product(product_record)
             if image_records is not None:
@@ -60,7 +64,7 @@ def get_product_by_barcode(barcode) -> dict:
 
             result = {
                 'status': "success",
-                'message': "successfully retrieved product",
+                'Message': "successfully retrieved product",
                 'data': product_record.__dict__
             }
 
@@ -81,11 +85,9 @@ def get_product_by_barcode(barcode) -> dict:
 
 
 def get_product_by_product_code(productCode) -> dict:
-
     # Get Product Details
     pr = ProductResource()
     product_record = pr.get_product_by_product_code(productCode)
-
 
     try:
         if product_record is not None:
@@ -95,12 +97,11 @@ def get_product_by_product_code(productCode) -> dict:
             # Converting Decimal to float (Python serializable)
             product_record['price'] = float(product_record['price'])
 
-
             # Packing data in the Model
             product_record = Product(product_record)
             if image_records is not None:
                 product_record.imageList = image_records
-            
+
             result = {
                 'status': "success",
                 'message': "successfully retrieved product",
@@ -137,7 +138,7 @@ def update_products() -> dict:
 
     if success:
         return product_resource.update_products(product_list)
-    
+
     return {
         'status': 'error',
         'data': None,
@@ -159,6 +160,62 @@ def update_prices(customer_code='TESTDEBTOR') -> dict:
         'data': None,
         'Message': "Error while retrieving product price from SQUIZZ server"
     }
+
+
+def import_metadata(data) -> dict:
+    username = data['Username']
+    password = data['Password']
+    try:
+        user_resource = UserResource()
+        org_id = user_resource.validate_username_password(username, password)
+    except AttributeError:
+        return {'status': "failure", "message": "LOGIN_ERROR"}
+
+    if org_id is None:
+        # wrong username or password
+        return {'status': "failure", "message": "LOGIN_ERROR"}
+    product_list = data['Products']
+    errormessage = ""
+    for product in product_list:
+        code = product['Code']
+        product_resource = ProductResource()
+        product_id = product_resource.get_product_id_by_product_code(code)
+        if product_id is None:
+            errormessage += '"' + code + '" '
+            continue
+        model_metadata_resource = ModelMetadataResource()
+        res = model_metadata_resource.get_metadata_by_product_code(code)
+        json_dict = {}
+        for element in product['ProductParameters']:
+            json_dict[element['Key']] = element['Value']
+        json_string = json.dumps(json_dict)
+        json_string.replace('\'', '\"')
+
+        if res is not None:
+            status_code = model_metadata_resource.update_metadata(code, str(json_string))
+            if status_code == 0:
+                errormessage += '\"' + code + '\" '
+            continue
+        status_code = model_metadata_resource.insert_metadata(product_id, code, str(json_string))
+        if status_code == 0:
+            errormessage += '\"' + code + '\" '
+            continue
+    if errormessage == "":
+        return {"status": "success", "message": "import success"}
+    else:
+        return {"status": "partial success",
+                "message": "product code with " + errormessage + "failed to upload, please check the product code or "
+                                                                 "try again"}
+
+
+def get_metadata_by_product_code(productCode) -> dict:
+    model_metadata_resource = ModelMetadataResource()
+    result = model_metadata_resource.get_metadata_by_product_code(productCode)
+    if result is None:
+        return {"found": "false"}
+    meta_json = str(result['meta_json_string'])
+
+    return {"found": "true", "json_data": json.loads(meta_json)}
 
 
 def restore_category():
