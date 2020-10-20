@@ -1,6 +1,6 @@
-import os, json
 from flask import Flask
 from flask_session import Session
+
 
 # For more information on Flask application factories:
 # https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/
@@ -12,27 +12,14 @@ from werkzeug.exceptions import HTTPException
 
 sess = Session()
 
-
 def create_app(test_config=None):
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
+    app.secret_key = '95011002f30bbbb7226e1af0d33f06c4ffff34f07d254efe'
+    app.config['SESSION_TYPE'] = 'filesystem'
     
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_pyfile(test_config)
-    
-    # Ensure the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
     sess.init_app(app)
 
     # Blueprint for auth routes in our app
-
     from app.Controller import UserController as auth_blueprint
     app.register_blueprint(auth_blueprint.user)
 
