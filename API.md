@@ -466,8 +466,8 @@
 ## 4. Order API
   ### 4.1： Make an order
 -  **Request**
-  - Send **POST** to `/api/purchase`
-  - Request Header:
+    - Send **POST** to `/api/purchase`
+    - Request Header:
      ```JSON
      {"Content-Type": "application/json"}
      ```
@@ -516,7 +516,7 @@
   - Send **GET** to `/api/history`
   - Take session_id as parameter e.g: `/api/history?session_id=785BC1EC135931064EC38E81A0D85952`
   
-  - **Response**
+- **Response**
     ```JSON
     {
     "message": "Successfully retrieved order history",
