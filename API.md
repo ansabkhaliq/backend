@@ -436,7 +436,7 @@
     {"Content-Type":"application/json"}
     ```
     - Request body:
-    ``` JSON
+    ```JSON
         {
         "Username": "user1",
         "Password": "squizz",
@@ -468,7 +468,7 @@
 -  **Request**
   - Send **POST** to `/api/purchase`
   - Request Header:
-     ``` JSON
+     ```JSON
      {"Content-Type": "application/json"}
      ```
     - Request Body:
@@ -500,23 +500,24 @@
           "sessionKey":"785BC1EC135931064EC38E81A0D85952"
         }
         ```
-   **Response:**
-        ``` JSON
-          {
-          "data": {
-          "puchaseID": 35
-          },
-          "message": "Successfully inserted order and order details",
-          "status": "success"
-        }
-        ```
+- **Response**  
+  ```JSON
+  {
+    "data": {
+    "puchaseID": 35
+    },
+    "message": "Successfully inserted order and order details",
+    "status": "success"
+  }
+  ```
+
    ### 4.2 get history order
 - **Request** 
   - Send **GET** to `/api/history`
   - Take session_id as parameter e.g: `/api/history?session_id=785BC1EC135931064EC38E81A0D85952`
   
   - **Response**
-    ``` JSON
+    ```JSON
     {
     "message": "Successfully retrieved order history",
     "orders": [
@@ -551,7 +552,7 @@
        }
     ],
     "status": "success"
-}
+    }
     ```
     
   
