@@ -178,12 +178,16 @@ class ProductResource(DatabaseBase):
             return None
         return product_record[0]['id']
 
-    def get_product_images_by_id(self, id):
+    def search_product_id_by_product_code(self, productCode):
+        search_query = """SELECT id 
+                          FROM products
+                          WHERE productCode like %s"""
+        values = '%' + productCode + '%'
+        product_record = self.run_query(search_query, values, False)
+        if product_record is None:
+            return None
+        return product_record
 
-        search_image_query = """Select * From images where productId = %s """
-        values = [id]
-        image_records = self.run_query(search_image_query, values, False)
-        return image_records
 
     # This method is used to update the products that are stored in the database. Updated product infromation is fetched
     # from the SQUIZZ API.

@@ -52,6 +52,27 @@ class DatabaseBase:
             self.connection.close()
             raise e
 
+    def run_query_many(self, query: str, values: list, commit: bool = False):
+        """
+        Runs an SQL query against the MySQL database and returns the result
+
+        Args:
+            query: a MySQL query string
+            values: a list of values for the query
+            commit: indicates whether to commit after execution
+        """
+        while not self.connection.open:
+            self.connection.ping(reconnect=True)
+            logger.info("Reconnecting to the database")
+        try:
+            self.cursor.executemany(query, values)
+            if commit:
+                self.connection.commit()
+            return None if not self.cursor.rowcount else self.cursor.fetchall()
+        except Exception as e:
+            logger.error("Could not execute the query %s", str(e))
+            self.connection.close()
+            raise e
     # TODO to be finalized and tested
     # def run_as_transaction(self, queries: list):
     #     """

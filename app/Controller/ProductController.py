@@ -19,12 +19,10 @@ def get_barcode_product():
     return jsonify(product_service.get_product_by_barcode(barcode))
 
 
-
 # Example of the API call
 # http://127.0.0.1:3000/api/product?sessionKey=8A96E4EF6C4C9ECC4938A7DB816346DC&productCode=01248
 @product.route('/api/product', methods=['GET'])
 def get_product_by_id():
-
     productCode = request.args.get('productCode')
     return jsonify(product_service.get_product_by_product_code(productCode))
 
@@ -51,7 +49,7 @@ def retrieve_prices():
 @product.route('/updateProducts', methods=['GET'])
 def update_products():
     return jsonify(product_service.update_products())
-    
+
 
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
@@ -60,12 +58,20 @@ def update_products():
 def update_product_price():
     return jsonify(product_service.update_prices())
 
-@product.route('/metadata/import',methods=['POST'])
+
+@product.route('/metadata/import', methods=['POST'])
 def import_metadata():
     data = request.get_json(silent=True)
     return jsonify(product_service.import_metadata(data))
 
-@product.route('/api/metadata/get',methods=['GET'])
+
+@product.route('/threedmodel/import', methods=['POST'])
+def import_threedmodel():
+    data = request.get_json(silent=True)
+    return jsonify(product_service.import_threedmodel(data))
+
+
+@product.route('/api/metadata/get', methods=['GET'])
 def get_metadata_by_product_code():
     productCode = request.args.get('productCode')
     return jsonify(product_service.get_metadata_by_product_code(productCode))
