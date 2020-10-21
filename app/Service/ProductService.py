@@ -7,6 +7,7 @@ from app.Resource.ProductResource import ProductResource
 from app.Resource.UserResource import UserResource
 from app.Resource.ModelMetadataResource import ModelMetadataResource
 from app.Util import AuthUtil as authUtil
+from app.Resource.ImageResource import ImageResource
 import json
 import logging
 
@@ -125,8 +126,8 @@ def get_product_by_product_code(productCode) -> dict:
 
 
 def get_product_images(id) -> dict:
-    product_resource = ProductResource()
-    image_records = product_resource.get_product_images_by_id(id)
+    image_resource = ImageResource()
+    image_records = image_resource.get_product_images_by_id(id)
     return image_records
 
 
@@ -201,11 +202,57 @@ def import_metadata(data) -> dict:
             errormessage += '\"' + code + '\" '
             continue
     if errormessage == "":
-        return {"status": "success", "message": "import success"}
+        return {"status": "success", "message": "metadata was imported successfully"}
     else:
         return {"status": "partial success",
                 "message": "product code with " + errormessage + "failed to upload, please check the product code or "
                                                                  "try again"}
+
+
+def import_threedmodel(data) -> dict:
+    username = data['Username']
+    password = data['Password']
+    try:
+        user_resource = UserResource()
+        org_id = user_resource.validate_username_password(username, password)
+    except AttributeError:
+        return {'status': "failure", "message": "LOGIN_ERROR"}
+
+    if org_id is None:
+        # wrong username or password
+        return {'status': "failure", "message": "LOGIN_ERROR"}
+    product_list = data['Products']
+    errormessage = ""
+    # for each product
+    for product in product_list:
+        # check if the product exist
+        code = product['Code']
+        product_resource = ProductResource()
+        product_id_list = product_resource.search_product_id_by_product_code(code)
+        if product_id_list.__sizeof__() == 0:
+            errormessage += "\"" + code + "\" "
+            continue
+        # make a list of id, get one URl link check if the record exist in image
+        id_list = []
+        url = product['ModelURL']
+        for product_id in product_id_list:
+            id_list.append(product_id['id'])
+        image_resource = ImageResource()
+        record = image_resource.get_threed_link_by_product_id(id_list[0])
+        if record is None:
+            status_code = image_resource.insert_threed_model(url, id_list)
+            if status_code == 0:
+                errormessage += "\"" + code + "\" "
+            continue
+        else:
+            link = record['threeDModelLocation']
+            if link is None or link != url:
+                image_resource.update_threed_link(url, id_list)
+    if errormessage == "":
+        return {'status': "success", "message": "3d model have been imported successfully"}
+    else:
+        return {'status': "partial success",
+                    "message": "product code contains:" + errormessage + " failed to import ,please check product code or import again"}
 
 
 def get_metadata_by_product_code(productCode) -> dict:
