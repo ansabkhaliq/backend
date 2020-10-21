@@ -212,10 +212,10 @@ def get_metadata_by_product_code(productCode) -> dict:
     model_metadata_resource = ModelMetadataResource()
     result = model_metadata_resource.get_metadata_by_product_code(productCode)
     if result is None:
-        return {"found": "false"}
+        return {"found": False}
     meta_json = str(result['meta_json_string'])
 
-    return {"found": "true", "json_data": json.loads(meta_json)}
+    return {"found": True, "json_data": json.loads(meta_json)}
 
 
 def restore_category():
