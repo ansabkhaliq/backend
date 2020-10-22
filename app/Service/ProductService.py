@@ -189,6 +189,8 @@ def restore_category():
                 continue
             print(category.keyProductIDs)
             for productKey in category.keyProductIDs:
+                if productKey not in prod_key_id:
+                    continue
                 cate_prod_rel = CateProd({'categoryId': category.id, 'productId': prod_key_id[productKey]})
                 sr.insert(cate_prod_rel, commit=False)
 

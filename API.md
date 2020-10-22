@@ -335,6 +335,10 @@ The APIs having 'page' parameter support paging, in all those APIs, page is an o
 
 ## 3. Product API
 
+### 3.0 Sync Data from Squizz
+
+#### Sync Categories
+
 ### 3.1 List Products
 
 - **Request**
