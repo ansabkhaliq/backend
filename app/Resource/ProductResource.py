@@ -343,3 +343,25 @@ class ProductResource(DatabaseBase):
             },
         }
         return result
+
+
+
+    def search_products(self, identifier, identifierType):
+        """
+        Retrieves a list of product codes (or barcodes) from the database
+        that are syntactially similar to the given identifier
+
+        Args:
+            identifier: a potential product code or barcode
+            identifierType: 'barcode' or 'productCode'
+        Returns:
+            list of similar 'identifiers'
+        """
+
+        query = f"SELECT {identifierType} FROM products WHERE {identifierType} LIKE '{identifier + '%'}'"
+        logger.debug(query)
+        similar = self.run_query(query, None, False)
+        
+        return None if not similar else similar
+
+             
