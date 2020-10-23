@@ -124,6 +124,38 @@ def get_product_by_product_code(productCode) -> dict:
     return result
 
 
+def search_products(identifier, identifierType):
+    """
+    Takes an identifier value and returns the product codes or barcodes
+    of products in the database that are similar to the identifier
+
+    Args:
+        identifier: a potential product code or barcode
+        identifierType: 'barcode' or 'productCode'
+
+    Returns:
+        JSON object including a list of similar identifiers, or no identifiers, if none were found
+    """
+
+    product_resource = ProductResource()
+    product_identifiers = product_resource.search_products(identifier, identifierType)
+    
+    if not product_identifiers:
+        result = {
+            'status': 'error',
+            'identifiers': None,
+            'message': 'No barcodes or product codes match the given identifier'
+        }
+    else:
+        result = {
+            'status': 'success',
+            'identifiers': product_identifiers,
+            'message': 'Successfully retrieved similar barcodes or product codes'
+        }
+
+    return result
+
+
 def get_product_images(id) -> dict:
     product_resource = ProductResource()
     image_records = product_resource.get_product_images_by_id(id)

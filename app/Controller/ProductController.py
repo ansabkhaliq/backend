@@ -28,6 +28,16 @@ def get_product_by_id():
     productCode = request.args.get('productCode')
     return jsonify(product_service.get_product_by_product_code(productCode))
 
+# Example of the API call
+# http://localhost:3000/api/products/search?identifier=CFP&identifierType=productCode
+@product.route('/api/products/search', methods=['GET'])
+def search_products():
+    identifier = request.args.get('identifier')
+    identifierType = request.args.get('identifierType')
+    
+    return jsonify(product_service.search_products(identifier, identifierType))
+    
+
 
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
