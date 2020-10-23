@@ -362,17 +362,21 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
     - Send **GET** to `/api/products/search`
     - Take **identifier** and **identifierType** as parameters, where `identifierType` is either `barcode` or `productCode`
     
-      e.g. `/api/products/search?identifier=CFP&identifierType=productCode`
+      e.g. `/api/products/search?identifier=CFP-600-12&identifierType=productCode`
 
 - **Response**
   ```JSON
   {
     "identifiers": [
         {
-            "productCode": "CFP450/12"
+            "productCode": "CFP-600-12-LPP-150"
         },
         {
-            "productCode": "CFP600/24"
+            "productCode": "CFP-600-12-LPP-200"
+        },
+        ...
+        {
+            "productCode": "CFP-600-12-LPP-250"
         }
     ],
     "message": "Successfully retrieved similar barcodes or product codes",
