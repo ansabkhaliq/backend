@@ -344,7 +344,7 @@
 - **Response**
     ```JSON
     {
-    "found": "true",
+    "found": true,
     "json_data": {
         "Diffuser Width (Length Millimeters)": "595.000000000000",
         "Flow Nom (Hvac Air Flow Liters Per Second)": "112.500000000000",

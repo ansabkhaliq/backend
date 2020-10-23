@@ -25,6 +25,7 @@ class Product(Model):
         self.kitProductsSetPrice = None
         self.name = None
         self.productCode = None
+        self.productName = None
         self.productSearchCode = None
         self.averageCost = None
         self.drop = None

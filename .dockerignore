@@ -1,0 +1,13 @@
+.idea
+.vscode
+db
+E-R
+flask_session
+instance
+jenkins
+SampleJsonPayLoads
+.gitattributes
+.gitignore
+*.md
+LICENSE
+__pycache__
