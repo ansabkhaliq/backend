@@ -1,8 +1,6 @@
 import logging
 import datetime
-
 import math
-
 from app import config
 from app.Exception.exceptions import OtherException, PaginationError
 from app.Resource.DatabaseBase import DatabaseBase
@@ -91,7 +89,7 @@ class ProductResource(DatabaseBase):
             'message': "successfully stored products",
             'data': {
                 'failed': failed_to_store
-            }, 
+            },
         }
 
         return result
@@ -119,7 +117,8 @@ class ProductResource(DatabaseBase):
             try:
                 product_record = self.run_query(search_query, price.keyProductID, False)
             except Exception as e:
-                logger.error('Exception occurred when searching for product record in store_product_level method. %s', e)
+                logger.error('Exception occurred when searching for product record in store_product_level method. %s',
+                             e)
 
             if product_record is not None:
                 # Since we already checked the existence of the product, we could do the insertion.
@@ -170,7 +169,27 @@ class ProductResource(DatabaseBase):
         if product_record is None:
             return None
         return product_record[0]
-        
+
+    def get_product_id_by_product_code(self, productCode):
+        search_query = """SELECT id 
+                          FROM products
+                          WHERE productCode = %s"""
+        values = [productCode]
+        product_record = self.run_query(search_query, values, False)
+        logger.debug(product_record)
+        if product_record is None:
+            return None
+        return product_record[0]['id']
+
+    def search_product_id_by_product_code(self, productCode):
+        search_query = """SELECT id 
+                          FROM products
+                          WHERE productCode like %s"""
+        values = '%' + productCode + '%'
+        product_record = self.run_query(search_query, values, False)
+        if product_record is None:
+            return None
+        return product_record
 
     def get_product_images_by_id(self, productId):
         if isinstance(productId, list):
@@ -269,12 +288,13 @@ class ProductResource(DatabaseBase):
                     self.connection.rollback()
                     logger.error('Exception occurred when updating product table', e)
                     value_not_inserted += 1
-                    failed_to_store.append(product.keyProductID + " error:" + " error occurred while updating: " + str(e))
+                    failed_to_store.append(
+                        product.keyProductID + " error:" + " error occurred while updating: " + str(e))
 
         self.connection.close()
         logger.info('This is the value updated: %d' % value_inserted)
         logger.info('This is the value not updated: %d' % value_not_inserted)
-        result = {'status': "success", 'data': {'failed':failed_to_store}, 'message': "successfully updated products"}
+        result = {'status': "success", 'data': {'failed': failed_to_store}, 'message': "successfully updated products"}
         logger.info('Successfully synchronized latest products data from the SQUIZZ API')
         return result
 
@@ -325,7 +345,7 @@ class ProductResource(DatabaseBase):
             except Exception as e:
                 logger.error('Exception occurred when search price in price_level', e)
                 failed_to_store.append(price.keyProductID + "error:" + "failed to update price")
-                
+
         logger.info("Successfully updated 'price_level' table")
         result = {
             'status': "success",
@@ -335,6 +355,28 @@ class ProductResource(DatabaseBase):
             },
         }
         return result
+
+
+
+    def search_products(self, identifier, identifierType):
+        """
+        Retrieves a list of product codes (or barcodes) from the database
+        that are syntactially similar to the given identifier
+
+        Args:
+            identifier: a potential product code or barcode
+            identifierType: 'barcode' or 'productCode'
+        Returns:
+            list of similar 'identifiers'
+        """
+
+        query = f"SELECT {identifierType} FROM products WHERE {identifierType} LIKE '{identifier + '%'}'"
+        logger.debug(query)
+        similar = self.run_query(query, None, False)
+
+        return None if not similar else similar
+
+
 
     def list_products_by_category(self, category_id, page=None, page_size=None):
         count = 0
