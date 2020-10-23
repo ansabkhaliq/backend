@@ -92,6 +92,21 @@ def get_customer(customer_id):
     return cs.get_one_customer(customer_id).json(), 200
 
 
+@cust.route('/api/customer/<customer_id>', methods=['PUT'])
+def update_customer(customer_id):
+    data = request.get_json()
+    if 'id' in data:
+        del data['id']
+
+    customer = cs.get_one_customer(customer_id)
+    for key, value in data.items():
+        if key in customer.__dict__:
+            customer.__dict__[key] = value
+
+    cs.update_customer(customer)
+    return customer.json(), 200
+
+
 @cust.route('/api/customer/<customer_id>', methods=['DELETE'])
 def del_customer(customer_id):
     cs.delete_customer(customer_id)
@@ -127,6 +142,24 @@ def create_address(customer_id):
 def list_addresses(customer_id):
     cust_addresses = cs.list_customer_addresses(customer_id)
     return jsonify([addr.__dict__ for addr in cust_addresses]), 200
+
+
+@cust.route('/api/customer/<customer_id>/addresses/<address_id>', methods=['PUT'])
+def update_address(customer_id, address_id):
+    data = request.get_json()
+    if 'id' in data:
+        del data['id']
+
+    if 'customer_id' in data:
+        del data['customer_id']
+
+    address = cs.get_one_address(customer_id, address_id)
+    for key, value in data.items():
+        if key in address.__dict__:
+            address.__dict__[key] = value
+
+    cs.update_address(address)
+    return address.json(), 200
 
 
 @cust.route('/api/customer/<customer_id>/address/<address_id>', methods=['DELETE'])

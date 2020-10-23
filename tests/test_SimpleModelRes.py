@@ -90,6 +90,7 @@ def test_update():
 
     assert updated_customer.title == 'Mrs'
     assert updated_customer.customer_code == 'TestNew'
+    assert updated_customer.phone == '0123456789'
     with pytest.raises(NotFound):
         SR().get_one_by_id(C(pk=0))
 

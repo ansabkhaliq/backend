@@ -162,7 +162,39 @@ The APIs having 'page' parameter support paging
   - **200: OK**
   - **404: Customer Not Found**
 
-### 1.4 Delete Customer
+### 1.4 Update Customer
+
+- **Request**
+
+  Send **PUT** to `/api/customer/<customer_id>`
+
+  ```json
+  // Example PUT /api/customer/11
+  {
+      "first_name": "Petra",
+      "title": "Mrs"
+  }
+  ```
+
+- **Response**
+
+  ```json
+  {
+      "id": 11,
+      "customer_code": "ALLUNEED",
+      "title": "Mrs",
+      "first_name": "Petra",
+      "last_name": "S",
+      "phone": "0123456789",
+      "email": "233456@123.com",
+      "nationality_code": "AUS",
+      "organization_desc": "holySAS"
+  }
+  ```
+
+  
+
+### 1.5 Delete Customer
 
 - **Request**
 
@@ -181,7 +213,7 @@ The APIs having 'page' parameter support paging
   - **200: OK**
   - **404: Customer Not Found**
 
-### 1.5 Switch Customer
+### 1.6 Switch Customer
 
 - POST current customer **(Slow API approx 10 seconds)**
 
@@ -205,7 +237,7 @@ The APIs having 'page' parameter support paging
     - **404: Customer Code does not exist or match any customers**
     - **400: Bad request lack of customer_code**
 
-### 1.6 List Addresses
+### 1.7 List Addresses
 
 - **Request**
 
@@ -238,7 +270,7 @@ The APIs having 'page' parameter support paging
   - **200: OK**
   - **404: Customer Not Found**
 
-### 1.7 Create Address
+### 1.8 Create Address
 
 - **Request**
 
@@ -278,7 +310,59 @@ The APIs having 'page' parameter support paging
   - **201: Create Address for customer successful**
   - **404: Customer Not Found**
 
+### 1.9 Update Address
 
+- **Request**
+
+  Send **PUT** to `/api/customer/<customer_id>/address/<address_id>`
+
+  ```json
+  // Example PUT /api/customer/11/address/22
+  {
+      "postcode": "QLD1111",
+      "email": "petra2333@gmail.com"
+  }
+  ```
+
+- **Response**
+
+  ```json
+  {
+      "id": 22,
+      "customer_id": 11,
+      "contact": "9876541230",
+      "organization": null,
+      "email": "petra2333@gmail.com",
+      "fax": null,
+      "address_line1": "No.12",
+      "address_line2": "Murry St, Xet, QLD",
+      "address_line3": null,
+      "postcode": "QLD1111",
+      "region": "QLD",
+      "country": "Australia"
+  }
+  ```
+
+### 1.10 Delete Address
+
+- **Request**
+
+  Send **DELETE** to `/api/customer/<customer_id>/address/<address_id>`
+
+  Example `/api/customer/14/address/39`
+
+- **Response**
+
+  ```json
+  {
+      "message": "Address 39 deleted"
+  }
+  ```
+
+- **Status Code**
+
+  - **200: OK**
+  - **404: Customer or Address Not Found**
 
 ## 2. Category API
 

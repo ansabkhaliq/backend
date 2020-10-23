@@ -36,7 +36,7 @@ class Model:
                         self.__dict__[key] = self.__dict__[key].rstrip()
 
         elif pk is not None:
-            self.id = pk
+            self.id = int(pk)
 
         else:
             return

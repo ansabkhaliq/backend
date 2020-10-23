@@ -43,6 +43,10 @@ def create_customer(customer, address=None):
         create_customer_with_address(customer, address)
 
 
+def update_customer(customer):
+    SR().update(customer)
+
+
 def delete_customer(customer_id):
     SR().delete(Customer(pk=customer_id))
 
@@ -76,6 +80,14 @@ def create_customer_address(customer_id, address):
 
 
 def delete_address(customer_id, address_id):
-    address = Address(pk=address_id)
-    address.customer_id = customer_id
+    address = SR().find_one(Address({'id': address_id, 'customer_id': customer_id}))
     SR().delete(address)
+
+
+def get_one_address(customer_id, address_id):
+    addr = SR().find_one(Address({'id': address_id, 'customer_id': customer_id}))
+    return addr
+
+
+def update_address(address):
+    SR().update(address)
