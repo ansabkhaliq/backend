@@ -2,7 +2,7 @@
 
 ## 0. Pagination
 
-The APIs having 'page' parameter support paging, in all those APIs, page is an optional parameter. If
+The APIs having 'page' parameter support paging
 
 -  **200 Response**
 
@@ -339,6 +339,21 @@ The APIs having 'page' parameter support paging, in all those APIs, page is an o
 
 #### Sync Categories
 
+- **Request**
+
+  Send **GET** to `/updateCategories`
+
+- **Response**
+
+  ```json
+  {
+      "message": "Category data Updated",
+      "status": "Success"
+  }
+  ```
+
+  
+
 ### 3.1 List Products
 
 - **Request**
@@ -347,52 +362,39 @@ The APIs having 'page' parameter support paging, in all those APIs, page is an o
 
   | Params | Description                           | Example   | Optional |
   | ------ | ------------------------------------- | --------- | -------- |
-  | page   | Pagination, page size = 20            | page=1    | T        |
+  | page   | Pagination, page size = 20            | page=1    | F        |
   | cate   | Retrieve product in specific category | cate=2079 | T        |
   |        |                                       |           |          |
 
 - **Response**
 
   ```json
-  [
-      {
-          "averageCost": null,
-          "barcode": "9326243178476",
-          "barcodeInner": "5040.000000",
-          "brand": null,
-          "categoryList": null,
-          "depth": 0.0,
-          "description1": "Bandage Self Adhesive",
-          "description2": "29-12-2020",
-          "description3": null,
-          "description4": null,
-          "drop": null,
-          "height": 12.0,
-          "id": 749,
-          "imageList": null,
-          "internalID": "11EAF25670585D9DA1626AF3476460FC",
-          "isKitted": "N",
-          "isPriceTaxInclusive": "N",
-          "keyProductID": "21479232456673",
-          "keySellUnitID": "1",
-          "keyTaxcodeID": "34333235303332303734313136",
-          "kitProductsSetPrice": "N",
-          "name": "Bandage Self Adhesive",
-          "packQuantity": null,
-          "priceList": null,
-          "productCode": "178476",
-          "productCondition": null,
-          "productSearchCode": "Bandage-Self-Adhesive-21479232456673",
-          "sellUnits": null,
-          "sellUnitsIdList": null,
-          "stockLowQuantity": 144.0,
-          "stockQuantity": 4124.0,
-          "supplierOrganizationId": "11EAF2251136B090BB69B6800B5BCB6D",
-          "volume": 0.0,
-          "weight": 0.0,
-          "width": 144.0
-      },
-  ]
+  {
+      "items": [
+          {
+              "barcode": "9326243152575",
+              "id": 372,
+              "image": "https://attachments....",
+              "name": "Book Sudoku 96pg A4",
+              "price": 0.86,
+              "productCode": "152575"
+          },
+          {
+              "barcode": "9326243170319",
+              "id": 566,
+              "image": null,
+              "name": "Book Sudoku 496pg A5",
+              "price": 3.08,
+              "productCode": "170319"
+          },{
+              ...
+          }
+      ],
+      "page_items": 14,
+      "page_num": 1,
+      "total_items": 14,
+      "total_pages": 1
+  }
   ```
 
 ### 3.2 Get Product

@@ -342,7 +342,9 @@ class ProductResource(DatabaseBase):
             paging_str = ''
         else:
             paging_str = f'LIMIT {(page - 1) * page_size}, {page_size}'
-            count_query = f'SELECT COUNT(*) as count FROM categoryproducts WHERE categoryId = {category_id}'
+            count_query = f'SELECT COUNT(*) as count FROM categoryproducts '
+            if category_id is not None:
+                count_query += f'WHERE categoryId = {category_id} '
             count = self.run_query(count_query, [], False)[0]['count']
             total_pages = math.ceil(count / page_size)
             if total_pages == 0:
@@ -350,20 +352,26 @@ class ProductResource(DatabaseBase):
             if page > total_pages or page < 1:
                 raise PaginationError()
 
-        prod_query = f'SELECT products.*, prices.price FROM products \
-        JOIN prices ON products.id = prices.productId WHERE products.id IN (\
-        SELECT productId FROM categoryproducts WHERE categoryId = {category_id}\
-        ) {paging_str}'
+        if category_id is None:
+            prod_query = f'SELECT products.*, images.smallImageLocation as image FROM products\
+                        LEFT JOIN images ON products.id = images.productId {paging_str}'
+        else:
+            prod_query = f'SELECT products.*, images.smallImageLocation as image FROM products\
+                        LEFT JOIN images ON products.id = images.productId\
+                        WHERE products.id IN (\
+	                    SELECT productId FROM categoryproducts WHERE categoryId = {category_id}\
+                        ) {paging_str}'
 
         try:
             products = self.run_query(prod_query, [], False)
             products = [] if products is None else products
             items = []
             for p in products:
-                price = float(p['price'])
-                del p['price']
+                image = p['image']
+                image = None if image == '' else image
+                del p['image']
                 model = SR.to_model(Product, p)
-                model.price = price
+                model.image = image
                 items.append(model)
             if page is None:
                 return items
@@ -379,5 +387,29 @@ class ProductResource(DatabaseBase):
             # raise e
             raise OtherException(Product())
 
-    def list_products(self, page, page_size):
+    def append_prices_to_product(self, products: list):
+        """
+        Retrieve prices for products by product id
+        Notices: Some of the products have 2 prices, pick the "Contract" price
+                    where the referenceType is "C"
+
+        :param products: list of products
+        :return: None
+        """
+        product_ids = ','.join([str(p.id) for p in products])
+        query = f'SELECT productId, price, referenceType FROM prices \
+                    WHERE productId IN ({product_ids})\
+                    ORDER BY referenceType DESC'
+
+        try:
+            prices = self.run_query(query, [], False)
+            price_dict = {}
+            for price in prices:
+                if price['productId'] not in price_dict:
+                    price_dict[price['productId']] = float(price['price'])
+
+            for product in products:
+                product.price = price_dict.get(product.id, None)
+        except Exception as e:
+            logger.error('Exception occurred when retrieving prices for products %s', e)
         pass

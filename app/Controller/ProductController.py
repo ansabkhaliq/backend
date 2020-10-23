@@ -98,7 +98,7 @@ def list_categories():
 
 
 @product.route('/api/products', methods=['GET'])
-def list_products():
+def list_products_with_pagination():
     params = request.args
     category_id = params.get('cate')
     page = params.get('page')
@@ -107,13 +107,11 @@ def list_products():
 
     if page is not None:
         page = int(page)
+    else:
+        page = 1
 
-    # TODO no price info for retrieving products without category
     ret_set = product_service.list_all_products(category_id, page)
 
-    if page is None:
-        return jsonify([prod.__dict__ for prod in ret_set]), 200
-    else:
-        items = [item.__dict__ for item in ret_set['items']]
-        ret_set['items'] = items
-        return jsonify(ret_set), 200
+    items = [prod.basic_dict() for prod in ret_set['items']]
+    ret_set['items'] = items
+    return jsonify(ret_set), 200

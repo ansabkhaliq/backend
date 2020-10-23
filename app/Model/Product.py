@@ -39,6 +39,7 @@ class Product(Model):
         self.imageList = None  # List to store the images associated with the product
         self.supplierOrganizationId = None
         self.price = None
+        self.image = None
         super().__init__(json, pk)
 
     @staticmethod
@@ -84,4 +85,14 @@ class Product(Model):
             'stockLowQuantity': 'stockLowQuantity',
             'stockQuantity': 'stockQuantity',
             'supplierOrganizationId': 'supplierOrganizationId'
+        }
+
+    def basic_dict(self):
+        return {
+            'id': self.id,
+            'barcode': self.barcode,
+            'name': self.name,
+            'productCode': self.productCode,
+            'price': self.price,
+            'image': self.image
         }

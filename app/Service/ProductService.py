@@ -265,8 +265,9 @@ def list_all_categories():
     return p_cate_list, c_cate_dict
 
 
-def list_all_products(category_id=None, page=None, page_size=20):
-    if category_id is None:
-        return SR().list_all(Product, page=page)
-    else:
-        return ProductResource().list_products_by_category(category_id, page, page_size)
+def list_all_products(category_id=None, page=1, page_size=20):
+    # List products
+    result = ProductResource().list_products_by_category(category_id, page, page_size)
+    # set product price
+    ProductResource().append_prices_to_product(result['items'])
+    return result
