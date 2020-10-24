@@ -367,6 +367,8 @@ def restore_prices(customer_code="TESTDEBTOR"):
 
         # Rewrite prices
         for price in prices:
+            if price.keyProductID not in prod_key_id:
+                continue
             price.productId = prod_key_id[price.keyProductID]
             sr.insert(price, False)
 

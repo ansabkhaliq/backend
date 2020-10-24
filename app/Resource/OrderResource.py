@@ -22,7 +22,6 @@ class OrderResource(DatabaseBase):
     def __init__(self):
         super().__init__()
 
-
     def store_purchase(self, session_id: str, result_code: str, order: Order):
         """
         This methods will insert purchase table and lines tables in the database
@@ -162,7 +161,6 @@ class OrderResource(DatabaseBase):
             }
         }
         return result
-
         
     def get_order_history(self, session_id):
         """
@@ -191,7 +189,6 @@ class OrderResource(DatabaseBase):
                 'message': 'Invalid session, please try login again'
             }
             return result
-            
             
         # Retrieve the organization's previous 50 orders
         search_query = """SELECT * FROM orders WHERE organizationId = %s
@@ -225,3 +222,6 @@ class OrderResource(DatabaseBase):
             }
 
         return result
+
+    def save_order(self, customer, delivery_address, billing_address, products_list):
+        pass

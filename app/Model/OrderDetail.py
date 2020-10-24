@@ -16,3 +16,24 @@ class OrderDetail(Model):
         self.productId = None  # our own product_id
         self.orderId = None  # store the relationship of order
         super().__init__(json)
+
+    @staticmethod
+    def table_name():
+        return 'orderdetails'
+
+    @staticmethod
+    def fields_mapping():
+        return {
+            'id': 'id',
+            'keyProductID': 'keyProductId',
+            'keyProductId': 'keyProductID',
+            'productName': 'productName',
+            'quantity': 'quantity',
+            'unitPrice': 'unitPrice',
+            'totalPrice': 'totalPrice',
+            'priceTotalIncTax': 'priceTotalIncTax',
+            'priceTotalExTax': 'priceTotalExTax',
+            'productCode': 'productCode',
+            'orderId': 'orderId',
+            'productId': 'productId'
+        }

@@ -97,7 +97,8 @@ class SquizzGatewayService:
     def submit_purchase(self, session_id, order_details) -> Tuple[bool, Optional[list]]:
         header = {"Content-Type": "application/json"}
 
-        # I just hardcoded the CustomerAccountCode (we had three, just took one for now), this needs to be generic now. As based on a specific customer we will submit the order. Previously we only had 1 customer so
+        # I just hardcoded the CustomerAccountCode (we had three, just took one for now), this needs to be generic now.
+        # As based on a specific customer we will submit the order. Previously we only had 1 customer so
         # the team was not mentioning the customer. Now we have three.
         purchaseURL = ("https://api.squizz.com/rest/1/org/procure_purchase_order_from_supplier/" 
                        + session_id + "?supplier_org_id=" + self.supplier_org_id
@@ -107,8 +108,8 @@ class SquizzGatewayService:
         # Not mandotary details are are hard code for now.
         parameter = {
             "keyPurchaseOrderID": keyPurchaseOrderID,
-            "purchaseOrderCode":"test1",
-            "purchaseOrderNumber":keyPurchaseOrderID,
+            "purchaseOrderCode": "test1",
+            "purchaseOrderNumber": keyPurchaseOrderID,
             "keySupplierAccountID":"1",
             "supplierAccountCode":"PJSAS",
             "supplierAccountName":"PJ SAS test",
@@ -154,3 +155,6 @@ class SquizzGatewayService:
         data = self.requests.post(purchaseURL, json=result, headers=header).json()
         # return the result code of purchase
         return data["result_code"], Order(parameter)
+
+    def submit_order(self, customer, delivery_address, billing_address, products_list):
+        pass

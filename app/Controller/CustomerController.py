@@ -21,24 +21,16 @@ cust = Blueprint('customer', __name__)
 def switch_customer():
     data = request.get_json()
     # Check necessary keys
-    required = ['customer_code']
+    required = ['customer_id']
     lacked = lack_keys(data, required)
 
     if lacked:
         raise LackRequiredData(lacked)
 
-    cust_code = data.get('customer_code')
-    if cust_code is None:
-        raise LackRequiredData('customer_code')
+    cust_id = data.get('customer_id')
+    customer = cs.get_one_customer(cust_id)
 
-    if cust_code not in cs.customer_codes:
-        return jsonify({'message': f'Provided customer code {cust_code} does not exist'}), 404
-
-    if cust_code not in cs.list_used_customer_codes():
-        return jsonify({'message': f'Provided customer code {cust_code} does not match any customer'}), 404
-
-    # TODO this is a problematic function, to be fixed
-    sync_products_prices(cust_code)
+    sync_products_prices(customer.customer_code)
     return jsonify({'message': 'Switch customer successfully'}), 200
 
 

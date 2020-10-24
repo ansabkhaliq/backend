@@ -1,5 +1,6 @@
 from app.Model.Model import Model
 
+
 class Order(Model):
     def __init__(self, json):
         self.id = None
@@ -31,4 +32,16 @@ class Order(Model):
         self.lines = None  # store order detail object
         self.session_id = None                        
         self.billStatus = None
+        self.customer_id = None
         super().__init__(json)
+
+    @staticmethod
+    def table_name():
+        return 'orders'
+
+    @staticmethod
+    def fields_mapping():
+        return {
+            'id': 'id',
+
+        }

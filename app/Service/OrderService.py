@@ -29,3 +29,7 @@ def get_order_history(session_id) -> dict:
         }
 
     return result
+
+
+def save_order(customer_id, delivery_addr_id, billing_addr_id, product_dict):
+    pass
