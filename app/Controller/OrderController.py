@@ -2,7 +2,7 @@ from app.Exception.exceptions import LackRequiredData, IncorrectDataType
 from app.Model.OrderDetail import OrderDetail
 from app.Service import OrderService as order_service
 from app.Util import AuthUtil as authUtil
-from app.Util.validation import lack_keys
+from app.Util.Validation import lack_keys
 from flask import (
     Blueprint,
     redirect,

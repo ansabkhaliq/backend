@@ -3,7 +3,7 @@ from app.Model.Customer import Customer
 from app.Service import CustomerService as cs
 from app.Service.ProductService import restore_prices as sync_products_prices
 from app.Exception.exceptions import LackRequiredData
-from app.Util.validation import lack_keys
+from app.Util.Validation import lack_keys
 from app.Util import AuthUtil as authUtil
 from flask import (
     Blueprint,
