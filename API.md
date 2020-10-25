@@ -711,7 +711,7 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
   **This method is repsonbile for getting the latest  3d model's metadata**
 - **Request** 
- 
+
    - Send **POST** to `/updateProducts`
     - Request Header:
     ```JSON
@@ -781,7 +781,7 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
           ],
           "sessionKey":"785BC1EC135931064EC38E81A0D85952"
         }
-        ```
+     ```
    **Response**:
         ``` JSON
           {
@@ -792,6 +792,7 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
           "status": "success"
         }
         
+    
         ```
    ### 4.2 get history order
 - **Request** 
@@ -838,3 +839,170 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
     ```
     
   
+
+### 4.3 Create Order
+
+- **Request**
+
+  - Send **POST** to `/api/orders`
+
+    ```json
+    {
+    	"customer_id": 11,
+    	"delivery_addr_id": 22,
+    	"billing_addr_id": 22,
+    	"lines": [
+            {
+    		    "product_id": 21,
+    		    "quantity": 7
+    	    }, {
+    		    "product_id": 40,
+    		    "quantity": 5
+    	    }
+        ],
+    	"session_key": "F85F9E3320A47B776AF3C1D293A1B87E",
+    	"instructions": "Place it infront the gate"
+    }
+    ```
+
+- **Response**
+
+  ```json
+  {
+      "id": 26,
+      "keyPurchaseOrderID": null,
+      "organizationId": 1,
+      "keySupplierAccountID": null,
+      "supplierOrgId": "11EAF2251136B090BB69B6800B5BCB6D",
+      "createdDate": [
+          "2020-10-25  19:06:42"
+      ],
+      "instructions": "Place it infront the gate",
+      "deliveryOrgName": null,
+      "deliveryContact": "9876541230",
+      "deliveryEmail": "petra2333@gmail.com",
+      "deliveryAddress1": "No.12",
+      "deliveryAddress2": "Murry St, Xet, QLD",
+      "deliveryAddress3": null,
+      "deliveryRegionName": "QLD",
+      "deliveryCountryName": "Australia",
+      "deliveryPostcode": "QLD1131",
+      "billingContact": "9876541230",
+      "billingOrgName": null,
+      "billingEmail": "petra2333@gmail.com",
+      "billingAddress1": "No.12",
+      "billingAddress2": "Murry St, Xet, QLD",
+      "billingAddress3": null,
+      "billingRegionName": "QLD",
+      "billingCountryName": "Australia",
+      "billingPostcode": "QLD1131",
+      "isDropship": null,
+      "lines": [
+          {
+              "id": 24,
+              "lineType": "PRODUCT",
+              "keyProductID": "21479231996799",
+              "productName": "Disposable Tableware Plastic Tray Serving 210mm x 300mm 4pk",
+              "quantity": 7,
+              "unitPrice": 1.52,
+              "totalPrice": 11.704,
+              "priceTotalIncTax": 11.704,
+              "priceTotalExTax": 10.64,
+              "productCode": "100941",
+              "productId": 21,
+              "orderId": 26
+          },
+          {
+              "id": 25,
+              "lineType": "PRODUCT",
+              "keyProductID": "21479232016715",
+              "productName": "Bags Sandwich 6cm x 15cm 60pk",
+              "quantity": 5,
+              "unitPrice": 1.25,
+              "totalPrice": 6.875,
+              "priceTotalIncTax": 6.875,
+              "priceTotalExTax": 6.25,
+              "productCode": "104307",
+              "productId": 40,
+              "orderId": 26
+          }
+      ],
+      "session_id": null,
+      "billStatus": "purchased",
+      "customer_id": 11
+  }
+  ```
+
+  ### 4.4 Get Order
+
+  - **Request**
+
+    Send **GET** to `/api/order/<order_id>`
+
+  - **Response**
+
+    ```json
+    {
+        "id": 20,
+        "keyPurchaseOrderID": null,
+        "organizationId": 1,
+        "keySupplierAccountID": null,
+        "supplierOrgId": "11EA64D91C6E8F70A23EB6800B5BCB6D",
+        "createdDate": "2020-10-25  18:39:47",
+        "instructions": "Place it infront the gate",
+        "deliveryOrgName": null,
+        "deliveryContact": "9876541230",
+        "deliveryEmail": "petra2333@gmail.com",
+        "deliveryAddress1": "No.12",
+        "deliveryAddress2": "Murry St, Xet, QLD",
+        "deliveryAddress3": null,
+        "deliveryRegionName": "QLD",
+        "deliveryCountryName": "Australia",
+        "deliveryPostcode": null,
+        "billingContact": "9876541230",
+        "billingOrgName": null,
+        "billingEmail": "petra2333@gmail.com",
+        "billingAddress1": "No.12",
+        "billingAddress2": "Murry St, Xet, QLD",
+        "billingAddress3": null,
+        "billingRegionName": "QLD",
+        "billingCountryName": "Australia",
+        "billingPostcode": null,
+        "isDropship": null,
+        "lines": [
+            {
+                "id": 12,
+                "lineType": null,
+                "keyProductID": "21479231996639",
+                "productName": "Disposable Tableware Plate Oval 230mm x 300mm 10pk",
+                "quantity": 7.0,
+                "unitPrice": 1.74,
+                "totalPrice": 13.4,
+                "priceTotalIncTax": 13.4,
+                "priceTotalExTax": 12.18,
+                "productCode": "100934",
+                "productId": 20,
+                "orderId": 20
+            },
+            {
+                "id": 13,
+                "lineType": null,
+                "keyProductID": "21479231998906",
+                "productName": "Fishing Line 100m",
+                "quantity": 5.0,
+                "unitPrice": 1.6,
+                "totalPrice": 8.8,
+                "priceTotalIncTax": 8.8,
+                "priceTotalExTax": 8.0,
+                "productCode": "101290",
+                "productId": 24,
+                "orderId": 20
+            }
+        ],
+        "session_id": null,
+        "billStatus": "purchased",
+        "customer_id": 11
+    }
+    ```
+
+    

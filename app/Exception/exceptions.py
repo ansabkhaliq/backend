@@ -48,3 +48,15 @@ class LackRequiredData(HTTPException):
     def __init__(self, msg):
         self.description = f"Lack required data: '{msg}'."
         self.code = 400
+
+
+class IncorrectDataType(HTTPException):
+    def __init__(self, msg):
+        self.description = f"Incorrect data type for key '{msg}'."
+        self.code = 400
+
+
+class SquizzException(HTTPException):
+    def __init__(self, msg):
+        self.description = {msg}
+        self.code = 500

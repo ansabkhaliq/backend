@@ -1,7 +1,11 @@
 import logging
 import datetime
 from app import config
+from app.Model.Address import Address
+from app.Model.Customer import Customer
+from app.Model.Organization import Organization
 from app.Resource.DatabaseBase import DatabaseBase
+from app.Resource.SimpleModelResource import SimpleModelResource as SR
 from app.Model.Order import Order
 from app.Model.OrderDetail import OrderDetail
 
@@ -223,5 +227,49 @@ class OrderResource(DatabaseBase):
 
         return result
 
-    def save_order(self, customer, delivery_address, billing_address, products_list):
-        pass
+    def create_order(self, org: Organization, customer: Customer, delivery: Address, billing: Address,
+                     order_details_list: [OrderDetail], instructions=""):
+        """Create an order for the provided customer"""
+        new_order = Order()
+        new_order.organizationId = org.id
+        new_order.supplierOrgId = org.supplierOrgId
+        new_order.createdDate = datetime.datetime.now().strftime("%Y-%m-%d  %H:%M:%S"),
+        new_order.instructions = instructions
+        new_order.deliveryOrgName = delivery.organization
+        new_order.deliveryContact = delivery.contact
+        new_order.deliveryEmail = delivery.email
+        new_order.deliveryAddress1 = delivery.address_line1
+        new_order.deliveryAddress2 = delivery.address_line2
+        new_order.deliveryAddress3 = delivery.address_line3
+        new_order.deliveryRegionName = delivery.region
+        new_order.deliveryCountryName = delivery.country
+        new_order.deliveryPostcode = delivery.postcode
+        new_order.billingContact = billing.contact
+        new_order.billingOrgName = billing.organization
+        new_order.billingEmail = billing.email
+        new_order.billingAddress1 = billing.address_line1
+        new_order.billingAddress2 = billing.address_line2
+        new_order.billingAddress3 = billing.address_line3
+        new_order.billingRegionName = billing.region
+        new_order.billingCountryName = billing.country
+        new_order.billingPostcode = billing.postcode
+        new_order.billStatus = 'purchased'
+        new_order.customer_id = customer.id
+
+        # Create Order and Related Order lines
+        sr = SR()
+        try:
+            sr.insert(new_order, False)
+            for line in order_details_list:
+                line.orderId = new_order.id
+                sr.insert(line, False)
+
+        except Exception as e:
+            sr.connection.rollback()
+            sr.cursor.close()
+            raise e
+        else:
+            sr.connection.commit()
+            sr.cursor.close()
+            new_order.lines = order_details_list
+            return new_order

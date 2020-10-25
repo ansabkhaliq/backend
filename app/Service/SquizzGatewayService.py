@@ -2,6 +2,10 @@ import logging
 import requests
 import time
 from typing import Tuple, Optional
+
+from app.Model.Customer import Customer
+from app.Model.OrderDetail import OrderDetail
+from app.Model.Organization import Organization
 from app.Model.Product import Product
 from app.Model.Category import Category
 from app.Model.Price import Price
@@ -156,5 +160,36 @@ class SquizzGatewayService:
         # return the result code of purchase
         return data["result_code"], Order(parameter)
 
-    def submit_order(self, customer, delivery_address, billing_address, products_list):
-        pass
+    def submit_order(self, org: Organization, customer: Customer, order_details_list: [OrderDetail]):
+        session_id, _ = self.create_session()
+        header = {"Content-Type": "application/json"}
+        purchase_url = (f"https://api.squizz.com/rest/1/org/procure_purchase_order_from_supplier/{session_id}\
+        ?supplier_org_id={org.supplierOrgId}&customer_account_code={customer.customer_code}")
+
+        uuid = int(time.time() * 1000000)
+        data_record = {
+            "keyPurchaseOrderID": uuid,
+            "supplierAccountCode": org.accountCode,
+            "lines": [
+                {'lineType': detail.lineType, 'productCode': detail.productCode, 'quantity': detail.quantity}
+                for detail in order_details_list
+            ]
+        }
+
+        post_body = {
+            "version": 1.3,
+            "resultStatus": "1",
+            "message": "The purchase order data has been successfully obtained.",
+            "dataTransferMode": "COMPLETE",
+            "totalDataRecords": 1,
+            "configs": {},
+            "dataRecords": [data_record]
+        }
+        # print(post_body)
+
+        data = self.requests.post(purchase_url, json=post_body, headers=header).json()
+        # print(data)
+        lines_data = data['dataRecords'][0]['lines'].copy()
+
+        # return the result code and line data of purchase, line data contains tax info.
+        return data["result_code"], lines_data
