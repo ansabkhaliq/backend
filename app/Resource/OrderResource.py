@@ -87,7 +87,7 @@ class OrderResource(DatabaseBase):
         return result
 
     def create_order(self, org: Organization, customer: Customer, delivery: Address, billing: Address,
-                     order_details_list: [OrderDetail], instructions=""):
+                     order_details_list: [OrderDetail], status, instructions=""):
         """Create an order for the provided customer"""
         new_order = Order()
         new_order.organizationId = org.id
@@ -112,7 +112,7 @@ class OrderResource(DatabaseBase):
         new_order.billingRegionName = billing.region
         new_order.billingCountryName = billing.country
         new_order.billingPostcode = billing.postcode
-        new_order.billStatus = 'purchased'
+        new_order.billStatus = status
         new_order.customer_id = customer.id
 
         # Create Order and Related Order lines

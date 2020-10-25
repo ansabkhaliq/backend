@@ -26,7 +26,7 @@ def get_order_history(session_id) -> dict:
     return result
 
 
-def save_order(session_key, customer_id, delivery_addr_id, billing_addr_id, lines, instructions=""):
+def save_order(session_key, customer_id, delivery_addr_id, billing_addr_id, lines, status, instructions=""):
     # Retrieve objs
     sess = SR().find_one(Session({'sessionKey': session_key}))
     org = SR().get_one_by_id(Organization(pk=sess.orgId))
@@ -62,7 +62,7 @@ def save_order(session_key, customer_id, delivery_addr_id, billing_addr_id, line
         line.totalPrice = line.priceTotalIncTax
 
     # Save order and order lines
-    return OR().create_order(org, cust, deli, bill, details_list, instructions)
+    return OR().create_order(org, cust, deli, bill, details_list, result_code, instructions)
 
 
 def get_order(order_id):

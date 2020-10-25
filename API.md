@@ -577,10 +577,10 @@ These are the APIs to sync data from squizz platform
 - **Request** 
 
    - Send **GET** to `/api/product`
-   - Take **productCode** as parameter e.g. `/api/barcode?productCode=CFP-600-20`
+   - Take **productCode** as parameter e.g. `/api/product?productCode=CFP-600-20`
 
 - **Response**
-    
+  
   ```JSON
   {
     "data": {
@@ -623,6 +623,7 @@ These are the APIs to sync data from squizz platform
     "Message": "successfully retrieved product",
     "status": "success"
   }
+  ```
 ```
   
 ### 3.3 Retrieve product metadata by product code
@@ -645,7 +646,7 @@ These are the APIs to sync data from squizz platform
        ...
     }
 }
-    ```
+```
 
 ### 3.4 Search for product codes or barcodes similar to a given identifier
 This endpoint is used for live product search in the frontend `OrderPage` component
