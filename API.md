@@ -541,14 +541,15 @@ The APIs having 'page' parameter support paging
 - **Request** 
 
    - Send **GET** to `/api/product`
-   - Take **productCode** as parameter e.g. `/api/barcode?productCode=CFP-600-20`
+   - Take **productCode** as parameter e.g. `/api/product?productCode=CFP-600-20`
 
 - **Response**
     ```JSON
   {
     "data": {
+         "data": {
         "averageCost": null,
-        "barcode": "933044000895",
+        "barcode": null,
         "barcodeInner": null,
         "brand": null,
         "categoryList": null,
@@ -559,19 +560,19 @@ The APIs having 'page' parameter support paging
         "description4": null,
         "drop": null,
         "height": 0,
-        "id": 1,
+        "id": 3431,
         "imageList": null,
         "internalID": null,
         "isKitted": null,
         "isPriceTaxInclusive": null,
-        "keyProductID": "21479231976900",
+        "keyProductID": "CFP600/20",
         "keySellUnitID": null,
         "keyTaxcodeID": null,
         "kitProductsSetPrice": null,
         "name": null,
         "packQuantity": null,
         "priceList": null,
-        "productCode": "00089",
+        "productCode": "CFP-600-20",
         "productCondition": null,
         "productSearchCode": null,
         "sellUnits": null,
@@ -588,7 +589,7 @@ The APIs having 'page' parameter support paging
   }
   ```
 
-  ### 3.3 Retrieve product metadata by product code
+### 3.3 Retrieve product metadata by product code
 
 - **Request** 
 
@@ -605,10 +606,10 @@ The APIs having 'page' parameter support paging
         "Holyoake Product Range": "Holyoake Swirl Diffusers.",
         "Inlet Spigot Diameter (Length Millimeters)": "250.000000000000",
         "Manufacturer": "Holyoake",
-       ...
+      
     }
-}
     ```
+
 
 ### 3.4 Search for product codes or barcodes similar to a given identifier
 This endpoint is used for live product search in the frontend `OrderPage` component
@@ -656,9 +657,11 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
     "status": "success"
   }
   ```
+
   ### 3.6 Retrieve product price from squizz api
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
   **This method is repsonbile for getting the latest price from SQUIZZ platform and updating the table in the local database**
+  
 - **Request** 
     Before retrieve data from squizz api, you should log in first 
     Send **GET** to `/retrievePrices`
@@ -673,6 +676,7 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
     "status": "success"
   }
   ```
+
   ### 3.7 Update product from squizz api
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
   **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
@@ -690,6 +694,7 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
     "status": "success"
   }
   ```
+
   ### 3.8 Update product price from squizz api
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
   **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
@@ -707,6 +712,7 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
     "status": "success"
   }
   ```
+
   ### 3.9 import metadata
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
   **This method is repsonbile for getting the latest  3d model's metadata**
@@ -718,7 +724,7 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
     {"Content-Type":"application/json"}
     ```
     - Request body:
-    ``` JSON
+    ```JSON
         {
         "Username": "user1",
         "Password": "squizz",
@@ -748,9 +754,9 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
 ## 4. Order API
   ### 4.1： Make an order
 -  **Request**
-  - Send **POST** to `/api/purchase`
-  - Request Header:
-     ``` JSON
+    - Send **POST** to `/api/purchase`
+    - Request Header:
+     ```JSON
      {"Content-Type": "application/json"}
      ```
     - Request Body:
@@ -781,6 +787,7 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
           ],
           "sessionKey":"785BC1EC135931064EC38E81A0D85952"
         }
+
      ```
    **Response**:
         ``` JSON
@@ -794,13 +801,14 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
         
     
         ```
+
    ### 4.2 get history order
 - **Request** 
   - Send **GET** to `/api/history`
   - Take session_id as parameter e.g: `/api/history?session_id=785BC1EC135931064EC38E81A0D85952`
   
-  - **Response**
-    ``` JSON
+- **Response**
+    ```JSON
     {
     "message": "Successfully retrieved order history",
     "orders": [
@@ -835,7 +843,7 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
        }
     ],
     "status": "success"
-}
+    }
     ```
     
   
