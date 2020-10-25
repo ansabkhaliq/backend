@@ -356,8 +356,6 @@ class ProductResource(DatabaseBase):
         }
         return result
 
-
-
     def search_products(self, identifier, identifierType):
         """
         Retrieves a list of product codes (or barcodes) from the database
@@ -376,17 +374,17 @@ class ProductResource(DatabaseBase):
 
         return None if not similar else similar
 
-
-
     def list_products_by_category(self, category_id, page=None, page_size=None):
         count = 0
         if page is None:
             paging_str = ''
         else:
             paging_str = f'LIMIT {(page - 1) * page_size}, {page_size}'
-            count_query = f'SELECT COUNT(*) as count FROM categoryproducts '
             if category_id is not None:
-                count_query += f'WHERE categoryId = {category_id} '
+                count_query = f'SELECT COUNT(DISTINCT productId) as count FROM categoryproducts\
+                                WHERE categoryId = {category_id}'
+            else:
+                count_query = f'SELECT COUNT(*) as count FROM products'
             count = self.run_query(count_query, [], False)[0]['count']
             total_pages = math.ceil(count / page_size)
             if total_pages == 0:

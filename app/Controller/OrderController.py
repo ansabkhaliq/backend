@@ -17,21 +17,6 @@ logging.basicConfig(level=logging.DEBUG)
 order = Blueprint('order', __name__)
 
 
-@order.route('/api/purchase', methods=['POST'])
-def submit_purchase_order():
-
-    data = request.get_json(silent=True)
-    if not (data.__contains__('sessionKey') and data.__contains__('lines')):
-        return jsonify({
-            'status': "failure",
-            'data': 'null',
-            'Message': "Invalid data"
-        })
-    session_key = data['sessionKey']
-    order_details = [OrderDetail(line) for line in data['lines']]
-    return jsonify(order_service.submit_order(session_key, order_details))
-
-
 @order.route('/api/history', methods=['GET', 'POST'])
 def retrieve_order_history():
 
@@ -59,6 +44,7 @@ def submit_order():
             raise LackRequiredData(lacked)
 
     instructions = root_data.get('instructions', '')
+    # Save the order (Submit to SQUIZZ and Store into DB)
     result_order = order_service.save_order(
         root_data['session_key'],
         root_data['customer_id'],
@@ -75,6 +61,4 @@ def submit_order():
 @order.route('/api/order/<order_id>', methods=['GET'])
 def get_order(order_id):
     res = order_service.get_order(order_id).json()
-    print("==============================")
-    print(res)
     return res, 200
