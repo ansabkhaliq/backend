@@ -1,6 +1,6 @@
-from flask import Flask
+import os, json
+from flask import Flask, jsonify
 from flask_session import Session
-
 
 # For more information on Flask application factories:
 # https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/
@@ -16,7 +16,7 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.secret_key = '95011002f30bbbb7226e1af0d33f06c4ffff34f07d254efe'
     app.config['SESSION_TYPE'] = 'filesystem'
-    
+
     sess.init_app(app)
 
     # Blueprint for auth routes in our app
@@ -34,6 +34,6 @@ def create_app(test_config=None):
     app.register_blueprint(customer_blueprint.cust)
 
     # Register Exception handler
-    app.register_error_handler(HTTPException, lambda e: e.response)
+    app.register_error_handler(HTTPException, lambda e: (jsonify({'message': e.description}), e.code))
 
     return app

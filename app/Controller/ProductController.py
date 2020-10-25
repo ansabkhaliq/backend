@@ -37,6 +37,7 @@ def search_products():
     
 
 
+
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
 # This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database
@@ -45,25 +46,25 @@ def retrieve_products():
     return jsonify(product_service.retrieve_products())
 
 
-# This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
-# allow you to make calls to the REST API.
-# This method is repsonbile for getting the latest product prices from SQUIZZ platform and updating the table in the local database
+# This method is not called from the front end. These are supposed to be called by the Postman or another similar tool
+# that allow you to make calls to the REST API.
+# Getting the latest product prices from SQUIZZ platform and updating the table in the local database
 @product.route('/retrievePrices', methods=['GET'])
 def retrieve_prices():
     return jsonify(product_service.retrieve_prices())
 
 
-# This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
-# allow you to make calls to the REST API.
-# This method is repsonbile for getting the product update from SQUIZZ platform and updating the table in the local database
+# This method is not called from the front end. These are supposed to be called by the Postman or another similar tool
+# that allow you to make calls to the REST API.
+# Getting the product update from SQUIZZ platform and updating the table in the local database
 @product.route('/updateProducts', methods=['GET'])
 def update_products():
     return jsonify(product_service.update_products())
 
 
-# This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
-# allow you to make calls to the REST API.
-# This method is repsonbile for getting the latest product prices from SQUIZZ platform and updating the table in the local database
+# This method is not called from the front end. These are supposed to be called by the Postman or another similar tool
+# that allow you to make calls to the REST API.
+# Getting the latest product prices from SQUIZZ platform and updating the table in the local database
 @product.route('/updatePrices', methods=['GET'])
 def update_product_price():
     return jsonify(product_service.update_prices())
@@ -97,9 +98,34 @@ def update_product_categories():
 
 @product.route('/api/categories', methods=['GET'])
 def list_categories():
-    pass
+    parents, children = product_service.list_all_categories()
+    categories = []
+    for category in parents:
+        p_cate_dict = category.__dict__
+        if category.keyCategoryID not in children:
+            p_cate_dict['Children'] = []
+        else:
+            p_cate_dict['Children'] = [child.__dict__ for child in children[category.keyCategoryID]]
+        categories.append(p_cate_dict)
+
+    return jsonify(categories), 200
 
 
-@product.route('/api/category/<category_id>/products', methods=['GET'])
-def list_products(category_id):
-    pass
+@product.route('/api/products', methods=['GET'])
+def list_products_with_pagination():
+    params = request.args
+    category_id = params.get('cate')
+    page = params.get('page')
+    if category_id is not None:
+        category_id = int(category_id)
+
+    if page is not None:
+        page = int(page)
+    else:
+        page = 1
+
+    ret_set = product_service.list_all_products(category_id, page)
+
+    items = [prod.basic_dict() for prod in ret_set['items']]
+    ret_set['items'] = items
+    return jsonify(ret_set), 200

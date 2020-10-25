@@ -3,7 +3,7 @@ from app.Model.Customer import Customer
 from app.Service import CustomerService as cs
 from app.Service.ProductService import restore_prices as sync_products_prices
 from app.Exception.exceptions import LackRequiredData
-from app.Util.validation import lack_keys
+from app.Util.Validation import lack_keys
 from app.Util import AuthUtil as authUtil
 from flask import (
     Blueprint,
@@ -21,24 +21,16 @@ cust = Blueprint('customer', __name__)
 def switch_customer():
     data = request.get_json()
     # Check necessary keys
-    required = ['customer_code']
+    required = ['customer_id']
     lacked = lack_keys(data, required)
 
     if lacked:
         raise LackRequiredData(lacked)
 
-    cust_code = data.get('customer_code')
-    if cust_code is None:
-        raise LackRequiredData('customer_code')
+    cust_id = data.get('customer_id')
+    customer = cs.get_one_customer(cust_id)
 
-    if cust_code not in cs.customer_codes:
-        return jsonify({'message': f'Provided customer code {cust_code} does not exist'}), 404
-
-    if cust_code not in cs.list_used_customer_codes():
-        return jsonify({'message': f'Provided customer code {cust_code} does not match any customer'}), 404
-
-    # TODO this is a problematic function, to be fixed
-    sync_products_prices(cust_code)
+    sync_products_prices(customer.customer_code)
     return jsonify({'message': 'Switch customer successfully'}), 200
 
 
@@ -92,6 +84,21 @@ def get_customer(customer_id):
     return cs.get_one_customer(customer_id).json(), 200
 
 
+@cust.route('/api/customer/<customer_id>', methods=['PUT'])
+def update_customer(customer_id):
+    data = request.get_json()
+    if 'id' in data:
+        del data['id']
+
+    customer = cs.get_one_customer(customer_id)
+    for key, value in data.items():
+        if key in customer.__dict__:
+            customer.__dict__[key] = value
+
+    cs.update_customer(customer)
+    return customer.json(), 200
+
+
 @cust.route('/api/customer/<customer_id>', methods=['DELETE'])
 def del_customer(customer_id):
     cs.delete_customer(customer_id)
@@ -100,7 +107,14 @@ def del_customer(customer_id):
 
 @cust.route('/api/customer_codes', methods=['GET'])
 def list_customers_codes():
-    return jsonify(list(cs.list_unused_customer_codes())), 200
+    params = request.args
+    used = params.get('used')
+    if used is None:
+        return jsonify(list(cs.customer_codes)), 200
+    elif int(used) == 1:
+        return jsonify(list(cs.list_used_customer_codes())), 200
+    else:
+        return jsonify(list(cs.list_unused_customer_codes())), 200
 
 
 @cust.route('/api/customer/<customer_id>/addresses', methods=['POST'])
@@ -120,6 +134,24 @@ def create_address(customer_id):
 def list_addresses(customer_id):
     cust_addresses = cs.list_customer_addresses(customer_id)
     return jsonify([addr.__dict__ for addr in cust_addresses]), 200
+
+
+@cust.route('/api/customer/<customer_id>/addresses/<address_id>', methods=['PUT'])
+def update_address(customer_id, address_id):
+    data = request.get_json()
+    if 'id' in data:
+        del data['id']
+
+    if 'customer_id' in data:
+        del data['customer_id']
+
+    address = cs.get_one_address(customer_id, address_id)
+    for key, value in data.items():
+        if key in address.__dict__:
+            address.__dict__[key] = value
+
+    cs.update_address(address)
+    return address.json(), 200
 
 
 @cust.route('/api/customer/<customer_id>/address/<address_id>', methods=['DELETE'])
