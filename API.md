@@ -345,7 +345,7 @@
 - **Response**
     ```JSON
     {
-    "found": "true",
+    "found": true,
     "json_data": {
         "Diffuser Width (Length Millimeters)": "595.000000000000",
         "Flow Nom (Hvac Air Flow Liters Per Second)": "112.500000000000",
@@ -355,11 +355,40 @@
       
     }
     ```
- 
+
+
+### 3.4 Search for product codes or barcodes similar to a given identifier
+This endpoint is used for live product search in the frontend `OrderPage` component
+- **Request** 
+    - Send **GET** to `/api/products/search`
+    - Take **identifier** and **identifierType** as parameters, where `identifierType` is either `barcode` or `productCode`
     
-### 3.4 Retrieve product from squizz api
-  **This is not a api that front end can assess.  These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
-  **This method is responbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
+      e.g. `/api/products/search?identifier=CFP-600-12&identifierType=productCode`
+
+- **Response**
+  ```JSON
+  {
+    "identifiers": [
+        {
+            "productCode": "CFP-600-12-LPP-150"
+        },
+        {
+            "productCode": "CFP-600-12-LPP-200"
+        },
+        ...
+        {
+            "productCode": "CFP-600-12-LPP-250"
+        }
+    ],
+    "message": "Successfully retrieved similar barcodes or product codes",
+    "status": "success"
+  }
+  ```
+
+    
+### 3.5 Retrieve product from squizz api
+  **This is not a api that front end can assess.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
+   **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
 - **Request** 
     - Before retrieve data from squizz api, you should log in first 
     - Send **GET** to `/retrieveProduct`
@@ -374,9 +403,11 @@
     "status": "success"
   }
   ```
-### 3.5 Retrieve product price from squizz api
-  **This is not a api that front end can access. These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
-  **This method is responbile for getting the latest price from SQUIZZ platform and updating the table in the local database**
+
+  ### 3.6 Retrieve product price from squizz api
+  **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
+  **This method is repsonbile for getting the latest price from SQUIZZ platform and updating the table in the local database**
+  
 - **Request** 
     Before retrieve data from squizz api, you should log in first 
     Send **GET** to `/retrievePrices`
@@ -391,9 +422,10 @@
     "status": "success"
   }
   ```
-### 3.6 Update product from squizz api
-  **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
-  **This method is responbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
+
+  ### 3.7 Update product from squizz api
+  **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
+  **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
 - **Request** 
    - Before retrieve data from squizz api, you should log in first 
    - Send **GET** to `/updateProducts`
@@ -408,9 +440,10 @@
     "status": "success"
   }
   ```
-### 3.7 Update product price from squizz api
-  **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
-  **This method is responbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
+
+  ### 3.8 Update product price from squizz api
+  **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
+  **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
 - **Request** 
     Before retrieve data from squizz api, you should log in first 
     Send **GET** to `/updateProducts`
@@ -425,9 +458,10 @@
     "status": "success"
   }
   ```
-### 3.8 import metadata
-  **This is not a api that front end can access.  These are supposed to be called by the Postman and Utility that allow you to make calls to the REST API.**
-  **This method is responbile for getting the latest  3d model's metadata**
+
+  ### 3.9 import metadata
+  **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
+  **This method is repsonbile for getting the latest  3d model's metadata**
 - **Request** 
  
    - Send **POST** to `/updateProducts`

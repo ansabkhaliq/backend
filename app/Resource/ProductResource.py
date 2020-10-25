@@ -158,7 +158,7 @@ class ProductResource(DatabaseBase):
 
     def get_product_by_product_code(self, productCode):
         search_query = """SELECT products.id, products.barcode, products.productCode, products.productName,
-                          prices.keyProductID, prices.price, products.description1
+                          prices.keyProductID, prices.price, products.description1, products.description2
                           FROM products JOIN prices ON products.id = prices.productId
                           WHERE products.productCode = %s"""
         values = [productCode]
@@ -178,12 +178,16 @@ class ProductResource(DatabaseBase):
             return None
         return product_record[0]['id']
 
-    def get_product_images_by_id(self, id):
+    def search_product_id_by_product_code(self, productCode):
+        search_query = """SELECT id 
+                          FROM products
+                          WHERE productCode like %s"""
+        values = '%' + productCode + '%'
+        product_record = self.run_query(search_query, values, False)
+        if product_record is None:
+            return None
+        return product_record
 
-        search_image_query = """Select * From images where productId = %s """
-        values = [id]
-        image_records = self.run_query(search_image_query, values, False)
-        return image_records
 
     # This method is used to update the products that are stored in the database. Updated product infromation is fetched
     # from the SQUIZZ API.
@@ -339,3 +343,25 @@ class ProductResource(DatabaseBase):
             },
         }
         return result
+
+
+
+    def search_products(self, identifier, identifierType):
+        """
+        Retrieves a list of product codes (or barcodes) from the database
+        that are syntactially similar to the given identifier
+
+        Args:
+            identifier: a potential product code or barcode
+            identifierType: 'barcode' or 'productCode'
+        Returns:
+            list of similar 'identifiers'
+        """
+
+        query = f"SELECT {identifierType} FROM products WHERE {identifierType} LIKE '{identifier + '%'}'"
+        logger.debug(query)
+        similar = self.run_query(query, None, False)
+        
+        return None if not similar else similar
+
+             
