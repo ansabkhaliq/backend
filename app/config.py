@@ -1,3 +1,5 @@
+import os
+
 # SQUIZZ Platform API Environment Variables
 
 # Base URL for the website and calling api endpoints
@@ -17,7 +19,7 @@ API_ORG_KEY = "3a62ea5aa2d8845a72dd030369dd571d5123567f70fa76b5bc3bcdf103e3307cc
 SUPPLIER_ORG_ID = "11EAF2251136B090BB69B6800B5BCB6D"
 
 # MySQL Environment Variables
-HOST = "squizz-db.cuftfgbgib1y.us-east-1.rds.amazonaws.com"
-USER = "admin"
-PASSWORD = "12345678"
-DB_NAME = "squizz_app"
+HOST = os.environ.get("HOST") or "squizz-db.cuftfgbgib1y.us-east-1.rds.amazonaws.com"
+USER = os.environ.get("USER") or "admin"
+PASSWORD = os.environ.get("PASSWORD") or "12345678"
+DB_NAME = os.environ.get("squizz_app") or "squizz_app"
