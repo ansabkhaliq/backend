@@ -91,7 +91,6 @@ class OrderResource(DatabaseBase):
         """Create an order for the provided customer"""
         new_order = Order()
         new_order.organizationId = org.id
-        new_order.supplierOrgId = org.supplierOrgId
         new_order.createdDate = datetime.datetime.now().strftime("%Y-%m-%d  %H:%M:%S"),
         new_order.instructions = instructions
         new_order.deliveryOrgName = delivery.organization

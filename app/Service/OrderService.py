@@ -26,7 +26,7 @@ def get_order_history(session_id) -> dict:
     return result
 
 
-def save_order(session_key, customer_id, delivery_addr_id, billing_addr_id, lines, status, instructions=""):
+def save_order(session_key, customer_id, delivery_addr_id, billing_addr_id, lines, instructions=""):
     # Retrieve objs
     sess = SR().find_one(Session({'sessionKey': session_key}))
     org = SR().get_one_by_id(Organization(pk=sess.orgId))

@@ -7,7 +7,6 @@ class Order(Model):
         self.keyPurchaseOrderID = None
         self.organizationId = None
         self.keySupplierAccountID = None
-        self.supplierOrgId = None
         self.createdDate = None
         self.instructions = None
         self.deliveryOrgName = None
@@ -46,8 +45,6 @@ class Order(Model):
         return {
             'id': 'id',
             'organizationId': 'organizationId',
-            'supplierOrganizationId': 'supplierOrgId',
-            'supplierOrgId': 'supplierOrganizationId',
             'createdDate': 'createdOnDate',
             'createdOnDate': 'createdDate',
             'instructions': 'instructions',
