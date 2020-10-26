@@ -41,7 +41,7 @@ def search_products():
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
 # allow you to make calls to the REST API.
 # This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database
-@product.route('/api/retrieveProducts', methods=['GET'])
+@product.route('/retrieveProducts', methods=['GET'])
 def retrieve_products():
     return jsonify(product_service.retrieve_products())
 
