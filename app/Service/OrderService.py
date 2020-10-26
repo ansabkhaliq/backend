@@ -62,7 +62,7 @@ def save_order(session_key, customer_id, delivery_addr_id, billing_addr_id, line
         line.totalPrice = line.priceTotalIncTax
 
     # Save order and order lines
-    return OR().create_order(org, cust, deli, bill, details_list, instructions)
+    return OR().create_order(org, cust, deli, bill, details_list, result_code, instructions)
 
 
 def get_order(order_id):

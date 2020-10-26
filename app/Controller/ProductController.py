@@ -23,8 +23,8 @@ def get_barcode_product():
 # http://127.0.0.1:3000/api/product?sessionKey=8A96E4EF6C4C9ECC4938A7DB816346DC&productCode=01248
 @product.route('/api/product', methods=['GET'])
 def get_product_by_id():
-    productCode = request.args.get('productCode')
-    return jsonify(product_service.get_product_by_product_code(productCode))
+    product_code = request.args.get('productCode')
+    return jsonify(product_service.get_product_by_product_code(product_code))
 
 # Example of the API call
 # http://localhost:3000/api/products/search?identifier=CFP&identifierType=productCode
@@ -34,8 +34,6 @@ def search_products():
     identifierType = request.args.get('identifierType')
     
     return jsonify(product_service.search_products(identifier, identifierType))
-    
-
 
 
 # This method is not called from the front end. These are supposed to be called by the Postman or another similar tool that
@@ -84,8 +82,8 @@ def import_threedmodel():
 
 @product.route('/api/metadata/get', methods=['GET'])
 def get_metadata_by_product_code():
-    productCode = request.args.get('productCode')
-    return jsonify(product_service.get_metadata_by_product_code(productCode))
+    product_code = request.args.get('productCode')
+    return jsonify(product_service.get_metadata_by_product_code(product_code))
 
 
 @product.route('/updateCategories', methods=['GET'])
