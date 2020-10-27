@@ -150,7 +150,8 @@ class ProductResource(DatabaseBase):
 
     def get_product_by_barcode(self, barcode):
 
-        search_query = """SELECT products.id, products.barcode, products.productName, products.productCode, prices.keyProductID, prices.price 
+        search_query = """SELECT products.id, products.barcode, products.productName, products.keyTaxcodeID,
+                          products.productCode, prices.keyProductID, prices.price 
                           FROM products JOIN prices ON products.id = prices.Productid 
                           WHERE products.Barcode = %s"""
         values = [barcode]
@@ -161,7 +162,7 @@ class ProductResource(DatabaseBase):
 
     def get_product_by_product_code(self, productCode):
         search_query = """SELECT products.id, products.barcode, products.productCode, products.productName,
-                          prices.keyProductID, prices.price, products.description1, products.description2
+                          prices.keyProductID, prices.price, products.description1, products.description2, products.keyTaxcodeID
                           FROM products JOIN prices ON products.id = prices.productId
                           WHERE products.productCode = %s"""
         values = [productCode]
