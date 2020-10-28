@@ -1,5 +1,7 @@
 import logging
 import datetime
+from collections import defaultdict
+
 import math
 from app import config
 from app.Exception.exceptions import OtherException, PaginationError
@@ -394,12 +396,9 @@ class ProductResource(DatabaseBase):
                 raise PaginationError()
 
         if category_id is None:
-            prod_query = f'SELECT products.*, images.smallImageLocation as image FROM products\
-                        LEFT JOIN images ON products.id = images.productId {paging_str}'
+            prod_query = f'SELECT products.* FROM products {paging_str}'
         else:
-            prod_query = f'SELECT products.*, images.smallImageLocation as image FROM products\
-                        LEFT JOIN images ON products.id = images.productId\
-                        WHERE products.id IN (\
+            prod_query = f'SELECT products.* FROM products WHERE products.id IN (\
 	                    SELECT productId FROM categoryproducts WHERE categoryId = {category_id}\
                         ) {paging_str}'
 
@@ -408,11 +407,7 @@ class ProductResource(DatabaseBase):
             products = [] if products is None else products
             items = []
             for p in products:
-                image = p['image']
-                image = None if image == '' else image
-                del p['image']
                 model = SR.to_model(Product, p)
-                model.image = image
                 items.append(model)
             if page is None:
                 return items
@@ -428,7 +423,7 @@ class ProductResource(DatabaseBase):
             # raise e
             raise OtherException(Product())
 
-    def append_prices_to_product(self, products: list):
+    def assign_price_and_images_to_product(self, products: list):
         """
         Retrieve prices for products by product id
         Notices: Some of the products have 2 prices, pick the "Contract" price
@@ -438,19 +433,33 @@ class ProductResource(DatabaseBase):
         :return: None
         """
         product_ids = ','.join([str(p.id) for p in products])
-        query = f'SELECT productId, price, referenceType FROM prices \
+        price_query = f'SELECT productId, price, referenceType FROM {Price.table_name()} \
                     WHERE productId IN ({product_ids})\
                     ORDER BY referenceType DESC'
 
+        image_query = f'SELECT * FROM {Image.table_name()} \
+                    WHERE productId IN ({product_ids})'
+
         try:
-            prices = self.run_query(query, [], False)
+            prices = self.run_query(price_query, [], False)
+            images = self.run_query(image_query, [], False)
             price_dict = {}
+            image_dict = defaultdict(list)
+
+            # Pair productId, price
             for price in prices:
                 if price['productId'] not in price_dict:
                     price_dict[price['productId']] = float(price['price'])
 
+            # Pair productId, images
+            for image in images:
+                image_obj = SR.to_model(Image, image)
+                image_dict[image['productId']].append(image_obj)
+
             for product in products:
                 product.price = price_dict.get(product.id, None)
+                product.imageList = image_dict.get(product.id, [])
+
         except Exception as e:
             logger.error('Exception occurred when retrieving prices for products %s', e)
         pass

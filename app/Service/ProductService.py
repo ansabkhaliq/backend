@@ -409,5 +409,5 @@ def list_all_products(category_id=None, page=1, page_size=20):
     # List products
     result = ProductResource().list_products_by_category(category_id, page, page_size)
     # set product price
-    ProductResource().append_prices_to_product(result['items'])
+    ProductResource().assign_price_and_images_to_product(result['items'])
     return result
