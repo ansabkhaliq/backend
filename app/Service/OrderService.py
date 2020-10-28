@@ -37,7 +37,7 @@ def save_order(session_key, customer_id, delivery_addr_id, billing_addr_id, line
     details_list = []
     for line in lines:
         product = SR().get_one_by_id(Product(pk=line['product_id']))
-        PR().append_prices_to_product([product])
+        PR().assign_price_and_images_to_product([product])
         details = OrderDetail({
             'lineType': 'PRODUCT',
             'keyProductID': product.keyProductID,

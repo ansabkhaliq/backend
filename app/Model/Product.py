@@ -37,10 +37,9 @@ class Product(Model):
         self.categoryList = None  # store category object
         self.priceList = None  # store price object
         self.sellUnitsIdList = None  # sell the SellUnitIds (new table)
-        self.imageList = None  # List to store the images associated with the product
+        self.imageList = []  # List to store the images associated with the product
         self.supplierOrganizationId = None
         self.price = None
-        self.image = None
         super().__init__(json, pk)
 
     @staticmethod
@@ -95,5 +94,11 @@ class Product(Model):
             'name': self.name,
             'productCode': self.productCode,
             'price': self.price,
-            'image': self.image
+            'image': [image.__dict__ for image in self.imageList]
         }
+
+    def json(self):
+        if self.imageList is not None:
+            self.imageList = [image.__dict__ for image in self.imageList]
+
+        return super().json()
