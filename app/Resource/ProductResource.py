@@ -452,9 +452,10 @@ class ProductResource(DatabaseBase):
                     price_dict[price['productId']] = float(price['price'])
 
             # Pair productId, images
-            for image in images:
-                image_obj = SR.to_model(Image, image)
-                image_dict[image['productId']].append(image_obj)
+            if images is not None:
+                for image in images:
+                    image_obj = SR.to_model(Image, image)
+                    image_dict[image['productId']].append(image_obj)
 
             for product in products:
                 product.price = price_dict.get(product.id, None)
