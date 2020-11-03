@@ -2,7 +2,7 @@ from app.Model.Model import Model
 
 
 class OrderDetail(Model):
-    def __init__(self, json):
+    def __init__(self, json=None, pk=None):
         self.id = None  # autoincrement pk
         self.lineType = None
         self.keyProductID = None  # Unique key in product
@@ -15,4 +15,27 @@ class OrderDetail(Model):
         self.productCode = None  # same with product code in product
         self.productId = None  # our own product_id
         self.orderId = None  # store the relationship of order
-        super().__init__(json)
+        super().__init__(json, pk)
+
+    @staticmethod
+    def table_name():
+        return 'orderdetails'
+
+    @staticmethod
+    def fields_mapping():
+        return {
+            'id': 'id',
+            'keyProductID': 'keyProductId',
+            'keyProductId': 'keyProductID',
+            'productName': 'productName',
+            'quantity': 'quantity',
+            'unitPrice': 'unitPrice',
+            'totalPrice': 'totalPrice',
+            'priceTotalIncTax': 'totalPriceIncTax',
+            'totalPriceIncTax': 'priceTotalIncTax',
+            'priceTotalExTax': 'totalPriceExTax',
+            'totalPriceExTax': 'priceTotalExTax',
+            'productCode': 'productCode',
+            'orderId': 'orderId',
+            'productId': 'productId'
+        }

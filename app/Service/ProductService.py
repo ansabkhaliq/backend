@@ -7,6 +7,7 @@ from app.Resource.ProductResource import ProductResource
 from app.Resource.UserResource import UserResource
 from app.Resource.ModelMetadataResource import ModelMetadataResource
 from app.Util import AuthUtil as authUtil
+from app.Resource.ImageResource import ImageResource
 import json
 import logging
 
@@ -124,9 +125,41 @@ def get_product_by_product_code(productCode) -> dict:
     return result
 
 
-def get_product_images(id) -> dict:
+def search_products(identifier, identifierType):
+    """
+    Takes an identifier value and returns the product codes or barcodes
+    of products in the database that are similar to the identifier
+
+    Args:
+        identifier: a potential product code or barcode
+        identifierType: 'barcode' or 'productCode'
+
+    Returns:
+        JSON object including a list of similar identifiers, or no identifiers, if none were found
+    """
+
     product_resource = ProductResource()
-    image_records = product_resource.get_product_images_by_id(id)
+    product_identifiers = product_resource.search_products(identifier, identifierType)
+    
+    if not product_identifiers:
+        result = {
+            'status': 'error',
+            'identifiers': None,
+            'message': 'No barcodes or product codes match the given identifier'
+        }
+    else:
+        result = {
+            'status': 'success',
+            'identifiers': product_identifiers,
+            'message': 'Successfully retrieved similar barcodes or product codes'
+        }
+
+    return result
+
+
+def get_product_images(id) -> dict:
+    image_resource = ImageResource()
+    image_records = image_resource.get_product_images_by_id(id)
     return image_records
 
 
@@ -201,21 +234,67 @@ def import_metadata(data) -> dict:
             errormessage += '\"' + code + '\" '
             continue
     if errormessage == "":
-        return {"status": "success", "message": "import success"}
+        return {"status": "success", "message": "metadata was imported successfully"}
     else:
         return {"status": "partial success",
                 "message": "product code with " + errormessage + "failed to upload, please check the product code or "
                                                                  "try again"}
 
 
+def import_threedmodel(data) -> dict:
+    username = data['Username']
+    password = data['Password']
+    try:
+        user_resource = UserResource()
+        org_id = user_resource.validate_username_password(username, password)
+    except AttributeError:
+        return {'status': "failure", "message": "LOGIN_ERROR"}
+
+    if org_id is None:
+        # wrong username or password
+        return {'status': "failure", "message": "LOGIN_ERROR"}
+    product_list = data['Products']
+    errormessage = ""
+    # for each product
+    for product in product_list:
+        # check if the product exist
+        code = product['Code']
+        product_resource = ProductResource()
+        product_id_list = product_resource.search_product_id_by_product_code(code)
+        if product_id_list.__sizeof__() == 0:
+            errormessage += "\"" + code + "\" "
+            continue
+        # make a list of id, get one URl link check if the record exist in image
+        id_list = []
+        url = product['ModelURL']
+        for product_id in product_id_list:
+            id_list.append(product_id['id'])
+        image_resource = ImageResource()
+        record = image_resource.get_threed_link_by_product_id(id_list[0])
+        if record is None:
+            status_code = image_resource.insert_threed_model(url, id_list)
+            if status_code == 0:
+                errormessage += "\"" + code + "\" "
+            continue
+        else:
+            link = record['threeDModelLocation']
+            if link is None or link != url:
+                image_resource.update_threed_link(url, id_list)
+    if errormessage == "":
+        return {'status': "success", "message": "3d model have been imported successfully"}
+    else:
+        return {'status': "partial success",
+                    "message": "product code contains:" + errormessage + " failed to import ,please check product code or import again"}
+
+
 def get_metadata_by_product_code(productCode) -> dict:
     model_metadata_resource = ModelMetadataResource()
     result = model_metadata_resource.get_metadata_by_product_code(productCode)
     if result is None:
-        return {"found": "false"}
+        return {"found": False}
     meta_json = str(result['meta_json_string'])
 
-    return {"found": "true", "json_data": json.loads(meta_json)}
+    return {"found": True, "json_data": json.loads(meta_json)}
 
 
 def restore_category():
@@ -248,6 +327,8 @@ def restore_category():
                 continue
             print(category.keyProductIDs)
             for productKey in category.keyProductIDs:
+                if productKey not in prod_key_id:
+                    continue
                 cate_prod_rel = CateProd({'categoryId': category.id, 'productId': prod_key_id[productKey]})
                 sr.insert(cate_prod_rel, commit=False)
 
@@ -286,6 +367,8 @@ def restore_prices(customer_code="TESTDEBTOR"):
 
         # Rewrite prices
         for price in prices:
+            if price.keyProductID not in prod_key_id:
+                continue
             price.productId = prod_key_id[price.keyProductID]
             sr.insert(price, False)
 
@@ -301,3 +384,30 @@ def restore_prices(customer_code="TESTDEBTOR"):
         'status': 'Success',
         'message': 'Price data Updated.'
     }
+
+
+def list_all_categories():
+    # Parent categories
+    p_cate_list = []
+    # Children categories
+    c_cate_dict = {}
+
+    # Retrieve all categories
+    for category in SR().list_all(Category):
+        if category.keyCategoryParentID is None:
+            p_cate_list.append(category)
+        else:
+            if category.keyCategoryParentID not in c_cate_dict:
+                c_cate_dict[category.keyCategoryParentID] = [category]
+            else:
+                c_cate_dict[category.keyCategoryParentID].append(category)
+
+    return p_cate_list, c_cate_dict
+
+
+def list_all_products(category_id=None, page=1, page_size=20):
+    # List products
+    result = ProductResource().list_products_by_category(category_id, page, page_size)
+    # set product price
+    ProductResource().assign_price_and_images_to_product(result['items'])
+    return result

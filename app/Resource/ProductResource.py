@@ -1,7 +1,12 @@
 import logging
 import datetime
+from collections import defaultdict
+
+import math
 from app import config
+from app.Exception.exceptions import OtherException, PaginationError
 from app.Resource.DatabaseBase import DatabaseBase
+from app.Resource.SimpleModelResource import SimpleModelResource as SR
 from app.Model.Price import Price
 from app.Model.Product import Product
 from app.Model.BarcodeProduct import BarcodeProduct
@@ -147,7 +152,8 @@ class ProductResource(DatabaseBase):
 
     def get_product_by_barcode(self, barcode):
 
-        search_query = """SELECT products.id, products.barcode, products.productName, products.productCode, prices.keyProductID, prices.price 
+        search_query = """SELECT products.id, products.barcode, products.productName, products.keyTaxcodeID,
+                          products.productCode, prices.keyProductID, prices.price 
                           FROM products JOIN prices ON products.id = prices.Productid 
                           WHERE products.Barcode = %s"""
         values = [barcode]
@@ -158,7 +164,7 @@ class ProductResource(DatabaseBase):
 
     def get_product_by_product_code(self, productCode):
         search_query = """SELECT products.id, products.barcode, products.productCode, products.productName,
-                          prices.keyProductID, prices.price, products.description1
+                          prices.keyProductID, prices.price, products.description1, products.description2, products.keyTaxcodeID, products.stockQuantity
                           FROM products JOIN prices ON products.id = prices.productId
                           WHERE products.productCode = %s"""
         values = [productCode]
@@ -178,10 +184,23 @@ class ProductResource(DatabaseBase):
             return None
         return product_record[0]['id']
 
-    def get_product_images_by_id(self, id):
+    def search_product_id_by_product_code(self, productCode):
+        search_query = """SELECT id 
+                          FROM products
+                          WHERE productCode like %s"""
+        values = '%' + productCode + '%'
+        product_record = self.run_query(search_query, values, False)
+        if product_record is None:
+            return None
+        return product_record
 
-        search_image_query = """Select * From images where productId = %s """
-        values = [id]
+    def get_product_images_by_id(self, productId):
+        if isinstance(productId, list):
+            search_image_query = """Select * From images where productId IN %s """
+            values = [str(tuple(productId))]
+        else:
+            search_image_query = """Select * From images where productId = %s """
+            values = [productId]
         image_records = self.run_query(search_image_query, values, False)
         return image_records
 
@@ -339,3 +358,109 @@ class ProductResource(DatabaseBase):
             },
         }
         return result
+
+    def search_products(self, identifier, identifierType):
+        """
+        Retrieves a list of product codes (or barcodes) from the database
+        that are syntactially similar to the given identifier
+
+        Args:
+            identifier: a potential product code or barcode
+            identifierType: 'barcode' or 'productCode'
+        Returns:
+            list of similar 'identifiers'
+        """
+
+        query = f"SELECT {identifierType} FROM products WHERE {identifierType} LIKE '{identifier + '%'}'"
+        logger.debug(query)
+        similar = self.run_query(query, None, False)
+
+        return None if not similar else similar
+
+    def list_products_by_category(self, category_id, page=None, page_size=None):
+        count = 0
+        if page is None:
+            paging_str = ''
+        else:
+            paging_str = f'LIMIT {(page - 1) * page_size}, {page_size}'
+            if category_id is not None:
+                count_query = f'SELECT COUNT(DISTINCT productId) as count FROM categoryproducts\
+                                WHERE categoryId = {category_id}'
+            else:
+                count_query = f'SELECT COUNT(*) as count FROM products'
+            count = self.run_query(count_query, [], False)[0]['count']
+            total_pages = math.ceil(count / page_size)
+            if total_pages == 0:
+                total_pages = 1
+            if page > total_pages or page < 1:
+                raise PaginationError()
+
+        if category_id is None:
+            prod_query = f'SELECT products.* FROM products {paging_str}'
+        else:
+            prod_query = f'SELECT products.* FROM products WHERE products.id IN (\
+	                    SELECT productId FROM categoryproducts WHERE categoryId = {category_id}\
+                        ) {paging_str}'
+
+        try:
+            products = self.run_query(prod_query, [], False)
+            products = [] if products is None else products
+            items = []
+            for p in products:
+                model = SR.to_model(Product, p)
+                items.append(model)
+            if page is None:
+                return items
+            else:
+                return {
+                    "total_pages": total_pages, "total_items": count,
+                    "page_num": page, "page_items": len(items),
+                    "items": items
+                }
+        except Exception as e:
+            self.cursor.close()
+            logger.error('Exception occurred when retrieving products by category %s', e)
+            # raise e
+            raise OtherException(Product())
+
+    def assign_price_and_images_to_product(self, products: list):
+        """
+        Retrieve prices for products by product id
+        Notices: Some of the products have 2 prices, pick the "Contract" price
+                    where the referenceType is "C"
+
+        :param products: list of products
+        :return: None
+        """
+        product_ids = ','.join([str(p.id) for p in products])
+        price_query = f'SELECT productId, price, referenceType FROM {Price.table_name()} \
+                    WHERE productId IN ({product_ids})\
+                    ORDER BY referenceType DESC'
+
+        image_query = f'SELECT * FROM {Image.table_name()} \
+                    WHERE productId IN ({product_ids})'
+
+        try:
+            prices = self.run_query(price_query, [], False)
+            images = self.run_query(image_query, [], False)
+            price_dict = {}
+            image_dict = defaultdict(list)
+
+            # Pair productId, price
+            for price in prices:
+                if price['productId'] not in price_dict:
+                    price_dict[price['productId']] = float(price['price'])
+
+            # Pair productId, images
+            if images is not None:
+                for image in images:
+                    image_obj = SR.to_model(Image, image)
+                    image_dict[image['productId']].append(image_obj)
+
+            for product in products:
+                product.price = price_dict.get(product.id, None)
+                product.imageList = image_dict.get(product.id, [])
+
+        except Exception as e:
+            logger.error('Exception occurred when retrieving prices for products %s', e)
+        pass
