@@ -261,7 +261,7 @@ def import_threedmodel(data) -> dict:
         code = product['Code']
         product_resource = ProductResource()
         product_id_list = product_resource.search_product_id_by_product_code(code)
-        if product_id_list.__sizeof__() == 0:
+        if product_id_list is None:
             errormessage += "\"" + code + "\" "
             continue
         # make a list of id, get one URl link check if the record exist in image
