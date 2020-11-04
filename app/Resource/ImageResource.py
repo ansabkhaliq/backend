@@ -18,7 +18,7 @@ class ImageResource(DatabaseBase):
     def get_threed_link_by_product_id(self, pid):
         select_query = """ Select * from images where is3DModelType = 'Y' and productId = %s"""
         values = [str(pid)]
-        records = self.run_query(select_query, values, False)
+        records = self.run_query(select_query, values, True)
         if records is None:
             return None
         return records[0]
