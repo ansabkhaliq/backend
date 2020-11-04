@@ -24,9 +24,9 @@ class ImageResource(DatabaseBase):
         return records[0]
 
     def update_threed_link(self, url, id_list):
-        update_query = """UPDATE images SET threeDModelLocation = %s, WHERE productId =%s and is3DModelType = 'Y'"""
+        update_query = """UPDATE images SET threeDModelLocation = %s  WHERE productId =%s and is3DModelType = 'Y' """
         for id in id_list:
-            self.run_query(update_query, [url, id], True)
+            self.run_query(update_query, [url, id], False)
 
 
 
