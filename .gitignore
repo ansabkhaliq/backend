@@ -11,3 +11,4 @@ static/node_modules
 *.iml
 .idea/COMP90082-Software-Project.iml
 .DS_Store
+/.idea/
