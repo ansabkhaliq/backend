@@ -502,7 +502,6 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
   **After uploading the 3D model into server you should use this API to record the location of model in server **
 - **Request** 
- 
    - Send **POST** to `/threedmodel/import`
     - Request Header:
     ```JSON
@@ -528,6 +527,41 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
     "status": "success"
   }
   ```
+  
+### 3.11 import threedmodel
+ - **Request** 
+   - Send **GET** to `/api/metadata/get`
+     the parameter is the productCode e.g`/api/metadata/get?productCode=CFP-600-12-LPP-200`
+ - **Response**  
+  ```JSON
+{
+    "found": true,
+    "json_data": {
+        "Description": "Radial Swirl Diffusers, Ceiling Fixed Pattern shall be Holyoake Model CFP-600/12.  Ceiling Radial Swirl Diffusers shall be designed for use in Variable Air Volume (VAV) systems with Highly Turbulent Radial  Air Flow Pattern and shall be suitable for ceiling heights of 2.4 to 4m. Ceiling Radial Swirl Diffusers shall maintain a COANDA effect at reduced air volumes and provide uniform temperature gradients throughout the occupied space. Diffusers shall be finished in powder coat and fitted with accessories and dampers where indicated as manufactured by Holyoake",
+        "Diffuser Width (Length Millimeters)": "595.000000000000",
+        "Flow Nom (Hvac Air Flow Liters Per Second)": "112.500000000000",
+        "Holyoake Product Range": "Holyoake Swirl Diffusers.",
+        "Inlet Spigot Diameter (Length Millimeters)": "250.000000000000",
+        "Manufacturer": "Holyoake",
+        "Material - Face": "Holyoake White",
+        "Material Body": "Holyoake-Aluminium",
+        "Max Flow (Hvac Air Flow Liters Per Second)": "200.000000000000",
+        "Min Flow (Hvac Air Flow Liters Per Second)": "25.000000000000",
+        "Model": "CFP-600/12 Low Profile complete with low profile plenum.",
+        "Name": "CFP - 600/12  Swirl Diffusers  with Low Profile Plenum 200 Spigot",
+        "Noise Level NC Max": "32NC",
+        "Noise Level NC Min": "5 NC",
+        "Plenum Box Height (Length Millimeters)": "250.000000000000",
+        "Plenum Box Width (Length Millimeters)": "570.000000000000",
+        "Static Pressure Max": "28 Pa",
+        "Static Pressure Min": "2 Pa",
+        "Type Comments": "Holyoake Swirl Diffuser CFP-600/12 c/w Low Profile Plenum.",
+        "URL": "http://www.holyoake.com",
+        "d_r (Length Millimeters)": "125.000000000000"
+    }
+}
+  ```
+     
 ## 4. Order API
  
    ### 4.1 get history order
