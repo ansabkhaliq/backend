@@ -2,7 +2,7 @@ from app.Model.Model import Model
 
 
 class Product(Model):
-    def __init__(self, json):
+    def __init__(self, json=None, pk=None):
         self.id = 0
         self.barcode = None
         self.barcodeInner = None
@@ -37,10 +37,10 @@ class Product(Model):
         self.categoryList = None  # store category object
         self.priceList = None  # store price object
         self.sellUnitsIdList = None  # sell the SellUnitIds (new table)
-        self.imageList = None  # List to store the images associated with the product
+        self.imageList = []  # List to store the images associated with the product
         self.supplierOrganizationId = None
-        self.priceList = None
-        super().__init__(json)
+        self.price = None
+        super().__init__(json, pk)
 
     @staticmethod
     def table_name():
@@ -86,3 +86,19 @@ class Product(Model):
             'stockQuantity': 'stockQuantity',
             'supplierOrganizationId': 'supplierOrganizationId'
         }
+
+    def basic_dict(self):
+        return {
+            'id': self.id,
+            'barcode': self.barcode,
+            'name': self.name,
+            'productCode': self.productCode,
+            'price': self.price,
+            'image': [image.__dict__ for image in self.imageList]
+        }
+
+    def json(self):
+        if self.imageList is not None:
+            self.imageList = [image.__dict__ for image in self.imageList]
+
+        return super().json()

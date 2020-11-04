@@ -2,11 +2,13 @@ import logging
 import requests
 import time
 from typing import Tuple, Optional
+
+from app.Model.Customer import Customer
+from app.Model.OrderDetail import OrderDetail
+from app.Model.Organization import Organization
 from app.Model.Product import Product
 from app.Model.Category import Category
 from app.Model.Price import Price
-from app.Model.Order import Order
-import json
 
 
 logger = logging.getLogger(__name__)
@@ -93,64 +95,39 @@ class SquizzGatewayService:
 
         return False, None
 
-    # Web Service Endpoint: Purchase Submit API
-    def submit_purchase(self, session_id, order_details) -> Tuple[bool, Optional[list]]:
+    """
+    Post order to SQUIZZ
+    """
+    def submit_order(self, org: Organization, customer: Customer, order_details_list: [OrderDetail]):
+        session_id, _ = self.create_session()
         header = {"Content-Type": "application/json"}
+        purchase_url = (f"https://api.squizz.com/rest/1/org/procure_purchase_order_from_supplier/{session_id}\
+        ?supplier_org_id={org.supplierOrgId}&customer_account_code={customer.customer_code}")
 
-        # I just hardcoded the CustomerAccountCode (we had three, just took one for now), this needs to be generic now. As based on a specific customer we will submit the order. Previously we only had 1 customer so
-        # the team was not mentioning the customer. Now we have three.
-        purchaseURL = ("https://api.squizz.com/rest/1/org/procure_purchase_order_from_supplier/" 
-                       + session_id + "?supplier_org_id=" + self.supplier_org_id
-                       + "&customer_account_code=TESTDEBTOR")
-
-        keyPurchaseOrderID = int(time.time() * 1000000) 
-        # Not mandotary details are are hard code for now.
-        parameter = {
-            "keyPurchaseOrderID": keyPurchaseOrderID,
-            "purchaseOrderCode":"test1",
-            "purchaseOrderNumber":keyPurchaseOrderID,
-            "keySupplierAccountID":"1",
-            "supplierAccountCode":"PJSAS",
-            "supplierAccountName":"PJ SAS test",
-            "deliveryContact":"test",
-            "deliveryOrgName":"Acme Industries",
-            "deliveryEmail":"js@someemailaddress.comm",
-            "deliveryPhone":"+6144433332222",
-            "deliveryFax":"+6144433332221",
-            "deliveryAddress1":"Unit 5",
-            "deliveryAddress2":"22 Bourkie Street",
-            "deliveryAddress3":"Melbourne",
-            "deliveryPostcode":"3000",
-            "deliveryRegionName":"Victoria",
-            "deliveryCountryName":"Australia",
-            "deliveryCountryCodeISO2":"AU",
-            "deliveryCountryCodeISO3":"AUS",
-            "billingContact":"John Citizen",
-            "billingOrgName":"Acme Industries International",
-            "billingEmail":"ms@someemailaddress.comm",
-            "billingPhone":"+61445242323423",
-            "billingFax":"+61445242323421",
-            "billingAddress1":"43",
-            "billingAddress2":"Drummond Street",
-            "billingAddress3":"Melbourne",
-            "billingPostcode":"3000",
-            "billingRegionName":"Victoria",
-            "billingCountryName":"Australia",
-            "billingCountryCodeISO2":"AU",
-            "billingCountryCodeISO3":"AUS",
-            "instructions":"Leave goods at the back entrance",
-            "isDropship":"N", 
-            "lines": [json.loads(order_detail.json()) for order_detail in order_details]
+        uuid = int(time.time() * 1000000)
+        data_record = {
+            "keyPurchaseOrderID": uuid,
+            "supplierAccountCode": org.accountCode,
+            "lines": [
+                {'lineType': detail.lineType, 'productCode': detail.productCode, 'quantity': detail.quantity}
+                for detail in order_details_list
+            ]
         }
-        result = {
-            "version": 1.2,
-            "resultStatus": 1,
+
+        post_body = {
+            "version": 1.3,
+            "resultStatus": "1",
             "message": "The purchase order data has been successfully obtained.",
             "dataTransferMode": "COMPLETE",
             "totalDataRecords": 1,
             "configs": {},
-            "dataRecords": [parameter]
+            "dataRecords": [data_record]
         }
-        data = self.requests.post(purchaseURL, json=result, headers=header).json()
-        # return the result code of purchase
-        return data["result_code"], Order(parameter)
+        # print(post_body)
+
+        data = self.requests.post(purchase_url, json=post_body, headers=header).json()
+        # print(data)
+        lines_data = data['dataRecords'][0]['lines'].copy()
+
+        # return the result code and line data of purchase, line data contains tax info.
+        return data["result_code"], lines_data

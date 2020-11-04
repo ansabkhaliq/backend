@@ -1,5 +1,7 @@
 import logging
 import datetime
+
+import math
 from pymysql import IntegrityError
 from werkzeug.exceptions import HTTPException
 from app.Resource.DatabaseBase import DatabaseBase
@@ -41,21 +43,28 @@ class SimpleModelResource(DatabaseBase):
         """
         fields_mapping = obj.fields_mapping()
         obj_dict = obj.__dict__.copy()
-        field_value_dict = {fields_mapping[k]: obj_dict[k] for k in obj_dict}
+        field_value_dict = {}
+        for key in obj_dict:
+            if key in fields_mapping:
+                field_value_dict[fields_mapping[key]] = obj_dict[key]
+
         return field_value_dict
 
     @staticmethod
-    def to_model(cls, obj_dict):
-        return cls(
-            {cls.fields_mapping()[k]: obj_dict[k] for k in obj_dict}
-        )
+    def to_model(cls, record_dict):
+        fields_mapping = cls.fields_mapping()
+        obj_dict = {}
+        for key in record_dict:
+            if key in fields_mapping:
+                obj_dict[fields_mapping[key]] = record_dict[key]
+        return cls(obj_dict)
 
     def get_one_by_id(self, obj):
         """
         Retrieve on record from specific table in database
 
         """
-        obj_type = type(obj)
+        cls = type(obj)
         table = obj.table_name()
         query = f'SELECT * FROM {table} WHERE id=%s'
         ret = self.run_query(query, [obj.id], False)
@@ -63,29 +72,43 @@ class SimpleModelResource(DatabaseBase):
             logger.error(f'Record not found in table {table}')
             raise NotFound(obj)
         else:
-            ret_obj = obj_type(
-                {obj.fields_mapping()[k]: ret[0][k] for k in ret[0]}
-            )
+            ret_obj = self.to_model(cls, ret[0])
             return ret_obj
 
-    def list_all(self, cls, fields=None):
+    def list_all(self, cls, fields=None, page=None, page_size=20):
         """return all records by the given class"""
         table = cls.table_name()
+
         if fields is None:
             fields_str = '*'
         else:
             fields_str = ','.join(fields)
-        query = f'SELECT {fields_str} FROM {table}'
-        obj_dict_list = self.run_query(query, [], False)
-        if obj_dict_list is None:
-            return []
-        obj_list = []
-        for ele in obj_dict_list:
-            obj_list.append(cls(
-                {cls.fields_mapping()[k]: ele[k] for k in ele}
-            ))
 
-        return obj_list
+        if page is None:
+            paging_str = ''
+        else:
+            paging_str = f'LIMIT {(page - 1) * page_size}, {page_size}'
+            count_query = f'SELECT COUNT(*) AS count FROM {table}'
+            count = self.run_query(count_query, [], False)[0]['count']
+            total_pages = math.ceil(count / page_size)
+            if total_pages == 0:
+                total_pages = 1
+            if page > total_pages or page < 1:
+                raise PaginationError()
+
+        query = f'SELECT {fields_str} FROM {table} {paging_str}'
+        obj_dict_list = self.run_query(query, [], False)
+        obj_dict_list = [] if obj_dict_list is None else obj_dict_list
+        obj_list = [self.to_model(cls, obj_dict) for obj_dict in obj_dict_list]
+
+        if page is None:
+            return obj_list
+        else:
+            return {
+                "total_pages": total_pages, "total_items": count,
+                "page_num": page, "page_items": len(obj_list),
+                "items": obj_list
+            }
 
     def insert(self, obj, commit=True):
         """
@@ -93,18 +116,11 @@ class SimpleModelResource(DatabaseBase):
 
         """
         table = obj.table_name()
-        obj_dict = obj.__dict__.copy()
-        del obj_dict['id']
-        for key in list(obj_dict.keys()):
-            if key not in obj.fields_mapping():
-                del obj_dict[key]
+        record_dict = self.to_dict(obj)
+        del record_dict['id']
 
-        fields = map(
-            lambda x: obj.fields_mapping()[x],
-            obj_dict.keys()
-        )
-        fields_str = ','.join(fields)
-        values = list(obj_dict.values())
+        fields_str = ','.join(record_dict.keys())
+        values = list(record_dict.values())
         place_holders = ('%s,' * len(values))[:-1]
         query = f"INSERT into {table} ({fields_str}) VALUES ({place_holders})"
         try:
@@ -158,14 +174,11 @@ class SimpleModelResource(DatabaseBase):
         """
         self.get_one_by_id(obj)
         table = obj.table_name()
-        obj_dict = obj.__dict__.copy()
-        del obj_dict['id']
-        fields = map(
-            lambda x: obj.fields_mapping()[x],
-            obj_dict.keys()
-        )
+        record_dict = self.to_dict(obj)
+        del record_dict['id']
 
-        values = list(obj_dict.values())
+        fields = record_dict.keys()
+        values = list(record_dict.values())
         sets = ','.join([f'{field}=%s' for field in fields])
         query = f"UPDATE {table} SET {sets} WHERE id={obj.id}"
         try:
@@ -192,11 +205,13 @@ class SimpleModelResource(DatabaseBase):
         query = f'DELETE FROM {table} WHERE id=%s'
         self.run_query(query, [obj.id], commit)
 
-    def find_all(self, obj):
+    def find_all(self, obj, page=None, page_size=20):
         """
         Exact match records by obj, do not support filtering Nulls.
 
         :param  obj
+        :param  page page number
+        :param  page_size page size
         :return exact one obj
         :raise  OtherException
         """
@@ -216,7 +231,12 @@ class SimpleModelResource(DatabaseBase):
         where_clause = 'WHERE ' + ' AND '.join(
             [f'{field}=%s' for field in fields]
         )
-        query = f'SELECT * FROM {table} {where_clause}'
+        if page is None:
+            paging_str = ''
+        else:
+            paging_str = f'LIMIT {(page - 1) * page_size}, {page_size}'
+
+        query = f'SELECT * FROM {table} {where_clause} {paging_str}'
         try:
             ret_list = self.run_query(query, values, False)
             if ret_list is None:

@@ -261,7 +261,7 @@ def import_threedmodel(data) -> dict:
         code = product['Code']
         product_resource = ProductResource()
         product_id_list = product_resource.search_product_id_by_product_code(code)
-        if product_id_list.__sizeof__() == 0:
+        if product_id_list is None:
             errormessage += "\"" + code + "\" "
             continue
         # make a list of id, get one URl link check if the record exist in image
@@ -327,6 +327,8 @@ def restore_category():
                 continue
             print(category.keyProductIDs)
             for productKey in category.keyProductIDs:
+                if productKey not in prod_key_id:
+                    continue
                 cate_prod_rel = CateProd({'categoryId': category.id, 'productId': prod_key_id[productKey]})
                 sr.insert(cate_prod_rel, commit=False)
 
@@ -365,6 +367,8 @@ def restore_prices(customer_code="TESTDEBTOR"):
 
         # Rewrite prices
         for price in prices:
+            if price.keyProductID not in prod_key_id:
+                continue
             price.productId = prod_key_id[price.keyProductID]
             sr.insert(price, False)
 
@@ -380,3 +384,30 @@ def restore_prices(customer_code="TESTDEBTOR"):
         'status': 'Success',
         'message': 'Price data Updated.'
     }
+
+
+def list_all_categories():
+    # Parent categories
+    p_cate_list = []
+    # Children categories
+    c_cate_dict = {}
+
+    # Retrieve all categories
+    for category in SR().list_all(Category):
+        if category.keyCategoryParentID is None:
+            p_cate_list.append(category)
+        else:
+            if category.keyCategoryParentID not in c_cate_dict:
+                c_cate_dict[category.keyCategoryParentID] = [category]
+            else:
+                c_cate_dict[category.keyCategoryParentID].append(category)
+
+    return p_cate_list, c_cate_dict
+
+
+def list_all_products(category_id=None, page=1, page_size=20):
+    # List products
+    result = ProductResource().list_products_by_category(category_id, page, page_size)
+    # set product price
+    ProductResource().assign_price_and_images_to_product(result['items'])
+    return result

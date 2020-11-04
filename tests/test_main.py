@@ -69,67 +69,67 @@ def test_history_order():
     assert json_response['status'] == "success"
 
 
-def test_submit_order():
-    if len(squizz_sessions) == 0:
-        test_login()
-    url = 'api/purchase'
-    headers = {"Content-Type": "application/json"}
-    order_details = [
-        {
-            "keyProductId": "21479231996639",
-            "productName": "test",
-            "quantity": "2",
-            "unitPrice": "1.38",
-            "totalPrice": "2.76",
-            "priceTotalIncTax": "0.00",
-            "priceTotalExTax": "0.00",
-            "productCode": "21479231996639",
-            "productId": "20",
-        }
-    ]
-    data = {'lines': order_details, 'sessionKey': squizz_sessions[0]}
-
-    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
-    json_response = json.loads(response.text)
-    assert json_response['status'] == "error"
-    data = {'lines': order_details}
-    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
-    json_response = json.loads(response.text)
-    assert json_response['status'] == "failure"
-
-    data = {}
-    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
-    json_response = json.loads(response.text)
-    assert json_response['status'] == "failure"
-
-    data = {'sessionKey': squizz_sessions[0]}
-    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
-    json_response = json.loads(response.text)
-    assert json_response['status'] == "failure"
-
-    order_details = [{
-        "barcode": "9326243001224",
-        "depth": 0,
-        "height": 0,
-        "id": 5,
-        "keyProductID": "21479231981826",
-        "lineType": "PRODUCT",
-        "price": 8.23,
-        "priceTotalExTax": 8.23,
-        "productCode": "01224",
-        "productName": "Tarpaulin 240cm x 300cm (8' x 10')",
-        "quantity": 1,
-        "stockLowQuantity": 0,
-        "stockQuantity": 0,
-        "totalPrice": 8.23,
-        "unitPrice": 8.23,
-        "volume": 0,
-        "weight": 0,
-        "width": 0}]
-    data = {'lines': order_details, 'sessionKey': squizz_sessions[0]}
-    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
-    json_response = json.loads(response.text)
-    assert json_response['status'] == "success"
+# def test_submit_order():
+#     if len(squizz_sessions) == 0:
+#         test_login()
+#     url = 'api/purchase'
+#     headers = {"Content-Type": "application/json"}
+#     order_details = [
+#         {
+#             "keyProductId": "21479231996639",
+#             "productName": "test",
+#             "quantity": "2",
+#             "unitPrice": "1.38",
+#             "totalPrice": "2.76",
+#             "priceTotalIncTax": "0.00",
+#             "priceTotalExTax": "0.00",
+#             "productCode": "21479231996639",
+#             "productId": "20",
+#         }
+#     ]
+#     data = {'lines': order_details, 'sessionKey': squizz_sessions[0]}
+#
+#     response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+#     json_response = json.loads(response.text)
+#     assert json_response['status'] == "error"
+#     data = {'lines': order_details}
+#     response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+#     json_response = json.loads(response.text)
+#     assert json_response['status'] == "failure"
+#
+#     data = {}
+#     response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+#     json_response = json.loads(response.text)
+#     assert json_response['status'] == "failure"
+#
+#     data = {'sessionKey': squizz_sessions[0]}
+#     response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+#     json_response = json.loads(response.text)
+#     assert json_response['status'] == "failure"
+#
+#     order_details = [{
+#         "barcode": "9326243001224",
+#         "depth": 0,
+#         "height": 0,
+#         "id": 5,
+#         "keyProductID": "21479231981826",
+#         "lineType": "PRODUCT",
+#         "price": 8.23,
+#         "priceTotalExTax": 8.23,
+#         "productCode": "01224",
+#         "productName": "Tarpaulin 240cm x 300cm (8' x 10')",
+#         "quantity": 1,
+#         "stockLowQuantity": 0,
+#         "stockQuantity": 0,
+#         "totalPrice": 8.23,
+#         "unitPrice": 8.23,
+#         "volume": 0,
+#         "weight": 0,
+#         "width": 0}]
+#     data = {'lines': order_details, 'sessionKey': squizz_sessions[0]}
+#     response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+#     json_response = json.loads(response.text)
+#     assert json_response['status'] == "success"
 
 
 def test_logout():
@@ -140,7 +140,7 @@ def test_logout():
     squizz_sessions.pop()
 
 
-def test_import():
+def test_import_metadata():
     url = '/metadata/import'
     headers = {"Content-Type": "application/json"}
     data = {
@@ -219,3 +219,76 @@ def test_import():
     }
     response = s.post(base_url + url, data=json.dumps(data), headers=headers)
     json_response = json.loads(response.text)
+    assert json_response['status'] == "success"
+    data = {
+        "Username": "user1",
+        "Password": "12345678",
+        "Products": [
+            {
+                "Code": "CFP-600-12",
+                "ProductParameters": [{
+                    "Key": "Name",
+                    "Value": "CFP - 600/12 Swirl Diffusers  with  Low Profile Plenum 250 Spigot"
+                }]
+            }
+
+        ]
+    }
+    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+    json_response = json.loads(response.text)
+    assert json_response['status'] == "failure"
+    data = {
+        "Username": "user1",
+        "Password": "squizz",
+        "Products": [
+            {
+                "Code": "CFP-600-12777777",
+                "ProductParameters": [{
+                    "Key": "Name",
+                    "Value": "CFP - 600/12 Swirl Diffusers  with  Low Profile Plenum 250 Spigot"
+                }]
+            }
+
+        ]
+    }
+    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+    json_response = json.loads(response.text)
+    assert json_response['status'] == "partial success"
+
+
+def test_import_model():
+    url = '/threedmodel/import'
+    headers = {"Content-Type": "application/json"}
+    data = {"Username": "user1",
+            "Password": "squizz",
+            "Products": [{
+                "Code": "CFP-600-20-LPP",
+                "ProductParameters": null,
+                "ModelURL": "https://s3-ap-southeast-2.amazonaws.com/awstest.project/3dModels/600_20_low Profile.glb"
+            }]
+            }
+    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+    json_response = json.loads(response.text)
+    assert json_response['status'] == "success"
+    data = {"Username": "user1",
+            "Password": "123456789",
+            "Products": [{
+                "Code": "CFP-600-20-LPP",
+                "ProductParameters": null,
+                "ModelURL": "https://s3-ap-southeast-2.amazonaws.com/awstest.project/3dModels/600_20_low Profile.glb"
+            }]
+            }
+    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+    json_response = json.loads(response.text)
+    assert json_response['status'] == "failure"
+    data = {"Username": "user1",
+            "Password": "squizz",
+            "Products": [{
+                "Code": "CFP-600-20-77777",
+                "ProductParameters": null,
+                "ModelURL": "https://s3-ap-southeast-2.amazonaws.com/awstest.project/3dModels/600_20_low Profile.glb"
+            }]
+            }
+    response = s.post(base_url + url, data=json.dumps(data), headers=headers)
+    json_response = json.loads(response.text)
+    assert json_response['status'] == "partial success"
