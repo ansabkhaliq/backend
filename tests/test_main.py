@@ -292,3 +292,18 @@ def test_import_model():
     response = s.post(base_url + url, data=json.dumps(data), headers=headers)
     json_response = json.loads(response.text)
     assert json_response['status'] == "partial success"
+
+
+def test_get_metadata():
+    if len(squizz_sessions) == 0:
+        test_login()
+    base_url = "http://127.0.0.1:5000"
+    url = '/api/metadata/get'
+    para = '?productCode=CFP-600-12-LPP-200'
+    response = s.get(base_url + url + para)
+    json_response = json.loads(response.text)
+    assert json_response['found'] == True
+    para = '?productCode=CFP-600-12-LPP'
+    response = s.get(base_url + url + para)
+    json_response = json.loads(response.text)
+    assert json_response['found'] == False
