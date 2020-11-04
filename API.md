@@ -423,7 +423,7 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
   }
   ```
 
-  ### 3.7 Update product from squizz api
+### 3.7 Update product from squizz api
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool thatallow you to make calls to the REST API.**
   **This method is repsonbile for getting the latest products from SQUIZZ platform and updating the table in the local database**
 - **Request** 
@@ -528,9 +528,9 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
   }
   ```
   
-### 3.11 import threedmodel
+### 3.11 get model's metadata 
  - **Request** 
-   - Send **GET** to `/api/metadata/get`
+   - Send **GET** to `/api/metadata/get`   
      the parameter is the productCode e.g`/api/metadata/get?productCode=CFP-600-12-LPP-200`
  - **Response**  
   ```JSON
