@@ -459,12 +459,12 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
   }
   ```
 
-  ### 3.9 import metadata
+### 3.9 import metadata
   **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
   **This method is repsonbile for getting the latest  3d model's metadata**
 - **Request** 
  
-   - Send **POST** to `/updateProducts`
+   - Send **POST** to `/metadata/import`
     - Request Header:
     ```JSON
     {"Content-Type":"application/json"}
@@ -497,55 +497,40 @@ This endpoint is used for live product search in the frontend `OrderPage` compon
     "status": "success"
   }
   ```
-## 4. Order API
-  ### 4.1： Make an order
--  **Request**
-    - Send **POST** to `/api/purchase`
+  
+  ### 3.10 import threedmodel
+  **This is not a api that front end can access.  These are supposed to be called by the Postman or another similar tool that allow you to make calls to the REST API.**
+  **After uploading the 3D model into server you should use this API to record the location of model in server **
+- **Request** 
+ 
+   - Send **POST** to `/threedmodel/import`
     - Request Header:
-     ```JSON
-     {"Content-Type": "application/json"}
-     ```
-    - Request Body:
-     ```JSON
-     {"lines":[
-         {            "barcode": "9326243001224",
-                      "depth": 0,
-                      "height": 0,
-                      "id": 5,
-                      "keyProductID": "21479231981826",
-                      "lineType": "PRODUCT",
-                      "price": 8.23,
-                      "priceTotalExTax": 8.23,
-                      "productCode": "01224",
-                      "productCondition": null,
-                      "productName": "Tarpaulin 240cm x 300cm (8' x 10')",
-                      "productSearchCode": null,
-                      "quantity": 1,
-                      "stockLowQuantity": 0,
-                      "stockQuantity": 0,
-                      "totalPrice": 8.23,
-                      "unitPrice": 8.23,
-                      "volume": 0,
-                      "weight": 0,
-                      "width": 0},{
-                      ...
-                      }
-          ],
-          "sessionKey":"785BC1EC135931064EC38E81A0D85952"
-        }
-        ```
+    ```JSON
+    {"Content-Type":"application/json"}
+    ```
+    - Request body:
+    ```JSON
+        {"Username": "user1",
+            "Password": "squizz",
+            "Products": [{
+                "Code": "CFP-600-20-LPP",
+                "ProductParameters": null,
+                "ModelURL": "https://s3-ap-southeast-2.amazonaws.com/awstest.project/3dModels/600_20_low Profile.glb"
+            },{
+            ...
+            }]
+            }
+    ```
 - **Response**  
   ```JSON
   {
-    "data": {
-    "puchaseID": 35
-    },
-    "message": "Successfully inserted order and order details",
+    "message": "import success",
     "status": "success"
   }
   ```
-
-   ### 4.2 get history order
+## 4. Order API
+ 
+   ### 4.1 get history order
 - **Request** 
   - Send **GET** to `/api/history`
   - Take session_id as parameter e.g: `/api/history?session_id=785BC1EC135931064EC38E81A0D85952`
