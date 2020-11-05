@@ -114,17 +114,17 @@ Here is a brief overview of the deployed infrastructure.
 2. Click `Create Database`
 3. Select `Standard Create` as the database creation method
 4. Select MySQL Version 8.0.20 or above
-5. Select `Dev/Test` in `Templates`
-6. In the `Settings` pane, set the DB instance identifier. For our database, it is `squizz-database`
+5. In the **Templates** section, select `Dev/Test`
+6. In the **Settings** pane, set the `DB instance identifier`. For our database, it is `squizz-database`
 7. Define username and password credentials
-8. For `DB Instance Size`, select the option that suits your needs. We went with `db.m5.large`
+8. For **DB Instance Size**, select the option that suits your needs. We went with `db.m5.large`
 9. In the **Storage** section, untick `Enable storage autoscaling`
 10. In **Availability & durability**, select `Do not create a standby instance`
 11. In **Connectivity**, click `Additional connectivity configuration`. For `Public access`, select `Yes` and choose an existing VPC
 12. In **Database authentication**, select `Password authentication`
 13. Disable any other additional configurations, such as automatic backups, encryption, and performance insights (anything that adds additional unnecessary costs)
 14. Now, click `Create Database`
-15. Once the database is created, you can connect to it with a tool like [MySQL Workbench](https://www.mysql.com/products/workbench/) and run the [SQL script]() to dump the database
+15. Once the database is created, you can connect to it with a tool like [MySQL Workbench](https://www.mysql.com/products/workbench/) and run the [SQL script](./db/data/FinalSQLDump.sql) to dump the database
 
 
 ## Creating and configuring an S3 Bucket
