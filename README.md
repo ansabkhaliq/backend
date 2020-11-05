@@ -1,117 +1,112 @@
-# backend
- SQUIZZ Web APP API
-## Table Of Content
-**[Project Description](#Project-Description)** <br>
-**[Features](#Features)**  
-**[Documentation](#Documentation)**  
-**[System Requirements](#System-Requirements)**  
-**[Setup Guide](#Setup-Guide)**  
-**[Unit Testing](#Unit-Testing)**  
-**[Traceability Matrix](#Traceability-Matrix)**  
-  
-  
-## Project Description  
+# SQUIZZ Web Ordering Application Backend
 
-This project is a continuation of a project started by two pre-existing COM90082 Software Project teams, part of which was completed in Semester 1, 2020.  The existing application is a web ordering application, that functions as a business-to-business (B2B) and business-to-customer (B2C) ecosystem for suppliers to process orders made by customers, with great velocity. Additionally, the web-based system facilitates browsing and shopping by customers with respect to relationship-based catalogues within the SQUIZZ marketplace.  The is the backend part.
+## Table Of Contents
+1. **[Project Description](#Project-Description)**
+2. **[Features](#Features)**
+3. **[Documentation](#Documentation)**
+4. **[System Requirements](#System-Requirements)**
+5. **[Technologies Used](#Technologies-Used)**
+6. **[AWS Deployment Guide](#AWS-Deployment-Guide)**
+7. **[Setup Guide](#Setup-Guide)**
+8. **[Unit Testing](#Unit-Testing)**
+9. **[Attribution](#Attribution)**
 
-The objective of this project is to extend the web ordering application so that customers can have a better view of products and their fine-grained details.
+## Project Description
+This repository contains the backend source code for the SQUIZZ Web Ordering Application. It also contains the entire documentation for the project, an AWS deployment guide, and unit tests.
 
-As part of this project, we are tasked with integrating a 3D viewer into various pages in the website, in order to display 3D product images in the browser via two separate rendering techniques.
+The web ordering application is a B2B/B2C system that supports the product catalogues of Holyoake, and PJ SAS Trading. It allows users to procure orders for different products, and to view in-browser rendered 3D models for Holyoake swirl diffusers. It also supports dynamic customer-level pricing based on the current selected customer.
 
-These rendering techniques include:
+Please check out the [frontend repository](https://github.com/ansabkhaliq/frontend) for more details on the frontend client.
 
-3D IFC/Revit File (vector based)
-3D Bitmap Rotation
-Moreover, as an advanced (optional) feature, we have also been given the option to display the parameterized data of the 3D models within the 3D images themselves.
-
-The team will work in conjunction with team SQ-Koala to modify and extend the existing web pages, and to ensure that the viewers have interactive functionalities.
-
-Furthermore, the team will implement a service to convert IFC files to 3D images, and find an appropriate storage solution for these images.
-
-The intended outcome of this project will be to complete the above features, and subsequently demonstrate them to both the client, Glenn Drew of SQUIZZ, and Andrew Krake of Holyoake Industries, the latter being a representative for a company that supplies air management solutions to the construction and building industry within Australia and New Zealand.
-
+This project also integrates with our custom desktop utility that converts IFC files into 3D models. The repository for the utility can be found [here](https://github.com/ansabkhaliq/IFCConverto).
 
 ## Features
+* Import products from the SQUIZZ API
+* Import prices from the SQUIZZ API
+* Import categories from the SQUIZZ API
+* Import customer data form the SQUIZZ API
+* Send order details to SQUIZZ API to create orders
+* Sync customer pricing data when customer is switching
+* Provides a method to import 3D model meta data from the desktop utility
+* Provides a method to import 3D model URL from the desktop utility
+* Authenticates the front end user
+* Authenticates an organization and establish a session with SQUIZZ API
+* Provide data for products search via barcode or product code
+* Provide complete list of products along with their categories for the frontend
+
 ## Documentation
+All of the process and product related documentation for the project can be found [here](./docs) in the `docs` directory.
+
 ## System Requirements
+The backend can be run on any operating system.
 
-Since our allocated project is a continuation of a team from the previous semester, our team has decided to use the technology stack that the previous semester's team built the existing codebase with.
+Listed below are the requirements to run the application:
+* [Python 3.8](https://www.python.org/) or above
+* [Docker](https://www.docker.com/) (only if you want to run the backend using Docker) 
 
-The existing project uses a micro-services architecture to arrange the web application as a set of loosely-coupled services, including a backend server, frontend client, and database.
+We recommend using [Visual Studio Code](https://code.visualstudio.com/download) or [PyCharm](https://www.jetbrains.com/pycharm/) for development.
 
-In addition to prior modules, to meet the new requirements, we also introduced a new module, called IFC Converto, which is a Desktop based utility. It is used to convert the IFC files into 3D models and upload them to the S3 Bucket and send the links to the backend. The utility is also responsible for converting the text files that had parameterized info into JSON format files.
+## Technologies Used
+* [Python 3.8](https://www.python.org/)
+* [Flask](https://flask.palletsprojects.com/) for our backend framework
+* [PyMySQL](https://pymysql.readthedocs.io/en/latest/) for a Python MySQL client library
 
-The specific technologies used for each of these microservices / module are detailed below.
-
-### Backend  
-+ Flask RESTful API written in Python 3  **You should add python into enviroment variable** 
-+ Database  
-+ MySQL  
-
-### Desktop Utility Project & IFC Covertor Library Project  
-+ C#
-+ .Net Framework 4.7
-+ Visual Studio 2019
-+ MahApps.Metro
-+ Json.Net
-### Deployment/Hosting  
-The application is deployed on the AWS EC2 instance and uses MySQL database hosted on the RDS. The hosting environment has been provided by the client.
-
-+ Docker  
-+ Amazon Web Services
-  1. S3 Bucket (for storing the 3D models generated by the IFC Converto Utility
-  2. RDS for hosting the MySQL Database
-  3. EC2 instance where the frontend and backend dockers are deployed
-
-### Testing
-+ Format Checker: ESLint
-+ Type Checker: Flow
-+ Frontend Testing Framework: Jest + React Testing Library
-+ Backend Testing Framework: pytest
-+ Desktop Utility Testing Framework: MSTest
-
-
+## AWS Deployment Guide
+This repository includes a deployment guide and a Docker Compose file for deploying the entire application (including the frontend client and database) on AWS. These files can be found [here](./deployment).
 
 ## Setup Guide
+There are two ways to deploy the backend and database, either locally or in production. You can run the backend by either setting up a virtual environment or using Docker.
+
+### Using a Virtual Environment
  1. Set up a virtual environment
-```
-cd /backend
-python -m venv venv
-venv\Scripts\activate.bat
-pip install -r requirements.txt
-```
-2. Install MySQL Workbench and MySQL Server.   
-  If you don't know how to do, click [this](https://www.youtube.com/watch?v=u96rVINbAUI)
+    ```
+    $ python -m venv venv
+    $ venv\Scripts\activate.bat
+    $ pip install -r requirements.txt
+    ```
+    **Note:** These commands are for Windows. They are similar for Mac or Linux
 
-3. Run the script in FinalSqlDump.sql in backend/db/data in MySQL Workbench to create the database and populate the tables
+2. Install MySQL Workbench and MySQL Server
+  If you don't know how to do this, watch this [tutorial](https://www.youtube.com/watch?v=u96rVINbAUI)
 
-4. Modify SQL Server credentials in lines 20-23 in backend/app/config.py
-```
-HOST = "localhost"
-USER = ...
-PASSWORD = ...
-DB_NAME = "squizz_app"
-```
+3. Run the script `FinalSqlDump.sql` in `backend/db/data` in MySQL Workbench to create the database and populate the tables
+
+4. Modify SQL Server credentials in lines 22-25 in `app/config.py`
+    ```
+    HOST = ...               # MySQL Hostname (e.g. 'localhost')
+    USER = ...               # MySQL Username
+    PASSWORD = ...           # MySQL Password
+    DB_NAME = "squizz_app"
+    ```
 5. Start the Flask server
-```
-python -m flask run
-```
+    ```
+    $ python -m flask run
+    ```
+
+### Using Docker
+1. Create an image for the backend
+    ```bash
+    $ docker build -t squizz/flask-backend:latest .
+    ```
+
+2. Run the backend container
+    ```bash
+    $ docker run -p 5000:5000 --name flask-backend squizz/flask-backend:latest
+    ```
+
 ## Unit Testing
-There are ways to run unit testing.
-**Important: before run the test program you should start the backend server first!**
-Use `pytest --version`  to check if installed pytest
-Use `pip install pytest` to install pytest
+The unit tests are written in Python using [pytest](https://docs.pytest.org/en/stable/).
 
-### Run the testing via command line:
-The first way is cd to root path of backend and type in "pytest"
+To install `pytest`:
+```bash
+$ pip install pytest
 ```
-cd.../backend
-pytest
-```
-### Run the testing in the IDE(PyCharm):
-If you don't have the  Ptcharm goto [Jetbrain](https://www.jetbrains.com/pycharm/) to get one. You can ask for a educational licence so that you can get all utilmate version for all IDE you like.
-In the Pycharm you can run the testing function directly. All the testing files are stored in tests folder
-Then you can find a clickable icon near the line number for each testing functions.  
-Click that icon and select run or debug.
+**Note**: Before you can run the tests, you need to start the backend server first.
 
-## Traceability Matrix
+To run the tests, first ensure that you are in the root directory of the backend. Then, run:
+```bash
+$ pytest
+```
+
+## Attribution
+Created by SQ-Wombat and SQ-Koala.
