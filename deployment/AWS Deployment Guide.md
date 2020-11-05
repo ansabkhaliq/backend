@@ -113,7 +113,7 @@ Here is a brief overview of the deployed infrastructure.
 1. Go to the AWS RDS Service dashboard
 2. Click `Create Database`
 3. Select `Standard Create` as the database creation method
-4. Select MySQL Version 8.0.20 or above
+4. Select `MySQL Version 8.0.20` or above
 5. In the **Templates** section, select `Dev/Test`
 6. In the **Settings** pane, set the `DB instance identifier`. For our database, it is `squizz-database`
 7. Define username and password credentials
