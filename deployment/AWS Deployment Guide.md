@@ -124,7 +124,7 @@ Here is a brief overview of the deployed infrastructure.
 12. In **Database authentication**, select `Password authentication`
 13. Disable any other additional configurations, such as automatic backups, encryption, and performance insights (anything that adds additional unnecessary costs)
 14. Now, click `Create Database`
-15. Once the database is created, you can connect to it with a tool like [MySQL Workbench](https://www.mysql.com/products/workbench/) and run the [SQL script](./db/data/FinalSQLDump.sql) to dump the database
+15. Once the database is created, you can connect to it with a tool like [MySQL Workbench](https://www.mysql.com/products/workbench/) and run the [SQL script](https://github.com/ansabkhaliq/backend/blob/master/db/data/FinalSQLDump.sql) to dump the database
 
 
 ## Creating and configuring an S3 Bucket
