@@ -35,7 +35,7 @@ This project also integrates with our custom desktop utility that converts IFC f
 * Provide complete list of products along with their categories for the frontend
 
 ## Documentation
-All of the process and product related documentation for the project can be found [here](./Docs).
+All of the process and product related documentation for the project can be found [here](./docs) in the `docs` directory.
 
 ## System Requirements
 The backend can be run on any operating system.
@@ -71,11 +71,11 @@ There are two ways to deploy the backend and database, either locally or in prod
 
 3. Run the script `FinalSqlDump.sql` in `backend/db/data` in MySQL Workbench to create the database and populate the tables
 
-4. Modify SQL Server credentials in lines 22-25 in `backend/app/config.py`
+4. Modify SQL Server credentials in lines 22-25 in `app/config.py`
     ```
-    HOST = "localhost"
-    USER = ...
-    PASSWORD = ...
+    HOST = ...               # MySQL Hostname (e.g. 'localhost')
+    USER = ...               # MySQL Username
+    PASSWORD = ...           # MySQL Password
     DB_NAME = "squizz_app"
     ```
 5. Start the Flask server
