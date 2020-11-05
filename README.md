@@ -9,7 +9,9 @@
 6. **[AWS Deployment Guide](#AWS-Deployment-Guide)**
 7. **[Setup Guide](#Setup-Guide)**
 8. **[Unit Testing](#Unit-Testing)**
-9. **[Attribution](#Attribution)**
+9. **[User Acceptance Tests](#User-Acceptance-Tests)**
+10. **[Traceability Matrix](#Traceability-Matrix)**
+11. **[Attribution](#Attribution)**
 
 ## Project Description
 This repository contains the backend source code for the SQUIZZ Web Ordering Application. It also contains the entire documentation for the project, an AWS deployment guide, and unit tests.
@@ -35,7 +37,7 @@ This project also integrates with our custom desktop utility that converts IFC f
 * Provide complete list of products along with their categories for the frontend
 
 ## Documentation
-All of the process and product related documentation for the project can be found [here](./docs) in the `docs` directory.
+All of the process and product related documentation for the project can be found [here](./Docs) in the `Docs` directory.
 
 ## System Requirements
 The backend can be run on any operating system.
@@ -107,6 +109,13 @@ To run the tests, first ensure that you are in the root directory of the backend
 ```bash
 $ pytest
 ```
+
+## User Acceptance Tests
+The user acceptance tests can be found [here](https://github.com/ansabkhaliq/backend/blob/master/Test%20Cases%20Docs/Test%20Cases%20Report.pdf).
+
+
+## Traceability Matrix
+The traceability matrix can be found on the last page of the user acceptance tests document. Please refer to [User Acceptance Tests](#User-Acceptance-Tests).
 
 ## Attribution
 Created by SQ-Wombat and SQ-Koala.
