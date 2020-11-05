@@ -18,15 +18,15 @@ class ImageResource(DatabaseBase):
     def get_threed_link_by_product_id(self, pid):
         select_query = """ Select * from images where is3DModelType = 'Y' and productId = %s"""
         values = [str(pid)]
-        records = self.run_query(select_query, values, False)
+        records = self.run_query(select_query, values, True)
         if records is None:
             return None
         return records[0]
 
     def update_threed_link(self, url, id_list):
-        update_query = """UPDATE images SET threeDModelLocation = %s, WHERE productId =%s and is3DModelType = 'Y'"""
+        update_query = """UPDATE images SET threeDModelLocation = %s  WHERE productId =%s and is3DModelType = 'Y' """
         for id in id_list:
-            self.run_query(update_query, [url, id], True)
+            self.run_query(update_query, [url, id], False)
 
 
 
